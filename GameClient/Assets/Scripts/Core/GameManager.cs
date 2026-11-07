@@ -1,4 +1,5 @@
 using UnityEngine;
+using LegendsRPG.Combat;
 
 namespace LegendsRPG.Core
 {
@@ -75,7 +76,7 @@ namespace LegendsRPG.Core
         {
             if (State != GameState.Battle) return;
             State = GameState.FloorCleared;
-            Audio.Play("Victory");
+            LegendsRPG.Audio.AudioSystem.Play("Victory");
             CombatEvents.RaiseNotification("Floor cleared!");
             if (Tower != null) Tower.AdvanceFloor();
             SaveSystem.Save(Tower, Team);
