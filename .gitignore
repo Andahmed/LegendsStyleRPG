@@ -3,12 +3,14 @@
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
-[Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 MemoryCaptures/
 
-# Never ignore source, settings or the delivered APK folder placeholders
+# Builds: ignore outputs but keep the folder placeholder
+Builds/*
+!Builds/Android/
+Builds/Android/*
 !Builds/Android/.gitkeep
 
 # IDE
@@ -48,3 +50,7 @@ Backend/app.log
 !debug.keystore
 *.jks
 .env
+
+# real env files (only *.env.example are committed)
+Deployment/config/*.env
+!Deployment/config/*.env.example
