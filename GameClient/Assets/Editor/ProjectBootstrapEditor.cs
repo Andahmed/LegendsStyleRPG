@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -13,8 +14,17 @@ namespace LegendsRPG.EditorTools
         [InitializeOnLoadMethod]
         private static void OnProjectLoaded()
         {
+            ConfigureAndroid();
             if (!File.Exists(ScenePath)) CreateBootScene();
             EnsureSceneInBuildSettings();
+        }
+
+        private static void ConfigureAndroid()
+        {
+            PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
+            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
         }
 
         [MenuItem("Legends RPG/Setup/Create Boot Scene", priority = 0)]
@@ -82,8 +92,7 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.productName = "Legends Reborn Style RPG";
             PlayerSettings.bundleVersion = "0.1.0";
             PlayerSettings.Android.bundleVersionCode = 1;
-            PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
-            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
+            ConfigureAndroid();
 
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
             {
