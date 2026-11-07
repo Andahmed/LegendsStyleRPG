@@ -10,20 +10,16 @@ _KNOWN_DB_SCHEMES = ("sqlite", "postgresql", "postgres", "mysql", "mssql", "orac
 
 
 def _database_url() -> str:
-    """Return DATABASE_URL, falling back to local SQLite when the inherited
-    environment variable is not a recognizable SQLAlchemy URL (defensive)."""
+    """Return DATABASE_URL if it starts with a known SQLAlchemy scheme
+    (e.g. "postgresql+psycopg://"), otherwise fall back to local SQLite."""
     raw = os.getenv("DATABASE_URL", "").strip()
-    if raw.split(":", 1)[0].lower() in _KNOWN_DB_SCHEMES and "+psycopg" not in raw.split(":", 1)[0]:
-        # accept both "postgresql://" and "postgresql+psycopg://"
+    scheme = raw.split(":", 1)[0].lower().split("+", 1)[0]
+    if scheme in _KNOWN_DB_SCHEMES:
         return raw
-    if raw.startswith("postgresql+psycopg://") or raw.startswith("postgresql://"):
-        return raw
-    if raw and not raw.lower().startswith(_KNOWN_DB_SCHEMES):
+    if raw:
         import warnings
-        warnings.warn(
-            f"Ignoring unsupported DATABASE_URL ({raw.split(':', 1)[0]}...); using local SQLite."
-        )
-    return raw if raw.lower().startswith(_KNOWN_DB_SCHEMES) else "sqlite:///./legends_dev.db"
+        warnings.warn(f"Ignoring unsupported DATABASE_URL ({scheme}...); using local SQLite.")
+    return "sqlite:///./legends_dev.db"
 
 
 def _bool(name: str, default: str = "false") -> bool:

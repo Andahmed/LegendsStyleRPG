@@ -5,10 +5,8 @@ Security invariants:
 - Tokens are opaque random values with server-side expiry.
 - The client is NEVER trusted for account state; everything is validated here.
 """
-import datetime
-
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -98,11 +96,6 @@ def me(player: Player = Depends(current_player)):
 
 def cleanup_expired_tokens(db: Session) -> int:
     """Housekeeping helper (callable from a scheduler job)."""
-    now_naive = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-    result = db.execute(
-        select(AuthToken).where(AuthToken.expires_at < now_naive)
-    ).scalars().all()
-    for row in result:
-        db.delete(row)
+    result = db.execute(delete(AuthToken).where(AuthToken.expires_at < utcnow()))
     db.commit()
-    return len(result)
+    return result.rowcount or 0

@@ -10,8 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY Backend/app ./app
 
-# non-root user
-RUN useradd -m appuser && chown -R appuser /srv/backend
+# non-root user + writable data dir (named volume inherits this ownership)
+RUN useradd -m appuser \
+    && mkdir -p /srv/backend/data \
+    && chown -R appuser /srv/backend
 USER appuser
 
 EXPOSE 8000
