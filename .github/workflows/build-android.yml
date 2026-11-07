@@ -16,25 +16,30 @@ jobs:
         with:
           lfs: true
 
+      # 1. تفعيل الترخيص باستخدام الملف السري
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
+      # 2. بناء المشروع بالإصدار الصحيح (2022.3.55f1)
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: GameClient
-          unityVersion: 2022.3.55f1
+          unityVersion: 2022.3.55f1  # تأكد أن هذا هو إصدار مشروعك
           targetPlatform: Android
           buildMethod: ProjectBootstrapEditor.BuildAndroidAPK
           androidExportType: androidPackage
-          dockerShmSize: 2g  # 👈 السطر ده هو اللي بيزود الذاكرة ويحل مشكلة الـ Docker
+          dockerShmSize: 2g # زيادة الذاكرة المشتركة لتجنب أخطاء Docker
 
+      # 3. رفع ملف APK الناتج
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
