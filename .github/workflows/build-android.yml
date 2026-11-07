@@ -1,17 +1,41 @@
-name: Acquire activation file
+name: Build Android APK
+
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  activation:
-    name: Request manual activation file
+  build:
+    name: Build Unity Android APK
     runs-on: ubuntu-latest
+
     steps:
-      - name: Request manual activation file
-        id: getManualLicenseFile
-        uses: game-ci/unity-request-activation-file@v2
-      - name: Expose as artifact
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: GameClient
+          unityVersion: 2022.3.55f1
+          targetPlatform: Android
+          buildMethod: ProjectBootstrapEditor.BuildAndroidAPK
+          androidExportType: androidPackage
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.getManualLicenseFile.outputs.filePath }}
-          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          name: Android-APK
+          path: build/Android/*.apk
