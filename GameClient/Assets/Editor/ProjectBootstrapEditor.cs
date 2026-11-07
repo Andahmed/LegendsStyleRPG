@@ -27,6 +27,7 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
             PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
+            PlayerSettings.stripEngineCode = false;
             IncludeShaders("Standard", "Legacy Shaders/Particles/Additive", "Sprites/Default", "UI/Default");
         }
 
@@ -122,7 +123,6 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.companyName = "LegendsStyleRPG";
             PlayerSettings.productName = "Legends Reborn Style RPG";
             PlayerSettings.bundleVersion = "0.1.0";
-            PlayerSettings.Android.bundleVersionCode = 1;
             ConfigureAndroid();
 
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
