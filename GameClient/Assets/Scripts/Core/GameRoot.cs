@@ -3,6 +3,7 @@ using UnityEngine;
 using LegendsRPG.Audio;
 using LegendsRPG.Cam;
 using LegendsRPG.Characters;
+using LegendsRPG.Combat;
 using LegendsRPG.Core;
 using LegendsRPG.InputCtl;
 using LegendsRPG.Team;
