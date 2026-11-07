@@ -90,37 +90,4 @@ namespace LegendsRPG.EditorTools
         {
             EnsureSceneInBuildSettings();
 
-            PlayerSettings.companyName = "LegendsStyleRPG";
-            PlayerSettings.productName = "Legends Reborn Style RPG";
-            PlayerSettings.bundleVersion = "0.1.0";
-            PlayerSettings.Android.bundleVersionCode = 1;
-            PlayerSettings.Android.minSdkVersion = (AndroidSdkVersion)23;
-            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersion)34;
-
-            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-            {
-                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
-            }
-
-            var options = new BuildPlayerOptions
-            {
-                scenes = new[] { ScenePath },
-                locationPathName = "Builds/Android/LegendsRPG-v0.1.0.apk",
-                target = BuildTarget.Android,
-                options = BuildOptions.None
-            };
-
-            var report = BuildPipeline.BuildPlayer(options);
-            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
-            {
-                Debug.Log("[LegendsRPG] APK built successfully: " + report.summary.outputPath +
-                          "  size=" + (report.summary.totalSize / (1024f * 1024f)).ToString("F1") + " MB");
-            }
-            else
-            {
-                Debug.LogError("[LegendsRPG] APK build FAILED: " + report.summary.result);
-            }
-        }
-    }
-}
-#endif
+            PlayerSettings.compan
