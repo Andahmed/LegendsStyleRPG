@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using LegendsRPG.Combat;
+using LegendsRPG.Core;
 
 namespace LegendsRPG.Characters
 {
