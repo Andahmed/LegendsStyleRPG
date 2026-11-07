@@ -6,6 +6,7 @@ using LegendsRPG.Combat;
 using LegendsRPG.Core;
 using LegendsRPG.InputCtl;
 using LegendsRPG.Team;
+using LegendsRPG.World;
 
 namespace LegendsRPG.UI
 {
@@ -258,7 +259,7 @@ namespace LegendsRPG.UI
             cdImg.raycastTarget = false;
             _skillCooldownFills[index] = cdImg;
 
-            _skillCooldownTexts[index] = UIBuilder.CreateText(cdBg, "CdText", "", 34,
+            _skillCooldownTexts[index] = UIBuilder.CreateText(cdBg.transform, "CdText", "", 34,
                 Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero,
                 new Vector2(140f, 50f));
             _skillButtons[index] = btn;
@@ -358,17 +359,17 @@ namespace LegendsRPG.UI
             if (hero == null || hero.HP == null) return;
 
             _activeHeroText.text = hero.Data.displayName + "  Lv." + hero.Stats.Level;
-            _activeHeroHpFill.sizeDelta = new Vector2(426f * hero.HP.Ratio, 22f);
+            _activeHeroHpFill.rectTransform.sizeDelta = new Vector2(426f * hero.HP.Ratio, 22f);
             _activeHeroHpFill.color = hero.HP.Ratio > 0.5f ? new Color(0.15f, 0.85f, 0.3f)
                 : hero.HP.Ratio > 0.25f ? new Color(0.95f, 0.75f, 0.2f) : new Color(0.95f, 0.3f, 0.25f);
 
             float expRatio = Mathf.Clamp01(hero.Stats.Exp / CharacterStats.NeededExp(hero.Stats.Level));
-            _activeHeroExpFill.sizeDelta = new Vector2(426f * expRatio, 8f);
+            _activeHeroExpFill.rectTransform.sizeDelta = new Vector2(426f * expRatio, 8f);
 
             if (_ultChargeFill != null)
             {
-                _ultChargeFill.sizeDelta = new Vector2(196f, 196f * (1f - hero.Caster.UltCharge / 100f));
-                _ultChargeFill.anchoredPosition = new Vector2(0f, -196f * (hero.Caster.UltCharge / 100f) * 0.5f);
+                _ultChargeFill.rectTransform.sizeDelta = new Vector2(196f, 196f * (1f - hero.Caster.UltCharge / 100f));
+                _ultChargeFill.rectTransform.anchoredPosition = new Vector2(0f, -196f * (hero.Caster.UltCharge / 100f) * 0.5f);
             }
         }
 
@@ -411,7 +412,7 @@ namespace LegendsRPG.UI
                 if (_portraitFills[i] != null)
                 {
                     float ratio = h.HP.IsDead ? 0f : h.HP.Ratio;
-                    _portraitFills[i].sizeDelta = new Vector2(84f * ratio, 12f);
+                    _portraitFills[i].rectTransform.sizeDelta = new Vector2(84f * ratio, 12f);
                     _portraitFills[i].color = h.HP.IsDead ? new Color(0.4f, 0.4f, 0.4f)
                         : ratio > 0.5f ? new Color(0.2f, 0.9f, 0.3f)
                         : ratio > 0.25f ? new Color(0.95f, 0.75f, 0.2f) : new Color(0.95f, 0.3f, 0.25f);
