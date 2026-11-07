@@ -1,30 +1,15 @@
-name: Build Android APK
-
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+name: Build Unity Android APK
+on: [push, workflow_dispatch]
 
 jobs:
   build:
     name: Build Unity Android APK
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           lfs: true
 
-      # 1. تفعيل الترخيص باستخدام الملف السري
-      - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-
-      # 2. بناء المشروع بالإصدار الصحيح (2022.3.55f1)
       - name: Build project
         uses: game-ci/unity-builder@v4
         env:
@@ -32,16 +17,10 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: GameClient
-          unityVersion: 2022.3.55f1  # تأكد أن هذا هو إصدار مشروعك
           targetPlatform: Android
-          buildMethod: ProjectBootstrapEditor.BuildAndroidAPK
-          androidExportType: androidPackage
-          dockerShmSize: 2g # زيادة الذاكرة المشتركة لتجنب أخطاء Docker
+          unityVersion: 2019.2.11f1
 
-      # 3. رفع ملف APK الناتج
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Android-APK
-          path: build/Android/*.apk
+          path: build/Android
