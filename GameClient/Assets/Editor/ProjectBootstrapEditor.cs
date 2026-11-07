@@ -25,6 +25,37 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
             PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
+            IncludeShaders("Standard", "Legacy Shaders/Particles/Additive", "Sprites/Default", "UI/Default");
+        }
+
+        private static void IncludeShaders(params string[] names)
+        {
+            var gs = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>("ProjectSettings/GraphicsSettings.asset");
+            if (gs == null) return;
+            var so = new SerializedObject(gs);
+            var arr = so.FindProperty("m_AlwaysIncludedShaders");
+            bool changed = false;
+            foreach (var n in names)
+            {
+                var sh = Shader.Find(n);
+                if (sh == null) continue;
+                bool has = false;
+                for (int i = 0; i < arr.arraySize; i++)
+                {
+                    if (arr.GetArrayElementAtIndex(i).objectReferenceValue == sh) { has = true; break; }
+                }
+                if (has) continue;
+                arr.InsertArrayElementAtIndex(arr.arraySize);
+                arr.GetArrayElementAtIndex(arr.arraySize - 1).objectReferenceValue = sh;
+                changed = true;
+            }
+            if (changed)
+            {
+                so.ApplyModifiedProperties();
+                AssetDatabase.SaveAssets();
+            }
         }
 
         [MenuItem("Legends RPG/Setup/Create Boot Scene", priority = 0)]
