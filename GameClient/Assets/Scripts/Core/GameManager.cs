@@ -21,6 +21,8 @@ namespace LegendsRPG.Core
         public UI.HUDController Hud;
         public Audio.AudioSystem Audio;
         public Vfx.VFXFactory Vfx;
+        public int LastRewardGold { get; private set; }
+        public bool LastClearWasBoss { get; private set; }
 
         private float _fpsAccum;
         private int _fpsFrames;
@@ -83,6 +85,8 @@ namespace LegendsRPG.Core
             int floor = Tower != null ? Tower.CurrentFloor : 1;
             bool boss = floor % GameConfig.BossEveryNFloors == 0;
             int reward = 150 + floor * 10 + (boss ? 500 + floor * 20 : 0);
+            LastRewardGold = reward;
+            LastClearWasBoss = boss;
             Inventory.AddGold(reward);
             CombatEvents.RaiseNotification(boss ? "BOSS REWARD +" + reward + " GOLD" : "CLEAR REWARD +" + reward + " GOLD");
             if (Tower != null) Tower.AdvanceFloor();
