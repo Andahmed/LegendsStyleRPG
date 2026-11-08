@@ -10,7 +10,24 @@ namespace LegendsRPG.Characters
     /// </summary>
     public static class HeroDatabase
     {
+        private static List<HeroData> _all;
+
+        /// <summary>The full roster (cached) — every summonable hero.</summary>
+        public static List<HeroData> AllHeroes
+        {
+            get
+            {
+                if (_all == null) _all = BuildRoster();
+                return _all;
+            }
+        }
+
         public static List<HeroData> CreateDefaultRoster()
+        {
+            return AllHeroes;
+        }
+
+        private static List<HeroData> BuildRoster()
         {
             var list = new List<HeroData>();
 
@@ -62,7 +79,167 @@ namespace LegendsRPG.Characters
                 MakeSkill("verda_s2", "Life Bloom", SkillKind.HealAlly, ElementType.Nature, 3.0f, 6f, 0f, "heal"),
                 MakeSkill("verda_ult", "Worldspring", SkillKind.UltimateAoe, ElementType.Nature, 2.6f, 15f, 0f, "ultimate", 4.5f)));
 
+            // ============================================================
+            //  v0.4 summon pool — 14 additional heroes (roster total: 20)
+            // ============================================================
+
+            // --- Common ---
+            AddRosterHero(list, "bram_ironvow", "Bram", HeroClass.Warrior, ElementType.Fire, Rarity.Common,
+                110, 12, 9, 5.0f, 1.05f, 2.2f,
+                new Color(0.80f, 0.45f, 0.20f), new Color(0.30f, 0.26f, 0.22f),
+                "Cinder Cleave", "Ember Burst", "Flame Wall");
+            AddRosterHero(list, "pell_mossfoot", "Pell", HeroClass.Healer, ElementType.Nature, Rarity.Common,
+                120, 10, 8, 4.9f, 0.95f, 7f,
+                new Color(0.45f, 0.70f, 0.35f), new Color(0.28f, 0.24f, 0.18f),
+                "Thorn Dart", "Mending Spores", "Grove Blessing");
+            AddRosterHero(list, "juno_glint", "Juno", HeroClass.Archer, ElementType.Lightning, Rarity.Common,
+                95, 12, 5, 5.4f, 1.30f, 8f,
+                new Color(0.95f, 0.80f, 0.35f), new Color(0.24f, 0.25f, 0.30f),
+                "Spark Shot", "Static Field", "Sky Piercer");
+
+            // --- Rare ---
+            AddRosterHero(list, "tamsin_dusk", "Tamsin", HeroClass.Assassin, ElementType.Dark, Rarity.Rare,
+                100, 16, 5, 5.9f, 1.45f, 2.1f,
+                new Color(0.40f, 0.30f, 0.60f), new Color(0.15f, 0.14f, 0.20f),
+                "Umbral Stab", "Night Bolt", "Veil of Dusk");
+            AddRosterHero(list, "odo_shieldhand", "Odo", HeroClass.Paladin, ElementType.Light, Rarity.Rare,
+                175, 12, 13, 4.7f, 0.90f, 2.2f,
+                new Color(0.90f, 0.85f, 0.60f), new Color(0.32f, 0.30f, 0.26f),
+                "Blessed Bash", "Sanctuary", "Aegis Verdict");
+            AddRosterHero(list, "wren_hailcaller", "Wren", HeroClass.Mage, ElementType.Ice, Rarity.Rare,
+                105, 15, 6, 4.9f, 0.95f, 7.5f,
+                new Color(0.45f, 0.75f, 0.90f), new Color(0.20f, 0.24f, 0.32f),
+                "Hail Spike", "Frost Ring", "Whiteout");
+            AddRosterHero(list, "maro_tidebind", "Maro", HeroClass.Mage, ElementType.Water, Rarity.Rare,
+                108, 15, 6, 4.8f, 0.95f, 7.5f,
+                new Color(0.35f, 0.60f, 0.95f), new Color(0.18f, 0.22f, 0.30f),
+                "Tide Bolt", "Riptide", "Maelstrom");
+
+            // --- Epic ---
+            AddRosterHero(list, "iskra_cinder", "Iskra", HeroClass.Warrior, ElementType.Fire, Rarity.Epic,
+                155, 17, 10, 5.3f, 1.20f, 2.4f,
+                new Color(0.95f, 0.50f, 0.15f), new Color(0.28f, 0.22f, 0.20f),
+                "Cinder Edge", "Pyre Wave", "Ashfall Reckoning");
+            AddRosterHero(list, "fenn_lorekeeper", "Fenn", HeroClass.Healer, ElementType.Light, Rarity.Epic,
+                135, 12, 9, 5.0f, 1.00f, 7f,
+                new Color(0.95f, 0.90f, 0.70f), new Color(0.30f, 0.28f, 0.22f),
+                "Lumen Dart", "Dawn Mend", "Aurora Veil");
+            AddRosterHero(list, "vashta_nightpine", "Vashta", HeroClass.Archer, ElementType.Nature, Rarity.Epic,
+                115, 17, 6, 5.5f, 1.35f, 8.5f,
+                new Color(0.40f, 0.75f, 0.45f), new Color(0.22f, 0.26f, 0.20f),
+                "Bramble Shot", "Overgrowth", "Wildhunt Volley");
+            AddRosterHero(list, "korrag_deepfury", "Korrag", HeroClass.Warrior, ElementType.Water, Rarity.Epic,
+                165, 16, 11, 5.1f, 1.10f, 2.4f,
+                new Color(0.30f, 0.55f, 0.85f), new Color(0.20f, 0.24f, 0.30f),
+                "Tidebreaker", "Whirlpool Strike", "Ocean's Wrath");
+
+            // --- Legendary ---
+            AddRosterHero(list, "lyra_dawnveil", "Lyra", HeroClass.Paladin, ElementType.Light, Rarity.Legendary,
+                190, 15, 15, 4.8f, 0.95f, 2.3f,
+                new Color(1f, 0.90f, 0.60f), new Color(0.34f, 0.30f, 0.24f),
+                "Radiant Smite", "Guardian Light", "Sunfall Judgement");
+            AddRosterHero(list, "morvath_ashen", "Morvath", HeroClass.Mage, ElementType.Dark, Rarity.Legendary,
+                120, 20, 7, 4.9f, 0.95f, 7.5f,
+                new Color(0.50f, 0.30f, 0.80f), new Color(0.14f, 0.12f, 0.20f),
+                "Grave Bolt", "Wither Wave", "Eternal Night");
+
+            // --- Mythic ---
+            AddRosterHero(list, "seraphel", "Seraphel", HeroClass.Assassin, ElementType.Lightning, Rarity.Mythic,
+                110, 25, 6, 6.2f, 1.55f, 2.1f,
+                new Color(0.65f, 0.85f, 1f), new Color(0.18f, 0.20f, 0.30f),
+                "Storm Fang", "Thunderbind", "Tempest Execution");
+
             return list;
+        }
+
+        // ---- v0.4 compact roster helpers ----
+        private static HeroData AddRosterHero(List<HeroData> list, string id, string name, HeroClass cls,
+            ElementType el, Rarity r, float hp, float atk, float def, float ms, float aspd, float range,
+            Color primary, Color secondary, string s1, string s2, string ult)
+        {
+            var h = MakeHero(id, name, cls, el, r,
+                hp, atk, def, ms, aspd, range,
+                hp * 0.11f, atk * 0.14f, def * 0.13f,
+                primary, secondary,
+                ClassSkill(cls, el, 1, s1),
+                ClassSkill(cls, el, 2, s2),
+                ClassSkill(cls, el, 3, ult));
+            list.Add(h);
+            return h;
+        }
+
+        /// <summary>Builds a class-appropriate skill set: [1] signature move,
+        /// [2] secondary, [3] ultimate — balanced close to the hand-made heroes.</summary>
+        private static SkillData ClassSkill(HeroClass cls, ElementType el, int tier, string displayName)
+        {
+            SkillKind kind;
+            float power, cooldown, castRange;
+
+            switch (cls)
+            {
+                case HeroClass.Mage:
+                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateAoe;
+                    power = tier == 1 ? 2.1f : tier == 2 ? 1.7f : 3.8f;
+                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 6f : 15f;
+                    castRange = tier == 1 ? 10f : 0f;
+                    break;
+                case HeroClass.Archer:
+                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateNuke;
+                    power = tier == 1 ? 1.8f : tier == 2 ? 1.5f : 5.2f;
+                    cooldown = tier == 1 ? 3f : tier == 2 ? 5f : 16f;
+                    castRange = tier == 1 ? 11f : tier == 3 ? 12f : 0f;
+                    break;
+                case HeroClass.Paladin:
+                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.HealAlly : SkillKind.UltimateAoe;
+                    power = tier == 1 ? 2.0f : tier == 2 ? 2.4f : 3.2f;
+                    cooldown = tier == 1 ? 4.5f : tier == 2 ? 7f : 15f;
+                    castRange = tier == 1 ? 2.6f : 0f;
+                    break;
+                case HeroClass.Assassin:
+                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.Projectile : SkillKind.UltimateNuke;
+                    power = tier == 1 ? 2.6f : tier == 2 ? 1.7f : 5.6f;
+                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 4.5f : 16f;
+                    castRange = tier == 1 ? 2.3f : tier == 2 ? 8f : 3f;
+                    break;
+                case HeroClass.Healer:
+                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.HealAlly : SkillKind.UltimateAoe;
+                    power = tier == 1 ? 1.6f : tier == 2 ? 3.0f : 2.6f;
+                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 6f : 15f;
+                    castRange = tier == 1 ? 9f : 0f;
+                    break;
+                default: // Warrior
+                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateAoe;
+                    power = tier == 1 ? 2.2f : tier == 2 ? 1.7f : 3.6f;
+                    cooldown = tier == 1 ? 4f : tier == 2 ? 6f : 14f;
+                    castRange = tier == 1 ? 2.8f : 0f;
+                    break;
+            }
+
+            string vfx = tier == 3 ? "ultimate" : VfxFor(kind, el);
+            return MakeSkill("gen_" + cls + "_" + tier + "_" + el, displayName, kind, el, power, cooldown, castRange, vfx);
+        }
+
+        private static string VfxFor(SkillKind kind, ElementType el)
+        {
+            switch (kind)
+            {
+                case SkillKind.MeleeStrike: return "slash";
+                case SkillKind.HealAlly: return "heal";
+                case SkillKind.AoEBurst: return "ice_nova";
+                case SkillKind.Projectile:
+                    switch (el)
+                    {
+                        case ElementType.Fire: return "fireball";
+                        case ElementType.Ice: return "ice_shard";
+                        case ElementType.Water: return "ice_shard";
+                        case ElementType.Lightning: return "lightning";
+                        case ElementType.Light: return "lightning";
+                        case ElementType.Nature: return "nature_bolt";
+                        case ElementType.Dark: return "dark_bolt";
+                        default: return "fireball";
+                    }
+                default: return "hit";
+            }
         }
 
         public static Dictionary<string, MonsterData> CreateMonsters()

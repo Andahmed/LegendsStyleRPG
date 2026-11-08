@@ -17,6 +17,9 @@ namespace LegendsRPG.Team
 
         public List<HeroCharacter> Heroes { get; } = new List<HeroCharacter>();
         public List<string> UnlockedHeroes { get; } = new List<string>();
+
+        /// <summary>Full roster injected by GameRoot — used by RebuildTeam (summon / loadout edits).</summary>
+        public List<HeroData> Roster { get; set; }
         public int ActiveIndex { get; private set; }
         public HeroCharacter ActiveHero
         {
@@ -64,20 +67,37 @@ namespace LegendsRPG.Team
             }
 
             int slot = 0;
+
+            // spawn order: the saved team loadout first, then any other unlocked heroes
+            var ordered = new List<HeroData>();
+            var loadout = SaveSystem.Current.teamLoadout;
+            for (int i = 0; i < loadout.Count; i++)
+            {
+                var d = FindInRoster(roster, loadout[i]);
+                if (d != null && UnlockedHeroes.Contains(loadout[i]) && ordered.IndexOf(d) < 0) ordered.Add(d);
+            }
             foreach (var data in roster)
             {
-                if (!UnlockedHeroes.Contains(data.heroId)) continue;
+                if (UnlockedHeroes.Contains(data.heroId) && ordered.IndexOf(data) < 0) ordered.Add(data);
+            }
+
+            foreach (var data in ordered)
+            {
                 if (slot >= GameConfig.TeamSize) break;
 
                 var go = new GameObject("HeroRoot_" + data.displayName);
                 var hero = go.AddComponent<HeroCharacter>();
-                int level = Mathf.Max(1, SaveSystem.Current.playerLevel);
-                hero.Setup(data, level, slot, FormationPosition(slot));
+                hero.Setup(data, Inventory.HeroLevel(data.heroId), slot, FormationPosition(slot));
                 go.AddComponent<TeamAIBrain>().Bind(hero, this);
 
                 var health = hero.HP;
                 var captured = hero;
                 health.Died += delegate { OnHeroDied(captured); };
+
+                // v0.5: per-hero level persistence + equipment bonuses
+                string heroKey = data.heroId;
+                hero.Stats.OnLevelUp += lv => Inventory.SetHeroLevel(heroKey, lv);
+                Equipment.Apply(hero);
 
                 Heroes.Add(hero);
                 slot++;
@@ -89,8 +109,32 @@ namespace LegendsRPG.Team
 
         public Vector3 FormationPosition(int slot)
         {
-            float angle = slot * 60f * Mathf.Deg2Rad;
-            return BasePosition + new Vector3(Mathf.Sin(angle) * 1.6f, 0f, Mathf.Cos(angle) * 1.6f);
+            // two rows of three, 2.6m apart, so heroes never overlap
+            float x = (slot % 3 - 1) * 2.6f;
+            float z = -(slot / 3) * 2.6f;
+            return BasePosition + new Vector3(x, 0f, z);
+        }
+
+        /// <summary>Respawns the whole team from the roster + current save state.
+        /// Called after summoning heroes or editing the team loadout in the UI.</summary>
+        public void RebuildTeam()
+        {
+            if (BasePosition == Vector3.zero && Heroes.Count == 0)
+            {
+                // CreateTeam never ran (should not happen) — nothing sane to rebuild from
+                return;
+            }
+            var roster = Roster != null && Roster.Count > 0 ? Roster : HeroDatabase.AllHeroes;
+            CreateTeam(roster, BasePosition, false);
+        }
+
+        private static HeroData FindInRoster(List<HeroData> roster, string heroId)
+        {
+            for (int i = 0; i < roster.Count; i++)
+            {
+                if (roster[i].heroId == heroId) return roster[i];
+            }
+            return null;
         }
 
         public void SwitchTo(int index)

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace LegendsRPG.UI
 {
     /// <summary>
-    /// Code-first uGUI construction helpers (portrait 1080x1920 canvas).
+    /// Code-first uGUI construction helpers (landscape 1920x1080 canvas).
     /// Uses the built-in runtime font — the Arabic localization pass will
     /// switch to TextMeshPro with an Arabic font + reshaper in a later phase.
     /// </summary>
@@ -27,17 +27,47 @@ namespace LegendsRPG.UI
             }
         }
 
+        private static Sprite _solid, _rounded;
+
         public static Sprite SolidSprite
         {
             get
             {
+                if (_solid != null) return _solid;
                 var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
                 var c = Color.white;
                 for (int y = 0; y < 4; y++)
                     for (int x = 0; x < 4; x++)
                         tex.SetPixel(x, y, c);
                 tex.Apply();
-                return Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+                _solid = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+                return _solid;
+            }
+        }
+
+        /// <summary>9-sliced rounded rectangle with a soft light top edge — used for buttons and panels.</summary>
+        public static Sprite RoundedSprite
+        {
+            get
+            {
+                if (_rounded != null) return _rounded;
+                int n = 64, r = 20;
+                var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear };
+                for (int y = 0; y < n; y++)
+                {
+                    for (int x = 0; x < n; x++)
+                    {
+                        float cx = Mathf.Clamp(x, r, n - 1 - r), cy = Mathf.Clamp(y, r, n - 1 - r);
+                        float d = Vector2.Distance(new Vector2(x, y), new Vector2(cx, cy));
+                        float a = Mathf.Clamp01(r - d + 0.5f);
+                        float shade = Mathf.Lerp(0.82f, 1f, y / (float)n);    // lighter top, darker bottom
+                        tex.SetPixel(x, y, new Color(shade, shade, shade, a));
+                    }
+                }
+                tex.Apply();
+                _rounded = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f, 0,
+                    SpriteMeshType.FullRect, new Vector4(r, r, r, r));
+                return _rounded;
             }
         }
 
@@ -49,7 +79,7 @@ namespace LegendsRPG.UI
 
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080f, 1920f);
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
 
             go.AddComponent<GraphicRaycaster>();
@@ -75,7 +105,8 @@ namespace LegendsRPG.UI
             rt.offsetMax = offsetMax;
 
             var img = go.AddComponent<Image>();
-            img.sprite = SolidSprite;
+            img.sprite = RoundedSprite;
+            img.type = Image.Type.Sliced;
             img.color = color;
             img.raycastTarget = false;
             return rt;
@@ -108,6 +139,10 @@ namespace LegendsRPG.UI
             t.raycastTarget = false;
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
             t.verticalOverflow = VerticalWrapMode.Overflow;
+            t.fontStyle = FontStyle.Bold;
+            var ol = rt.gameObject.AddComponent<Outline>();     // readable on any background
+            ol.effectColor = new Color(0f, 0f, 0f, 0.8f);
+            ol.effectDistance = new Vector2(2f, -2f);
             return t;
         }
 
@@ -118,9 +153,13 @@ namespace LegendsRPG.UI
             var rt = CreateFreeRect(parent, name, size, anchor, anchoredPos);
 
             var img = rt.gameObject.AddComponent<Image>();
-            img.sprite = SolidSprite;
+            img.sprite = RoundedSprite;
+            img.type = Image.Type.Sliced;
             img.color = bgColor;
             img.raycastTarget = true;
+            var shadow = rt.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.45f);
+            shadow.effectDistance = new Vector2(0f, -6f);
 
             var btn = rt.gameObject.AddComponent<Button>();
             var colors = btn.colors;

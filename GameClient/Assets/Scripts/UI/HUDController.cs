@@ -25,6 +25,7 @@ namespace LegendsRPG.UI
         private TeamManager _team;
         private IsometricCameraController _camera;
 
+        private GameObject _canvasGo;
         private Text _floorText;
         private Text _difficultyText;
         private Text _fpsText;
@@ -51,6 +52,7 @@ namespace LegendsRPG.UI
             _camera = camera;
 
             var canvas = UIBuilder.CreateCanvas("HUDCanvas");
+            _canvasGo = canvas.gameObject;
 
             BuildHeader(canvas.transform);
             BuildTeamPortraits(canvas.transform);
@@ -83,9 +85,14 @@ namespace LegendsRPG.UI
             var bar = UIBuilder.CreatePanel(parent, "TopBar", new Color(0f, 0f, 0f, 0.55f),
                 new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -150f), new Vector2(0f, 0f));
 
+            // MENU button (opens the management screens and pauses the battle)
+            UIBuilder.CreateButton(bar, "MenuBtn", "MENU", new Vector2(150f, 80f),
+                new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Color(0.55f, 0.32f, 0.15f, 0.95f),
+                Color.white, 30, () => { if (MenuController.Instance != null) MenuController.Instance.Open(); });
+
             _difficultyText = UIBuilder.CreateText(bar, "Difficulty", "EASY", 30,
                 new Color(1f, 0.8f, 0.35f), TextAnchor.MiddleLeft, new Vector2(0f, 0.5f),
-                new Vector2(28f, 0f), new Vector2(320f, 44f));
+                new Vector2(340f, 0f), new Vector2(320f, 44f));
 
             _floorText = UIBuilder.CreateText(bar, "Floor", "Floor 1", 34,
                 Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero,
@@ -121,8 +128,9 @@ namespace LegendsRPG.UI
                 var fillGo = new GameObject("Fill");
                 var frt = fillGo.AddComponent<RectTransform>();
                 frt.SetParent(fillArea, false);
-                frt.anchorMin = Vector2.zero;
-                frt.anchorMax = Vector2.zero;
+                frt.anchorMin = new Vector2(0f, 0.5f);
+                frt.anchorMax = new Vector2(0f, 0.5f);
+                frt.pivot = new Vector2(0f, 0.5f);
                 frt.sizeDelta = new Vector2(84f, 12f);
                 frt.anchoredPosition = new Vector2(0f, 0f);
                 var fill = fillGo.AddComponent<Image>();
@@ -158,6 +166,7 @@ namespace LegendsRPG.UI
             hpRt.SetParent(hpBg, false);
             hpRt.anchorMin = new Vector2(0f, 0.5f);
             hpRt.anchorMax = new Vector2(0f, 0.5f);
+            hpRt.pivot = new Vector2(0f, 0.5f);
             hpRt.sizeDelta = new Vector2(426f, 22f);
             hpRt.anchoredPosition = new Vector2(2f, 0f);
             _activeHeroHpFill = hpFill.AddComponent<Image>();
@@ -175,6 +184,7 @@ namespace LegendsRPG.UI
             expRt.SetParent(expBg, false);
             expRt.anchorMin = new Vector2(0f, 0.5f);
             expRt.anchorMax = new Vector2(0f, 0.5f);
+            expRt.pivot = new Vector2(0f, 0.5f);
             expRt.sizeDelta = new Vector2(426f, 8f);
             expRt.anchoredPosition = new Vector2(2f, 0f);
             _activeHeroExpFill = expFill.AddComponent<Image>();
@@ -209,27 +219,28 @@ namespace LegendsRPG.UI
             _skillButtons = new Button[3];
 
             // attack button
-            var attack = UIBuilder.CreateButton(parent, "AttackBtn", "ATTACK", new Vector2(230f, 230f),
-                new Vector2(1f, 0f), new Vector2(-160f, 230f), new Color(0.85f, 0.25f, 0.2f, 0.95f),
+            var attack = UIBuilder.CreateButton(parent, "AttackBtn", "ATTACK", new Vector2(220f, 220f),
+                new Vector2(1f, 0f), new Vector2(-170f, 200f), new Color(0.85f, 0.25f, 0.2f, 0.95f),
                 Color.white, 36, () => { });
             AddHoldBehavior(attack.gameObject);
 
             // skill 1 & 2
-            MakeSkillButton(parent, 0, "S1", new Vector2(1f, 0f), new Vector2(-330f, 160f), new Color(0.2f, 0.5f, 0.9f, 0.95f));
-            MakeSkillButton(parent, 1, "S2", new Vector2(1f, 0f), new Vector2(-150f, 480f), new Color(0.55f, 0.3f, 0.9f, 0.95f));
+            MakeSkillButton(parent, 0, "S1", new Vector2(1f, 0f), new Vector2(-420f, 170f), new Color(0.2f, 0.5f, 0.9f, 0.95f));
+            MakeSkillButton(parent, 1, "S2", new Vector2(1f, 0f), new Vector2(-370f, 380f), new Color(0.55f, 0.3f, 0.9f, 0.95f));
 
             // ultimate
-            var ult = UIBuilder.CreateButton(parent, "UltBtn", "ULT", new Vector2(200f, 200f),
-                new Vector2(1f, 0f), new Vector2(-350f, 420f), new Color(0.9f, 0.65f, 0.1f, 0.95f),
+            var ult = UIBuilder.CreateButton(parent, "UltBtn", "ULT", new Vector2(196f, 196f),
+                new Vector2(1f, 0f), new Vector2(-170f, 450f), new Color(0.9f, 0.65f, 0.1f, 0.95f),
                 Color.white, 40, () => CastSkill(2));
 
             var ultFill = new GameObject("UltCharge");
             var ultRt = ultFill.AddComponent<RectTransform>();
             ultRt.SetParent(ult.transform, false);
-            ultRt.anchorMin = Vector2.zero;
-            ultRt.anchorMax = Vector2.zero;
+            ultRt.anchorMin = new Vector2(0.5f, 1f);
+            ultRt.anchorMax = new Vector2(0.5f, 1f);
+            ultRt.pivot = new Vector2(0.5f, 1f);
             ultRt.sizeDelta = new Vector2(196f, 196f);
-            ultRt.anchoredPosition = Vector2.zero;
+            ultRt.anchoredPosition = new Vector2(0f, -2f);
             _ultChargeFill = ultFill.AddComponent<Image>();
             _ultChargeFill.sprite = UIBuilder.SolidSprite;
             _ultChargeFill.color = new Color(0f, 0f, 0f, 0.55f);
@@ -245,9 +256,9 @@ namespace LegendsRPG.UI
             var cdBg = new GameObject("Cooldown");
             var cdRt = cdBg.AddComponent<RectTransform>();
             cdRt.SetParent(btn.transform, false);
-            cdRt.anchorMin = Vector2.zero;
-            cdRt.anchorMax = Vector2.zero;
-            cdRt.sizeDelta = new Vector2(146f, 146f);
+            cdRt.anchorMin = new Vector2(0.5f, 0.5f);
+            cdRt.anchorMax = new Vector2(0.5f, 0.5f);
+            cdRt.sizeDelta = new Vector2(138f, 138f);
             cdRt.anchoredPosition = Vector2.zero;
             var cdImg = cdBg.AddComponent<Image>();
             cdImg.sprite = UIBuilder.SolidSprite;
@@ -368,8 +379,7 @@ namespace LegendsRPG.UI
 
             if (_ultChargeFill != null)
             {
-                _ultChargeFill.rectTransform.sizeDelta = new Vector2(196f, 196f * (1f - hero.Caster.UltCharge / 100f));
-                _ultChargeFill.rectTransform.anchoredPosition = new Vector2(0f, -196f * (hero.Caster.UltCharge / 100f) * 0.5f);
+                _ultChargeFill.rectTransform.sizeDelta = new Vector2(196f, 196f * (1f - Mathf.Clamp01(hero.Caster.UltCharge / 100f)));
             }
         }
 
@@ -465,6 +475,11 @@ namespace LegendsRPG.UI
         {
             // camera micro-shake for juice
             if (_camera != null) _camera.Shake(0.25f, 0.12f);
+        }
+
+        public void SetVisible(bool visible)
+        {
+            if (_canvasGo != null) _canvasGo.SetActive(visible);
         }
 
         public void ShowFloorClearedPanel(bool show)

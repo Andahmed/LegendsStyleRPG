@@ -28,6 +28,12 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
             PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
             PlayerSettings.stripEngineCode = false;
+            // landscape only (menu + HUD are laid out for 1920x1080)
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
             IncludeShaders("Standard", "Legacy Shaders/Particles/Additive", "Sprites/Default", "UI/Default");
         }
 
@@ -122,7 +128,10 @@ namespace LegendsRPG.EditorTools
 
             PlayerSettings.companyName = "LegendsStyleRPG";
             PlayerSettings.productName = "Legends Reborn Style RPG";
-            PlayerSettings.bundleVersion = "0.1.0";
+            PlayerSettings.bundleVersion = "0.5.0";
+            // 11 > versionCode 10 of the v0.4 APK already installed on test devices
+            // (a lower code would be rejected as a "downgrade" on install).
+            PlayerSettings.Android.bundleVersionCode = 11;
             ConfigureAndroid();
 
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -133,7 +142,7 @@ namespace LegendsRPG.EditorTools
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { ScenePath },
-                locationPathName = "Builds/Android/LegendsRPG-v0.1.0.apk",
+                locationPathName = "Builds/Android/LegendsRPG-v0.5.0.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None
             };

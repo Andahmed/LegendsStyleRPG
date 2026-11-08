@@ -15,7 +15,7 @@ namespace LegendsRPG.Team
         private TeamManager _team;
 
         private const float EngageRadius = 11f;
-        private const float FollowDistance = 2.2f;
+        private const float FollowDistance = 1.4f;
 
         public void Bind(HeroCharacter hero, TeamManager team)
         {
@@ -68,7 +68,7 @@ namespace LegendsRPG.Team
         private Vector3 FormationOffset()
         {
             float a = (_hero.Slot * 60f + 30f) * Mathf.Deg2Rad;
-            return new Vector3(Mathf.Sin(a) * 1.8f, 0f, Mathf.Cos(a) * 1.8f);
+            return new Vector3(Mathf.Sin(a) * 3.0f, 0f, Mathf.Cos(a) * 3.0f);
         }
     }
 }

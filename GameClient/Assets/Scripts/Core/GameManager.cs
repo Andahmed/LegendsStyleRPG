@@ -78,6 +78,8 @@ namespace LegendsRPG.Core
             State = GameState.FloorCleared;
             LegendsRPG.Audio.AudioSystem.Play("Victory");
             CombatEvents.RaiseNotification("Floor cleared!");
+            DailyMissions.Add(DailyMissions.ClearFloors, 1);
+            Inventory.AddGold(150 + (Tower != null ? Tower.CurrentFloor * 10 : 0));
             if (Tower != null) Tower.AdvanceFloor();
             SaveSystem.Save(Tower, Team);
             if (Hud != null) Hud.ShowFloorClearedPanel(true);

@@ -31,7 +31,33 @@ namespace LegendsRPG.Core
             public float qualityPref = 1f;   // 0 Low 1 Med 2 High 3 Ultra
             public float musicVolume = 0.6f;
             public string lastSaveUtc = "";
-            public int schemaVersion = 1;
+
+            // ---- economy / inventory (schema 2) ----
+            public int gold = 0;
+            public int gems = 0;
+            public List<string> itemIds = new List<string>();
+            public List<int> itemCounts = new List<int>();
+
+            // ---- daily systems ----
+            public string dayKey = "";
+            public List<int> missionProgress = new List<int>();
+            public List<int> missionClaimed = new List<int>();
+            public List<string> shopKeys = new List<string>();
+            public List<int> shopCounts = new List<int>();
+
+            // ---- summoning + loadout (schema 3) ----
+            public int gachaTotalPulls = 0;
+            public List<int> gachaPity = new List<int>();      // pulls since last guaranteed Legendary, per banner
+            public string wishElement = "";                     // Faction Wish element (after unlock)
+            public List<string> teamLoadout = new List<string>(); // battle team order (max 6)
+            public bool summonGiftGiven = false;
+            // ---- per-hero progress + equipment (v0.5) ----
+            public List<string> levelHeroIds = new List<string>();
+            public List<int> levelValues = new List<int>();
+            public List<string> equipHero = new List<string>();
+            public List<int> equipSlot = new List<int>();
+            public List<string> equipItem = new List<string>();
+            public int schemaVersion = 3;
         }
 
         private static string FilePath
@@ -66,6 +92,8 @@ namespace LegendsRPG.Core
                 SeedFirstRun();
             }
 
+            Migrate();
+            Inventory.MigrateAndSeed();
             if (OnLoaded != null) OnLoaded();
             return true;
         }
@@ -75,6 +103,22 @@ namespace LegendsRPG.Core
             // The player starts with one hero: Kael the Flameblade.
             Current.unlockedHeroIds.Add("kael_flameblade");
             Current.playerLevel = 1;
+        }
+
+        private static void Migrate()
+        {
+            var s = Current;
+            if (s.gachaPity == null) s.gachaPity = new List<int>();
+            if (s.teamLoadout == null) s.teamLoadout = new List<string>();
+
+            // v0.2/v0.3 saves (schema <= 2): grant the v0.4 summon launch gift once
+            if (s.schemaVersion < 3 && !s.summonGiftGiven)
+            {
+                s.gems += 3200;
+                s.summonGiftGiven = true;
+                Debug.Log("[SaveSystem] v0.4 migration: +3200 gems summon launch gift");
+            }
+            s.schemaVersion = 3;
         }
 
         public static void Save(World.TowerSystem tower, Team.TeamManager team)

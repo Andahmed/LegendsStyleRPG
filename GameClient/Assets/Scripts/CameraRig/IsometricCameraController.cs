@@ -16,7 +16,7 @@ namespace LegendsRPG.Cam
 
         private float _yaw = GameConfig.CameraDefaultYaw;
         private float _pitch = GameConfig.CameraDefaultPitch;
-        private float _distance = 13f;
+        private float _distance = 16f;
         private float _yawInput, _pitchInput, _zoomInput;
         private Vector3 _shakeOffset;
         private float _shakeTimeLeft, _shakeMagnitude;
@@ -26,11 +26,14 @@ namespace LegendsRPG.Cam
         {
             _cam = GetComponent<Camera>();
             if (_cam == null) _cam = gameObject.AddComponent<Camera>();
-            _cam.fieldOfView = 50f;
+            _cam.fieldOfView = 42f;       // narrower FOV = less perspective distortion
             _cam.nearClipPlane = 0.3f;
             _cam.farClipPlane = 220f;
-            _cam.backgroundColor = new Color(0.05f, 0.06f, 0.10f);
+            _cam.backgroundColor = new Color(0.10f, 0.11f, 0.18f);
+            _cam.allowHDR = false;
+            _cam.allowMSAA = true;
             _cam.clearFlags = CameraClearFlags.SolidColor;
+            if (RenderSettings.skybox != null) _cam.clearFlags = CameraClearFlags.Skybox;   // set by ArenaBuilder
         }
 
         public void SetTarget(Transform t) { Target = t; }

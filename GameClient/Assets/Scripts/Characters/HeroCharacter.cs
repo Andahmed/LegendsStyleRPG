@@ -19,6 +19,7 @@ namespace LegendsRPG.Characters
         public CharacterAnimator Anim { get; private set; }
         public SkillCaster Caster { get; private set; }
         public Transform WeaponTip { get; private set; }
+        private Transform _ring;
 
         public int Slot { get; private set; }
         public bool IsActive { get; private set; }
@@ -44,7 +45,8 @@ namespace LegendsRPG.Characters
             Anim = gameObject.AddComponent<CharacterAnimator>();
             Caster = gameObject.AddComponent<SkillCaster>();
 
-            var body = CharacterBodyFactory.Build(gameObject, data.element, true, 1f, data.primaryColor, data.secondaryColor);
+            var body = CharacterBodyFactory.Build(gameObject, data.element, true, 1f, data.primaryColor, data.secondaryColor,
+                Art.ArtSlots.SlotForHeroClass(data.heroClass));
             Anim.Torso = body.Torso;
             Anim.Head = body.Head;
             Anim.ArmL = body.ArmL;
@@ -53,6 +55,7 @@ namespace LegendsRPG.Characters
             Anim.LegR = body.LegR;
             Anim.MainRenderer = body.MainRenderer;
             WeaponTip = body.WeaponTip;
+            _ring = body.Ring;
 
             float hp = data.baseHP + data.hpPerLevel * (level - 1);
             float atk = data.baseAttack + data.atkPerLevel * (level - 1);
@@ -79,6 +82,7 @@ namespace LegendsRPG.Characters
         public void SetActive(bool active)
         {
             IsActive = active;
+            if (_ring != null) _ring.localScale = Vector3.one * (active ? 2.6f : 1.7f);
         }
 
         /// <summary>Called every frame for the manually-controlled hero.</summary>

@@ -37,7 +37,8 @@ namespace LegendsRPG.Core
             Screen.autorotateToPortraitUpsideDown = false;
             Screen.autorotateToLandscapeLeft = true;
             Screen.autorotateToLandscapeRight = true;
-            Screen.orientation = ScreenOrientation.AutoRotation;
+            Screen.orientation = ScreenOrientation.LandscapeLeft;
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 #endif
 
             BuildGame();
@@ -93,7 +94,10 @@ namespace LegendsRPG.Core
             SaveSystem.Load();
             var roster = HeroDatabase.CreateDefaultRoster();
             var monsters = HeroDatabase.CreateMonsters();
-            team.CreateTeam(roster, new Vector3(0f, 0f, 8f), demoUnlockAll: true);
+            // v0.4: the save drives unlocks (player starts with Kael and summons
+            // the rest) — demoUnlockAll is off so the gacha loop is real.
+            team.Roster = roster;
+            team.CreateTeam(roster, new Vector3(0f, 0f, 8f), demoUnlockAll: false);
 
             camera.SetTarget(team.ActiveHero != null ? team.ActiveHero.transform : null);
 
@@ -124,6 +128,27 @@ namespace LegendsRPG.Core
 
             spawner.StartFloor();
             gm.SetState(GameManager.GameState.Battle);
+
+            // 10) main menu (battle stays paused until the player presses ENTER BATTLE)
+            var menuGo = new GameObject("MenuController");
+            var menu = menuGo.AddComponent<MenuController>();
+            menu.Build(team, hud);
+
+            // 11) main hub (v0.3): 3D diorama + full hub UI. The hub is the home screen now.
+            var hubSceneGo = new GameObject("HubScene");
+            var hubCenter = hubSceneGo.AddComponent<LegendsRPG.World.HubScene>().Build(team);
+
+            var hubGo = new GameObject("HubScreen");
+            var hub = hubGo.AddComponent<LegendsRPG.UI.HubScreen>();
+            hub.Build(team, hud, menu);
+            hub.ManagementRouter = id =>
+            {
+                menu.Open();          // pauses time, hides HUD, opens the management screen
+                menu.ShowScreen(id);  // jump straight to the requested screen
+                return true;
+            };
+            hub.Open();
+            camera.SetTarget(hubCenter);
 
             Debug.Log("[LegendsRPG] Prototype booted. Team=" + team.Heroes.Count +
                       " heroes, Floor=" + tower.CurrentFloor +

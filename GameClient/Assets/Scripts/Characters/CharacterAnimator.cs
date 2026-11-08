@@ -27,10 +27,12 @@ namespace LegendsRPG.Characters
         private bool _dead;
         private float _deathT;
         private Quaternion _torsoBaseRot;
+        private Vector3 _torsoBasePos, _headBasePos;
 
         private void Start()
         {
-            if (Torso != null) _torsoBaseRot = Torso.localRotation;
+            if (Torso != null) { _torsoBaseRot = Torso.localRotation; _torsoBasePos = Torso.localPosition; }
+            if (Head != null) _headBasePos = Head.localPosition;
         }
 
         public void SetMoving(bool moving) { _moving = moving; }
@@ -90,14 +92,15 @@ namespace LegendsRPG.Characters
                     if (ArmL != null) ArmL.localRotation = Quaternion.Euler(-swing * 0.7f, 0f, 0f);
                     if (ArmR != null) ArmR.localRotation = Quaternion.Euler(swing * 0.7f, 0f, 0f);
                 }
-                if (Torso != null)
-                {
-                    Torso.localPosition = new Vector3(0f, Mathf.Abs(Mathf.Sin(_walkPhase)) * 0.06f, 0f);
-                }
+                float bob = Mathf.Abs(Mathf.Sin(_walkPhase)) * 0.06f;
+                if (Torso != null) Torso.localPosition = _torsoBasePos + new Vector3(0f, bob, 0f);
+                if (Head != null) Head.localPosition = _headBasePos + new Vector3(0f, bob, 0f);
             }
             else
             {
                 _walkPhase = 0f;
+                if (Torso != null) Torso.localPosition = Vector3.Lerp(Torso.localPosition, _torsoBasePos, dt * 12f);
+                if (Head != null) Head.localPosition = Vector3.Lerp(Head.localPosition, _headBasePos, dt * 12f);
                 if (LegL != null) LegL.localRotation = Quaternion.Slerp(LegL.localRotation, Quaternion.identity, dt * 10f);
                 if (LegR != null) LegR.localRotation = Quaternion.Slerp(LegR.localRotation, Quaternion.identity, dt * 10f);
             }

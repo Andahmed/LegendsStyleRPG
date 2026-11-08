@@ -48,7 +48,7 @@ namespace LegendsRPG.Characters
             Anim = gameObject.AddComponent<CharacterAnimator>();
 
             var body = CharacterBodyFactory.Build(gameObject, data.element, false, data.scale,
-                data.primaryColor, data.secondaryColor);
+                data.primaryColor, data.secondaryColor, data.monsterId);
             Anim.Torso = body.Torso;
             Anim.Head = body.Head;
             Anim.ArmL = body.ArmL;
