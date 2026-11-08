@@ -33,7 +33,8 @@ namespace LegendsRPG.UI
         private MenuController _menu;
         private Canvas _canvas;
         private Text _goldText, _gemText, _toast, _powerText;
-        private Text _afkTimerText, _eventTimerText, _chatText, _gearText;
+        private Text _afkTimerText, _eventTimerText, _chatText, _gearText, _afkRewardText;
+        private Button _afkClaimButton;
         private RectTransform _afkBar;
         private float _toastTimer;
         private float _afkRemaining = 8f * 3600f;   // 08:00:00 like the reference
@@ -159,6 +160,14 @@ namespace LegendsRPG.UI
             if (_afkRemaining > 0f) { _afkRemaining -= dt; if (_afkRemaining < 0f) _afkRemaining = 0f; }
             if (_eventRemaining > 0f) { _eventRemaining -= dt; if (_eventRemaining < 0f) _eventRemaining = 24f * 3600f; }
             if (_afkTimerText != null) _afkTimerText.text = FormatClock(_afkRemaining);
+            if (_afkRewardText != null)
+            {
+                _afkRewardText.text = IdleProgression.HasPending
+                    ? "+" + MenuController.FormatNumber(IdleProgression.PendingGold) + " GOLD  /  +" +
+                      MenuController.FormatNumber(IdleProgression.PendingExp) + " EXP"
+                    : "AFK rewards are collecting";
+            }
+            if (_afkClaimButton != null) _afkClaimButton.interactable = IdleProgression.HasPending;
             if (_eventTimerText != null) _eventTimerText.text = FormatClock(_eventRemaining);
             if (_afkBar != null)
             {
@@ -434,6 +443,13 @@ namespace LegendsRPG.UI
             _afkTimerText = MenuTheme.Label(chip, "08:00:00", 30, MenuTheme.Gold, TextAnchor.MiddleLeft, true);
             _afkTimerText.rectTransform.offsetMin = new Vector2(112f, 8f);
             _afkTimerText.rectTransform.offsetMax = new Vector2(-16f, -30f);
+            _afkRewardText = MenuTheme.Label(chip, "AFK rewards are collecting", 18, AnimeTheme.Cyan, TextAnchor.MiddleLeft);
+            _afkRewardText.rectTransform.offsetMin = new Vector2(112f, 42f);
+            _afkRewardText.rectTransform.offsetMax = new Vector2(-16f, 68f);
+
+            _afkClaimButton = MenuTheme.BtnAt(chip, "ClaimAfk", "CLAIM", new Vector2(1f, 0f),
+                new Vector2(-58f, -44f), new Vector2(112f, 42f), AnimeTheme.Gold, AnimeTheme.Ink, 18,
+                ClaimOfflineRewards);
 
             var track = MenuTheme.Box(chip, "Track", new Vector2(0f, 0f), new Vector2(0f, 0f),
                 new Vector2(112f, 18f), new Vector2(-24f, 44f), Color.black, false);
@@ -444,6 +460,13 @@ namespace LegendsRPG.UI
             MenuTheme.BtnAt(root, "EnterBattle", "ENTER BATTLE  >", new Vector2(1f, 0f),
                 new Vector2(-330f, 210f), new Vector2(420f, 110f), new Color(0.8f, 0.3f, 0.14f), Color.white, 42,
                 EnterBattle);
+        }
+
+        private void ClaimOfflineRewards()
+        {
+            if (!IdleProgression.Claim(_team)) return;
+            SaveSystem.Save(GameManager.Instance != null ? GameManager.Instance.Tower : null, _team);
+            Toast("Offline rewards collected");
         }
 
         // ======================= toast =======================
