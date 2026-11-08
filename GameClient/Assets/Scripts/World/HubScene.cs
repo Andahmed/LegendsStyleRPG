@@ -4,6 +4,7 @@ using UnityEngine;
 using LegendsRPG.Characters;
 using LegendsRPG.Combat;
 using LegendsRPG.Team;
+using LegendsRPG.UI;
 using LegendsRPG.Vfx;
 
 namespace LegendsRPG.World
@@ -255,10 +256,10 @@ namespace LegendsRPG.World
             var eye = Prim(PrimitiveType.Sphere, "Eye", b, new Vector3(0f, 3.6f, 0.9f),
                 Vector3.one * 1.5f, MaterialLibrary.Emissive(new Color(0.9f, 0.15f, 0.2f), 1.6f));
             // horns
-            var h1 = Prim(PrimitiveType.Cone, "HornL", b, new Vector3(-2.1f, 6.6f, 0f),
+            var h1 = Prim(ConePrim, "HornL", b, new Vector3(-2.1f, 6.6f, 0f),
                 new Vector3(1f, 2.4f, 1f), MaterialLibrary.Solid(new Color(0.9f, 0.85f, 0.75f), 0.4f, 0.1f));
             h1.localRotation = Quaternion.Euler(0f, 0f, 18f);
-            var h2 = Prim(PrimitiveType.Cone, "HornR", b, new Vector3(2.1f, 6.6f, 0f),
+            var h2 = Prim(ConePrim, "HornR", b, new Vector3(2.1f, 6.6f, 0f),
                 new Vector3(1f, 2.4f, 1f), MaterialLibrary.Solid(new Color(0.9f, 0.85f, 0.75f), 0.4f, 0.1f));
             h2.localRotation = Quaternion.Euler(0f, 0f, -18f);
             b.GetComponent<HubBuilding>().Setup("beast", "Beast", eye, null, false);
@@ -299,9 +300,9 @@ namespace LegendsRPG.World
             portal.localRotation = Quaternion.Euler(90f, 0f, 0f);
             // spikes
             var spike = MaterialLibrary.Solid(new Color(0.14f, 0.11f, 0.18f), 0.35f, 0.2f);
-            var s1 = Prim(PrimitiveType.Cone, "Spike1", b, new Vector3(-3.6f, 3.4f, 0.6f), new Vector3(1.2f, 4.6f, 1.2f), spike);
+            var s1 = Prim(ConePrim, "Spike1", b, new Vector3(-3.6f, 3.4f, 0.6f), new Vector3(1.2f, 4.6f, 1.2f), spike);
             s1.localRotation = Quaternion.Euler(0f, 0f, 14f);
-            var s2 = Prim(PrimitiveType.Cone, "Spike2", b, new Vector3(3.5f, 3.0f, -0.2f), new Vector3(1f, 3.6f, 1f), spike);
+            var s2 = Prim(ConePrim, "Spike2", b, new Vector3(3.5f, 3.0f, -0.2f), new Vector3(1f, 3.6f, 1f), spike);
             s2.localRotation = Quaternion.Euler(0f, 0f, -12f);
             b.GetComponent<HubBuilding>().Setup("dungeon", "Dungeon", portal, null, true);
         }
@@ -318,7 +319,7 @@ namespace LegendsRPG.World
             {
                 Prim(PrimitiveType.Cylinder, "Tower" + side, b, new Vector3(side * 4.6f, 4.6f, 0f),
                     new Vector3(2.4f, 9.2f, 2.4f), stone);
-                var spire = Prim(PrimitiveType.Cone, "Spire" + side, b, new Vector3(side * 4.6f, 10.4f, 0f),
+                var spire = Prim(ConePrim, "Spire" + side, b, new Vector3(side * 4.6f, 10.4f, 0f),
                     new Vector3(2.8f, 3.2f, 2.8f), gold);
                 spire.localRotation = Quaternion.identity;
             }
@@ -372,7 +373,7 @@ namespace LegendsRPG.World
                     new Vector3(0.7f, 1.1f, 0.25f), MaterialLibrary.Emissive(new Color(1f, 0.85f, 0.45f), 1.2f));
                 y += 3.3f;
             }
-            var tip = Prim(PrimitiveType.Cone, "Tip", b, new Vector3(0f, y + 1.4f, 0f),
+            var tip = Prim(ConePrim, "Tip", b, new Vector3(0f, y + 1.4f, 0f),
                 new Vector3(3.6f, 2.8f, 3.6f), MaterialLibrary.Solid(new Color(0.85f, 0.65f, 0.2f), 0.55f, 0.65f));
             b.GetComponent<HubBuilding>().Setup("tower", "Ranking", null, tip, false);
         }
@@ -393,19 +394,61 @@ namespace LegendsRPG.World
         }
 
         // ------------------------------------------------------------ helpers
-        private GameObject NewBuilding(string id, string displayName, Vector3 localPos, bool dot)
+        private Transform NewBuilding(string id, string displayName, Vector3 localPos, bool dot)
         {
             var go = new GameObject("B_" + id);
             go.transform.SetParent(_root, false);
             go.transform.localPosition = localPos;
             var hb = go.AddComponent<HubBuilding>();
             _buildings.Add(hb);
-            return go;
+            return go.transform;
+        }
+
+        // Unity has no PrimitiveType.Cone, so build one (same size as a cylinder: radius 0.5, height 2).
+        private const PrimitiveType ConePrim = (PrimitiveType)100;
+        private static Mesh _coneMesh;
+
+        private static Mesh ConeMesh()
+        {
+            if (_coneMesh != null) return _coneMesh;
+            const int seg = 24;
+            var v = new List<Vector3>();
+            var tri = new List<int>();
+            var apex = new Vector3(0f, 1f, 0f);
+            for (int i = 0; i < seg; i++)
+            {
+                float a0 = i * Mathf.PI * 2f / seg;
+                float a1 = (i + 1) * Mathf.PI * 2f / seg;
+                int s = v.Count;
+                v.Add(apex);
+                v.Add(new Vector3(Mathf.Cos(a1) * 0.5f, -1f, Mathf.Sin(a1) * 0.5f));
+                v.Add(new Vector3(Mathf.Cos(a0) * 0.5f, -1f, Mathf.Sin(a0) * 0.5f));
+                tri.Add(s); tri.Add(s + 1); tri.Add(s + 2);
+                int c = v.Count;
+                v.Add(new Vector3(0f, -1f, 0f));
+                v.Add(new Vector3(Mathf.Cos(a0) * 0.5f, -1f, Mathf.Sin(a0) * 0.5f));
+                v.Add(new Vector3(Mathf.Cos(a1) * 0.5f, -1f, Mathf.Sin(a1) * 0.5f));
+                tri.Add(c); tri.Add(c + 1); tri.Add(c + 2);
+            }
+            var m = new Mesh { name = "ConeMesh" };
+            m.SetVertices(v);
+            m.SetTriangles(tri, 0);
+            m.RecalculateNormals();
+            m.RecalculateBounds();
+            _coneMesh = m;
+            return m;
         }
 
         private Transform Prim(PrimitiveType type, string name, Transform parent, Vector3 localPos, Vector3 scale, Material mat)
         {
-            var go = GameObject.CreatePrimitive(type);
+            GameObject go;
+            if (type == ConePrim)
+            {
+                go = new GameObject(name);
+                go.AddComponent<MeshFilter>().sharedMesh = ConeMesh();
+                go.AddComponent<MeshRenderer>();
+            }
+            else go = GameObject.CreatePrimitive(type);
             go.name = name;
             var col = go.GetComponent<Collider>();
             if (col != null) Destroy(col);

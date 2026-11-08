@@ -228,7 +228,7 @@ namespace LegendsRPG.UI
             for (int i = 0; i < small.Length; i++)
             {
                 int idx = i;
-                var btn = MenuTheme.BtnAt(card, small[i], new Vector2(0f, 0f), new Vector2(152f + i * 138f, 30f),
+                var btn = MenuTheme.BtnAt(card, "Small" + small[i], small[i], new Vector2(0f, 0f), new Vector2(152f + i * 138f, 30f),
                     new Vector2(128f, 52f), new Color(0.24f, 0.15f, 0.09f), MenuTheme.Parchment, 26,
                     () =>
                     {
