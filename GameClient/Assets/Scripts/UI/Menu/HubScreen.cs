@@ -131,7 +131,7 @@ namespace LegendsRPG.UI
                 case "guild": Toast("Guild hall: guilds arrive in the guild phase"); break;
                 case "arena": Toast("Arena: PvP arrives in the PvP phase"); break;
                 case "tower": Toast("Power Leaderboard coming soon"); break;
-                case "continent": EnterBattle(); break; // main-line battles live behind the continent portal
+                case "continent": OpenManagement("campaign"); break; // campaign map is the main-line portal
                 default: Toast(id); break;
             }
         }
