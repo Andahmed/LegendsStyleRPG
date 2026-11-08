@@ -48,14 +48,52 @@ namespace LegendsRPG.UI
             return null;
         }
 
+        private static Sprite LoadPath(params string[] paths)
+        {
+            if (!UseSkin) return null;
+            for (int i = 0; i < paths.Length; i++)
+            {
+                var sprite = Resources.Load<Sprite>(paths[i]);
+                if (sprite != null) return sprite;
+            }
+            return null;
+        }
+
         // slot -> candidate file names (first match wins)
         public static Sprite Button
-        { get { return Find("button", "buttonLong_brown", "buttonLong_beige", "buttonLong_blue", "buttonSquare_brown"); } }
+        {
+            get
+            {
+                return LoadPath(
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/button",
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/button_ready_on",
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/button_agree")
+                    ?? Find("button", "buttonLong_brown", "buttonLong_beige", "buttonLong_blue", "buttonSquare_brown");
+            }
+        }
 
         public static Sprite Panel
-        { get { return Find("panel", "panel_brown", "panel_beige", "panel_blue"); } }
+        {
+            get
+            {
+                return LoadPath(
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/big_roundframe",
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/Frame_big",
+                    "UISkin/AssetStore/CuteCartoonMobileGUI/HONETi/mobile_cartoon_GUI/GUI Elements/Panels/panel_start")
+                    ?? Find("panel", "panel_brown", "panel_beige", "panel_blue");
+            }
+        }
 
         public static Sprite PanelInset
-        { get { return Find("panel_inset", "panelInset_brown", "panelInset_beige", "panelInset_blue"); } }
+        {
+            get
+            {
+                return LoadPath(
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/lil_roundframe",
+                    "UISkin/AssetStore/GUIParts/GUI_Parts/Gui_parts/Mini_frame0",
+                    "UISkin/AssetStore/CuteCartoonMobileGUI/HONETi/mobile_cartoon_GUI/GUI Elements/Panels/panel_top")
+                    ?? Find("panel_inset", "panelInset_brown", "panelInset_beige", "panelInset_blue");
+            }
+        }
     }
 }
