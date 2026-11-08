@@ -45,6 +45,7 @@ namespace LegendsRPG.UI
         private Text _autoBattleLabel;
         private RectTransform _floorClearedPanel;
         private Text _floorClearedLabel;
+        private Text _floorClearedRewardText;
         private float _notificationTimer;
         private float _fpsRefresh;
 
@@ -336,6 +337,9 @@ namespace LegendsRPG.UI
             UIBuilder.CreateText(_floorClearedPanel, "Sub", "Loot & EXP collected", 34,
                 AnimeTheme.Text, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 60f), new Vector2(700f, 50f));
+            _floorClearedRewardText = UIBuilder.CreateText(_floorClearedPanel, "Reward", "", 30,
+                AnimeTheme.Cyan, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 10f), new Vector2(900f, 44f));
 
             UIBuilder.CreateButton(_floorClearedPanel, "NextBtn", "NEXT FLOOR", new Vector2(420f, 120f),
                 new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), AnimeTheme.Mint,
@@ -526,6 +530,11 @@ namespace LegendsRPG.UI
 
         public void ShowFloorClearedPanel(bool show)
         {
+            if (show && _floorClearedRewardText != null && GameManager.Instance != null)
+            {
+                _floorClearedRewardText.text = (GameManager.Instance.LastClearWasBoss ? "BOSS CLEAR  •  " : "CLEAR  •  ") +
+                    "+" + GameManager.Instance.LastRewardGold + " GOLD";
+            }
             if (_floorClearedPanel != null) _floorClearedPanel.gameObject.SetActive(show);
         }
 

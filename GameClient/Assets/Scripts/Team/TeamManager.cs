@@ -30,6 +30,7 @@ namespace LegendsRPG.Team
             }
         }
         public Vector3 BasePosition { get; private set; }
+        public bool AutoBattleIsEnabled { get { return _autoBattle != null && _autoBattle.Enabled; } }
 
         public event Action<int> OnActiveChanged;
         public event Action<HeroCharacter> HeroRespawned;

@@ -57,7 +57,12 @@ namespace LegendsRPG.Core
             public List<string> equipHero = new List<string>();
             public List<int> equipSlot = new List<int>();
             public List<string> equipItem = new List<string>();
-            public int schemaVersion = 3;
+            // ---- idle / offline progression (schema 4) ----
+            public string idleLastUtc = "";
+            public int idlePendingGold = 0;
+            public int idlePendingExp = 0;
+            public int idlePendingSeconds = 0;
+            public int schemaVersion = 4;
         }
 
         private static string FilePath
@@ -94,6 +99,7 @@ namespace LegendsRPG.Core
 
             Migrate();
             Inventory.MigrateAndSeed();
+            IdleProgression.Reconcile();
             if (OnLoaded != null) OnLoaded();
             return true;
         }
@@ -118,7 +124,7 @@ namespace LegendsRPG.Core
                 s.summonGiftGiven = true;
                 Debug.Log("[SaveSystem] v0.4 migration: +3200 gems summon launch gift");
             }
-            s.schemaVersion = 3;
+            s.schemaVersion = 4;
         }
 
         public static void Save(World.TowerSystem tower, Team.TeamManager team)
@@ -151,6 +157,7 @@ namespace LegendsRPG.Core
                 }
 
                 Current.lastSaveUtc = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                IdleProgression.MarkSessionSaved();
                 var json = JsonUtility.ToJson(Current, true);
                 File.WriteAllText(FilePath, json);
             }
