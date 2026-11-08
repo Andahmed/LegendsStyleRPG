@@ -25,6 +25,7 @@ namespace LegendsRPG.Core
         private float _fpsAccum;
         private int _fpsFrames;
         private float _autosaveTimer;
+        private bool _autoAdvanceQueued;
 
         private void Awake()
         {
@@ -79,17 +80,35 @@ namespace LegendsRPG.Core
             LegendsRPG.Audio.AudioSystem.Play("Victory");
             CombatEvents.RaiseNotification("Floor cleared!");
             DailyMissions.Add(DailyMissions.ClearFloors, 1);
-            Inventory.AddGold(150 + (Tower != null ? Tower.CurrentFloor * 10 : 0));
+            int floor = Tower != null ? Tower.CurrentFloor : 1;
+            bool boss = floor % GameConfig.BossEveryNFloors == 0;
+            int reward = 150 + floor * 10 + (boss ? 500 + floor * 20 : 0);
+            Inventory.AddGold(reward);
+            CombatEvents.RaiseNotification(boss ? "BOSS REWARD +" + reward + " GOLD" : "CLEAR REWARD +" + reward + " GOLD");
             if (Tower != null) Tower.AdvanceFloor();
             SaveSystem.Save(Tower, Team);
             if (Hud != null) Hud.ShowFloorClearedPanel(true);
+
+            if (!_autoAdvanceQueued && Team.AutoBattleIsEnabled)
+            {
+                _autoAdvanceQueued = true;
+                StartCoroutine(AutoAdvanceRoutine());
+            }
         }
 
         public void StartNextFloor()
         {
+            _autoAdvanceQueued = false;
             if (Hud != null) Hud.ShowFloorClearedPanel(false);
             if (Spawner != null) Spawner.StartFloor();
             State = GameState.Battle;
+        }
+
+        private System.Collections.IEnumerator AutoAdvanceRoutine()
+        {
+            yield return new WaitForSecondsRealtime(1.6f);
+            if (State == GameState.FloorCleared && Team.AutoBattleIsEnabled) StartNextFloor();
+            else _autoAdvanceQueued = false;
         }
 
         public void Pause(bool pause)
