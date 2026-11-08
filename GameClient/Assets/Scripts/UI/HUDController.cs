@@ -326,19 +326,20 @@ namespace LegendsRPG.UI
         {
             _floorClearedPanel = UIBuilder.CreatePanel(parent, "FloorCleared", new Color(0f, 0f, 0f, 0.75f),
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            _floorClearedPanel.GetComponent<Image>().color = new Color(AnimeTheme.Ink.r, AnimeTheme.Ink.g, AnimeTheme.Ink.b, 0.94f);
             _floorClearedPanel.gameObject.SetActive(false);
 
             _floorClearedLabel = UIBuilder.CreateText(_floorClearedPanel, "Title", "FLOOR CLEARED!", 64,
-                new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
+                AnimeTheme.Gold, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 160f), new Vector2(900f, 90f));
 
             UIBuilder.CreateText(_floorClearedPanel, "Sub", "Loot & EXP collected", 34,
-                Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
+                AnimeTheme.Text, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 60f), new Vector2(700f, 50f));
 
             UIBuilder.CreateButton(_floorClearedPanel, "NextBtn", "NEXT FLOOR", new Vector2(420f, 120f),
-                new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Color(0.15f, 0.6f, 0.3f, 0.98f),
-                Color.white, 42, () =>
+                new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), AnimeTheme.Mint,
+                AnimeTheme.Ink, 34, () =>
                 {
                     if (GameManager.Instance != null) GameManager.Instance.StartNextFloor();
                 });
