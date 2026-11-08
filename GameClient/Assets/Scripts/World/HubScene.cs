@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using LegendsRPG.Characters;
 using LegendsRPG.Combat;
+using LegendsRPG.Team;
 using LegendsRPG.Vfx;
 
 namespace LegendsRPG.World
