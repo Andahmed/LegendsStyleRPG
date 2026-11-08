@@ -31,11 +31,13 @@ namespace LegendsRPG.UI
         private Text _fpsText;
         private Text _notificationText;
         private Text _activeHeroText;
+        private Text _activeHeroElementText;
         private Image _activeHeroHpFill;
         private Image _activeHeroExpFill;
         private Image _ultChargeFill;
         private Image[] _skillCooldownFills;
         private Text[] _skillCooldownTexts;
+        private Text[] _skillLabels;
         private Button[] _skillButtons;
         private readonly Image[] _portraitFills = new Image[6];
         private readonly Image[] _portraitFrames = new Image[6];
@@ -82,16 +84,19 @@ namespace LegendsRPG.UI
         // ================= construction =================
         private void BuildHeader(Transform parent)
         {
-            var bar = UIBuilder.CreatePanel(parent, "TopBar", new Color(0f, 0f, 0f, 0.55f),
+            var bar = UIBuilder.CreatePanel(parent, "TopBar", AnimeTheme.Ink,
                 new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, -150f), new Vector2(0f, 0f));
+
+            UIBuilder.CreateText(bar, "Brand", "LEGENDS  /  TOWER", 28, AnimeTheme.Cyan,
+                TextAnchor.MiddleLeft, new Vector2(0f, 0.5f), new Vector2(290f, 0f), new Vector2(300f, 42f));
 
             // MENU button (opens the management screens and pauses the battle)
             UIBuilder.CreateButton(bar, "MenuBtn", "MENU", new Vector2(150f, 80f),
-                new Vector2(0f, 0.5f), new Vector2(100f, 0f), new Color(0.55f, 0.32f, 0.15f, 0.95f),
-                Color.white, 30, () => { if (MenuController.Instance != null) MenuController.Instance.Open(); });
+                new Vector2(0f, 0.5f), new Vector2(100f, 0f), AnimeTheme.PanelRaised,
+                AnimeTheme.Text, 26, () => { if (MenuController.Instance != null) MenuController.Instance.Open(); });
 
             _difficultyText = UIBuilder.CreateText(bar, "Difficulty", "EASY", 30,
-                new Color(1f, 0.8f, 0.35f), TextAnchor.MiddleLeft, new Vector2(0f, 0.5f),
+                AnimeTheme.Gold, TextAnchor.MiddleLeft, new Vector2(0f, 0.5f),
                 new Vector2(340f, 0f), new Vector2(320f, 44f));
 
             _floorText = UIBuilder.CreateText(bar, "Floor", "Floor 1", 34,
@@ -115,9 +120,15 @@ namespace LegendsRPG.UI
                 var slot = UIBuilder.CreateFreeRect(row, "Portrait" + i, new Vector2(96f, 96f), anchor, pos);
 
                 var frame = slot.gameObject.AddComponent<Image>();
-                frame.sprite = UIBuilder.SolidSprite;
-                frame.color = new Color(0.25f, 0.27f, 0.32f, 0.9f);
+                frame.sprite = UIBuilder.RoundedSprite;
+                frame.type = Image.Type.Sliced;
+                frame.color = i < _team.Heroes.Count && _team.Heroes[i] != null
+                    ? AnimeTheme.Rarity(_team.Heroes[i].Data.rarity) : AnimeTheme.PanelRaised;
                 _portraitFrames[i] = frame;
+
+                UIBuilder.CreateText(slot, "HeroName", i < _team.Heroes.Count && _team.Heroes[i] != null
+                    ? _team.Heroes[i].Data.displayName : "HERO", 16, AnimeTheme.Text,
+                    TextAnchor.MiddleCenter, new Vector2(0.5f, 1f), new Vector2(0f, -8f), new Vector2(92f, 24f));
 
                 var fillArea = UIBuilder.CreateFreeRect(slot, "HpFill", new Vector2(84f, 12f),
                     new Vector2(0.5f, 0f), new Vector2(0f, 12f));
@@ -150,16 +161,22 @@ namespace LegendsRPG.UI
 
         private void BuildBottomBar(Transform parent)
         {
+            UIBuilder.CreatePanel(parent, "ActiveHeroCard", AnimeTheme.Panel,
+                new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(20f, 245f), new Vector2(520f, 395f));
+
             // active hero bar above joystick
             _activeHeroText = UIBuilder.CreateText(parent, "ActiveHero", "Kael  Lv.1", 32,
-                Color.white, TextAnchor.MiddleLeft, new Vector2(0f, 0f), new Vector2(40f, 330f),
+                AnimeTheme.Text, TextAnchor.MiddleLeft, new Vector2(0f, 0f), new Vector2(40f, 330f),
                 new Vector2(420f, 40f));
+            _activeHeroElementText = UIBuilder.CreateText(parent, "ActiveHeroElement", "FIRE", 22,
+                AnimeTheme.Gold, TextAnchor.MiddleRight, new Vector2(0f, 0f), new Vector2(450f, 330f),
+                new Vector2(70f, 40f));
 
             var hpBg = UIBuilder.CreateFreeRect(parent, "HpBg", new Vector2(430f, 26f),
                 new Vector2(0f, 0f), new Vector2(40f, 300f));
             var hpBgImg = hpBg.gameObject.AddComponent<Image>();
             hpBgImg.sprite = UIBuilder.SolidSprite;
-            hpBgImg.color = new Color(0f, 0f, 0f, 0.6f);
+            hpBgImg.color = new Color(0f, 0f, 0f, 0.72f);
 
             var hpFill = new GameObject("HpFill");
             var hpRt = hpFill.AddComponent<RectTransform>();
@@ -189,7 +206,7 @@ namespace LegendsRPG.UI
             expRt.anchoredPosition = new Vector2(2f, 0f);
             _activeHeroExpFill = expFill.AddComponent<Image>();
             _activeHeroExpFill.sprite = UIBuilder.SolidSprite;
-            _activeHeroExpFill.color = new Color(0.3f, 0.7f, 1f);
+            _activeHeroExpFill.color = AnimeTheme.Cyan;
 
             // ---- joystick ----
             var joyArea = UIBuilder.CreateFreeRect(parent, "Joystick", new Vector2(340f, 340f),
@@ -216,12 +233,13 @@ namespace LegendsRPG.UI
         {
             _skillCooldownFills = new Image[3];
             _skillCooldownTexts = new Text[3];
+            _skillLabels = new Text[3];
             _skillButtons = new Button[3];
 
             // attack button
             var attack = UIBuilder.CreateButton(parent, "AttackBtn", "ATTACK", new Vector2(220f, 220f),
-                new Vector2(1f, 0f), new Vector2(-170f, 200f), new Color(0.85f, 0.25f, 0.2f, 0.95f),
-                Color.white, 36, () => { });
+                new Vector2(1f, 0f), new Vector2(-170f, 200f), AnimeTheme.Danger,
+                AnimeTheme.Text, 32, () => { });
             AddHoldBehavior(attack.gameObject);
 
             // skill 1 & 2
@@ -230,8 +248,10 @@ namespace LegendsRPG.UI
 
             // ultimate
             var ult = UIBuilder.CreateButton(parent, "UltBtn", "ULT", new Vector2(196f, 196f),
-                new Vector2(1f, 0f), new Vector2(-170f, 450f), new Color(0.9f, 0.65f, 0.1f, 0.95f),
-                Color.white, 40, () => CastSkill(2));
+                new Vector2(1f, 0f), new Vector2(-170f, 450f), AnimeTheme.Gold,
+                AnimeTheme.Ink, 34, () => CastSkill(2));
+            _skillButtons[2] = ult;
+            _skillLabels[2] = ult.GetComponentInChildren<Text>();
 
             var ultFill = new GameObject("UltCharge");
             var ultRt = ultFill.AddComponent<RectTransform>();
@@ -251,7 +271,8 @@ namespace LegendsRPG.UI
             Vector2 pos, Color color)
         {
             var btn = UIBuilder.CreateButton(parent, "Skill" + index, label, new Vector2(150f, 150f),
-                anchor, pos, color, Color.white, 40, () => CastSkill(index));
+                anchor, pos, color, AnimeTheme.Text, 28, () => CastSkill(index));
+            _skillLabels[index] = btn.GetComponentInChildren<Text>();
 
             var cdBg = new GameObject("Cooldown");
             var cdRt = cdBg.AddComponent<RectTransform>();
@@ -284,8 +305,8 @@ namespace LegendsRPG.UI
         private void BuildAutoBattleButton(Transform parent)
         {
             _autoBattleButton = UIBuilder.CreateButton(parent, "AutoBtn", "AUTO\nOFF", new Vector2(150f, 130f),
-                new Vector2(1f, 1f), new Vector2(-100f, -230f), new Color(0.2f, 0.25f, 0.3f, 0.95f),
-                Color.white, 30, ToggleAutoBattle);
+                new Vector2(1f, 1f), new Vector2(-100f, -230f), AnimeTheme.PanelRaised,
+                AnimeTheme.Text, 26, ToggleAutoBattle);
             _autoBattleLabel = _autoBattleButton.GetComponentInChildren<Text>();
         }
 
@@ -305,19 +326,20 @@ namespace LegendsRPG.UI
         {
             _floorClearedPanel = UIBuilder.CreatePanel(parent, "FloorCleared", new Color(0f, 0f, 0f, 0.75f),
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            _floorClearedPanel.GetComponent<Image>().color = new Color(AnimeTheme.Ink.r, AnimeTheme.Ink.g, AnimeTheme.Ink.b, 0.94f);
             _floorClearedPanel.gameObject.SetActive(false);
 
             _floorClearedLabel = UIBuilder.CreateText(_floorClearedPanel, "Title", "FLOOR CLEARED!", 64,
-                new Color(1f, 0.85f, 0.3f), TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
+                AnimeTheme.Gold, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 160f), new Vector2(900f, 90f));
 
             UIBuilder.CreateText(_floorClearedPanel, "Sub", "Loot & EXP collected", 34,
-                Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
+                AnimeTheme.Text, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 60f), new Vector2(700f, 50f));
 
             UIBuilder.CreateButton(_floorClearedPanel, "NextBtn", "NEXT FLOOR", new Vector2(420f, 120f),
-                new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Color(0.15f, 0.6f, 0.3f, 0.98f),
-                Color.white, 42, () =>
+                new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), AnimeTheme.Mint,
+                AnimeTheme.Ink, 34, () =>
                 {
                     if (GameManager.Instance != null) GameManager.Instance.StartNextFloor();
                 });
@@ -370,6 +392,11 @@ namespace LegendsRPG.UI
             if (hero == null || hero.HP == null) return;
 
             _activeHeroText.text = hero.Data.displayName + "  Lv." + hero.Stats.Level;
+            if (_activeHeroElementText != null)
+            {
+                _activeHeroElementText.text = hero.Data.element.ToString().ToUpper();
+                _activeHeroElementText.color = AnimeTheme.Element(hero.Data.element);
+            }
             _activeHeroHpFill.rectTransform.sizeDelta = new Vector2(426f * hero.HP.Ratio, 22f);
             _activeHeroHpFill.color = hero.HP.Ratio > 0.5f ? new Color(0.15f, 0.85f, 0.3f)
                 : hero.HP.Ratio > 0.25f ? new Color(0.95f, 0.75f, 0.2f) : new Color(0.95f, 0.3f, 0.25f);
@@ -387,6 +414,19 @@ namespace LegendsRPG.UI
         {
             var hero = _team != null ? _team.ActiveHero : null;
             if (hero == null) return;
+
+            if (_skillLabels != null && hero.Caster.Skills != null)
+            {
+                for (int i = 0; i < _skillLabels.Length && i < hero.Caster.Skills.Length; i++)
+                {
+                    var skill = hero.Caster.Skills[i];
+                    if (_skillLabels[i] != null && skill != null)
+                        _skillLabels[i].text = skill.IsUltimate ? "ULT\n" + skill.displayName : skill.displayName;
+                    if (_skillButtons != null && i < _skillButtons.Length && _skillButtons[i] != null && skill != null)
+                        _skillButtons[i].interactable = hero.Caster.GetCooldownLeft(i) <= 0.01f
+                            && (!skill.IsUltimate || hero.Caster.UltCharge >= skill.ultimateChargeCost);
+                }
+            }
 
             for (int i = 0; i < 2; i++)
             {
@@ -430,8 +470,10 @@ namespace LegendsRPG.UI
                 if (_portraitFrames[i] != null)
                 {
                     _portraitFrames[i].color = i == _team.ActiveIndex
-                        ? new Color(1f, 0.8f, 0.25f, 0.95f)
-                        : new Color(0.25f, 0.27f, 0.32f, 0.9f);
+                        ? AnimeTheme.Gold
+                        : (i < _team.Heroes.Count && _team.Heroes[i] != null
+                            ? AnimeTheme.Rarity(_team.Heroes[i].Data.rarity)
+                            : AnimeTheme.PanelRaised);
                 }
             }
         }

@@ -10,16 +10,16 @@ namespace LegendsRPG.UI
     /// </summary>
     public static class MenuTheme
     {
-        public static readonly Color Wood = new Color(0.16f, 0.10f, 0.07f, 1f);
-        public static readonly Color WoodLight = new Color(0.28f, 0.18f, 0.11f, 1f);
-        public static readonly Color Parchment = new Color(0.90f, 0.82f, 0.66f, 1f);
-        public static readonly Color ParchmentDark = new Color(0.72f, 0.60f, 0.42f, 1f);
-        public static readonly Color Gold = new Color(0.96f, 0.76f, 0.27f, 1f);
-        public static readonly Color GoldDark = new Color(0.55f, 0.38f, 0.10f, 1f);
-        public static readonly Color Ink = new Color(0.20f, 0.12f, 0.07f, 1f);
-        public static readonly Color Slate = new Color(0.12f, 0.16f, 0.22f, 1f);
-        public static readonly Color Green = new Color(0.30f, 0.75f, 0.35f, 1f);
-        public static readonly Color Red = new Color(0.85f, 0.22f, 0.20f, 1f);
+        public static readonly Color Wood = new Color(0.025f, 0.035f, 0.09f, 1f);
+        public static readonly Color WoodLight = new Color(0.10f, 0.13f, 0.28f, 1f);
+        public static readonly Color Parchment = new Color(0.90f, 0.94f, 1f, 1f);
+        public static readonly Color ParchmentDark = new Color(0.62f, 0.72f, 0.90f, 1f);
+        public static readonly Color Gold = new Color(1f, 0.78f, 0.28f, 1f);
+        public static readonly Color GoldDark = new Color(0.50f, 0.30f, 0.10f, 1f);
+        public static readonly Color Ink = new Color(0.035f, 0.05f, 0.13f, 1f);
+        public static readonly Color Slate = new Color(0.10f, 0.13f, 0.28f, 1f);
+        public static readonly Color Green = new Color(0.31f, 1f, 0.73f, 1f);
+        public static readonly Color Red = new Color(1f, 0.30f, 0.35f, 1f);
 
         private static Sprite _circle;
         public static Sprite CircleSprite
@@ -269,10 +269,12 @@ namespace LegendsRPG.UI
             Characters.HeroData data, int level)
         {
             Color el = Combat.ElementalMatrix.GetElementColor(data.element);
-            var ring = Circle(parent, "Portrait_" + data.displayName, anchor, pos, diameter, Gold);
-            var body = Circle(ring, "Body", new Vector2(0.5f, 0.5f), Vector2.zero, diameter * 0.88f, Color.Lerp(el, Color.black, 0.45f));
+            var ring = Circle(parent, "Portrait_" + data.displayName, anchor, pos, diameter, AnimeTheme.Rarity(data.rarity));
+            var body = Circle(ring, "Body", new Vector2(0.5f, 0.5f), Vector2.zero, diameter * 0.88f,
+                Color.Lerp(data.primaryColor, Color.black, 0.45f));
             var glow = Circle(body, "Glow", new Vector2(0.5f, 0.5f), Vector2.zero, diameter * 0.66f, el);
             Label(glow, data.displayName.Substring(0, 1), Mathf.RoundToInt(diameter * 0.42f), Color.white, TextAnchor.MiddleCenter, true);
+            AddRarityPips(ring, data.rarity, new Vector2(0.5f, 0f), new Vector2(-((int)data.rarity * 9.5f), diameter * 0.10f), 5);
             if (level > 0)
             {
                 var badge = Circle(ring, "Lv", new Vector2(1f, 0f), new Vector2(-diameter * 0.12f, diameter * 0.12f), diameter * 0.36f, Color.black);

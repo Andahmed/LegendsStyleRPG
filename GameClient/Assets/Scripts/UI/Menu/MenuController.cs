@@ -304,17 +304,17 @@ namespace LegendsRPG.UI
                         }
                     }
                     cardOuter = MenuTheme.Box(grid, "Hero" + i, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
-                        idx == _heroSel ? MenuTheme.Gold : ItemDatabase.RarityColor(1 + (int)data.rarity), true, true);
-                    var cardIn = MenuTheme.Box(cardOuter, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f), new Color(0.12f, 0.15f, 0.22f));
+                        idx == _heroSel ? AnimeTheme.Gold : AnimeTheme.Rarity(data.rarity), true, true);
+                    var cardIn = MenuTheme.Box(cardOuter, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f), AnimeTheme.Panel);
                     MenuTheme.HeroPortrait(cardIn, new Vector2(0.5f, 0.62f), Vector2.zero, 150f, data, level);
-                    MenuTheme.Stars(cardIn, Mathf.Clamp((int)data.rarity + 1, 1, 5), new Vector2(0.5f, 0.2f), new Vector2(0f, 12f), 26f);
-                    MenuTheme.Label(cardIn, data.displayName, 28, Color.white, TextAnchor.LowerCenter);
+                    AnimeTheme.AddRarityPips(cardIn, data.rarity, new Vector2(0.5f, 0.2f), new Vector2(-((int)data.rarity * 9.5f), 12f), 5);
+                    MenuTheme.Label(cardIn, data.displayName, 24, AnimeTheme.Text, TextAnchor.LowerCenter);
                 }
                 else
                 {
                     cardOuter = MenuTheme.Box(grid, "Hero" + i, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
                         new Color(0.16f, 0.13f, 0.14f), true, true);
-                    var cardIn = MenuTheme.Box(cardOuter, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f), new Color(0.07f, 0.06f, 0.08f));
+                    var cardIn = MenuTheme.Box(cardOuter, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f), AnimeTheme.Ink);
                     var q = MenuTheme.Circle(cardIn, "Q", new Vector2(0.5f, 0.62f), Vector2.zero, 130f, new Color(0.15f, 0.13f, 0.17f));
                     MenuTheme.Label(q, "?", 64, new Color(1f, 1f, 1f, 0.22f), TextAnchor.MiddleCenter);
                     MenuTheme.Label(cardIn, "???", 28, new Color(1f, 1f, 1f, 0.4f), TextAnchor.LowerCenter);
