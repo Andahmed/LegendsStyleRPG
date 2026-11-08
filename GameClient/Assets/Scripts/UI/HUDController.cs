@@ -161,16 +161,22 @@ namespace LegendsRPG.UI
 
         private void BuildBottomBar(Transform parent)
         {
+            UIBuilder.CreatePanel(parent, "ActiveHeroCard", AnimeTheme.Panel,
+                new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(20f, 245f), new Vector2(520f, 395f));
+
             // active hero bar above joystick
             _activeHeroText = UIBuilder.CreateText(parent, "ActiveHero", "Kael  Lv.1", 32,
-                Color.white, TextAnchor.MiddleLeft, new Vector2(0f, 0f), new Vector2(40f, 330f),
+                AnimeTheme.Text, TextAnchor.MiddleLeft, new Vector2(0f, 0f), new Vector2(40f, 330f),
                 new Vector2(420f, 40f));
+            _activeHeroElementText = UIBuilder.CreateText(parent, "ActiveHeroElement", "FIRE", 22,
+                AnimeTheme.Gold, TextAnchor.MiddleRight, new Vector2(0f, 0f), new Vector2(450f, 330f),
+                new Vector2(70f, 40f));
 
             var hpBg = UIBuilder.CreateFreeRect(parent, "HpBg", new Vector2(430f, 26f),
                 new Vector2(0f, 0f), new Vector2(40f, 300f));
             var hpBgImg = hpBg.gameObject.AddComponent<Image>();
             hpBgImg.sprite = UIBuilder.SolidSprite;
-            hpBgImg.color = new Color(0f, 0f, 0f, 0.6f);
+            hpBgImg.color = new Color(0f, 0f, 0f, 0.72f);
 
             var hpFill = new GameObject("HpFill");
             var hpRt = hpFill.AddComponent<RectTransform>();
@@ -200,7 +206,7 @@ namespace LegendsRPG.UI
             expRt.anchoredPosition = new Vector2(2f, 0f);
             _activeHeroExpFill = expFill.AddComponent<Image>();
             _activeHeroExpFill.sprite = UIBuilder.SolidSprite;
-            _activeHeroExpFill.color = new Color(0.3f, 0.7f, 1f);
+            _activeHeroExpFill.color = AnimeTheme.Cyan;
 
             // ---- joystick ----
             var joyArea = UIBuilder.CreateFreeRect(parent, "Joystick", new Vector2(340f, 340f),
@@ -299,8 +305,8 @@ namespace LegendsRPG.UI
         private void BuildAutoBattleButton(Transform parent)
         {
             _autoBattleButton = UIBuilder.CreateButton(parent, "AutoBtn", "AUTO\nOFF", new Vector2(150f, 130f),
-                new Vector2(1f, 1f), new Vector2(-100f, -230f), new Color(0.2f, 0.25f, 0.3f, 0.95f),
-                Color.white, 30, ToggleAutoBattle);
+                new Vector2(1f, 1f), new Vector2(-100f, -230f), AnimeTheme.PanelRaised,
+                AnimeTheme.Text, 26, ToggleAutoBattle);
             _autoBattleLabel = _autoBattleButton.GetComponentInChildren<Text>();
         }
 
@@ -385,6 +391,11 @@ namespace LegendsRPG.UI
             if (hero == null || hero.HP == null) return;
 
             _activeHeroText.text = hero.Data.displayName + "  Lv." + hero.Stats.Level;
+            if (_activeHeroElementText != null)
+            {
+                _activeHeroElementText.text = hero.Data.element.ToString().ToUpper();
+                _activeHeroElementText.color = AnimeTheme.Element(hero.Data.element);
+            }
             _activeHeroHpFill.rectTransform.sizeDelta = new Vector2(426f * hero.HP.Ratio, 22f);
             _activeHeroHpFill.color = hero.HP.Ratio > 0.5f ? new Color(0.15f, 0.85f, 0.3f)
                 : hero.HP.Ratio > 0.25f ? new Color(0.95f, 0.75f, 0.2f) : new Color(0.95f, 0.3f, 0.25f);
