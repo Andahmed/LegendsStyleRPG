@@ -93,11 +93,11 @@ namespace LegendsRPG.UI
             if (panelSkin != null)
             {
                 var oi = outer.GetComponent<Image>();
-                oi.sprite = panelSkin; oi.type = Image.Type.Sliced; oi.color = Color.white;
+                UISkin.Apply(oi, panelSkin, 30f);
+                oi.color = Color.white;
                 var ii = innerRt.GetComponent<Image>();
                 var insetSkin = UISkin.PanelInset;
-                ii.sprite = insetSkin != null ? insetSkin : panelSkin;
-                ii.type = Image.Type.Sliced;
+                UISkin.Apply(ii, insetSkin != null ? insetSkin : panelSkin, 18f);
                 ii.color = Color.Lerp(Color.white, fill, 0.6f);
             }
             return innerRt;
@@ -141,7 +141,7 @@ namespace LegendsRPG.UI
             if (btnSkin != null)
             {
                 var oi = outer.GetComponent<Image>();
-                oi.sprite = btnSkin; oi.type = Image.Type.Sliced;
+                UISkin.Apply(oi, btnSkin, 22f);
                 oi.color = Color.Lerp(Color.white, fill, 0.5f);
                 inner.GetComponent<Image>().enabled = false;
             }

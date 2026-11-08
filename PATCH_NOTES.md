@@ -68,3 +68,12 @@
 | Editor/UISkinImporter.cs | جديد: أي صورة في Resources/UISkin بتتحوّل Sprite أوتوماتيك + حواف 9-slice (يشتغل في Cloud Build حتى من غير .meta) |
 | Scripts/UI/Menu/MenuTheme.cs | الأزرار والبانلز بتستخدم الـ Skin لو موجود |
 | Documentation/UISkin-AR.md | خطوات الرفع من الموبايل عبر GitHub |
+
+## v0.5.2 — مراجعة الأسماء والأرت
+
+| الملف | التغيير |
+|---|---|
+| Scripts/UI/Menu/UISkin.cs | شلت `Resources.LoadAll` (كان بيحمّل ~700 صورة مرة واحدة)، بقى تحميل بالمسار + كاش، و`Apply` يظبط حجم الحواف |
+| Editor/UISkinImporter.cs | بيظبط 9-slice تلقائي للإطارات/الأزرار اللي من غير حواف، ومش بيغيّر إعدادات الصور المظبوطة (spritesheets) |
+| Scripts/UI/Menu/MenuTheme.cs | استخدام `UISkin.Apply` |
+| Resources/UISkin → GameArt/AssetStore_Unused | نقل مجلد psd (46MB) والـ Preview وصور ArchersSprites برا Resources (بتتحط في الـ APK لو فضلت جواه) |
