@@ -108,6 +108,7 @@ namespace LegendsRPG.UI
                 case "bag": Push("BAG", BuildBag); break;
                 case "shop": Push("SHOP", BuildShop); break;
                 case "summon": Push("SUMMON", BuildSummon); break;
+                case "campaign": Push("CAMPAIGN MAP", BuildCampaign); break;
                 default: break;
             }
         }
@@ -209,7 +210,7 @@ namespace LegendsRPG.UI
             // bottom nav
             var nav = MenuTheme.Box(body, "Nav", new Vector2(0f, 0f), new Vector2(1f, 0f), Vector2.zero, new Vector2(0f, 190f),
                 new Color(0.07f, 0.04f, 0.03f, 0.95f), false);
-            string[] names = { "MISSIONS", "HEROES", "SUMMON", "BAG", "SHOP", "FORGE" };
+            string[] names = { "MISSIONS", "HEROES", "SUMMON", "BAG", "SHOP", "MAP" };
             Action[] acts =
             {
                 () => Push("DAILY MISSIONS", BuildMissions),
@@ -217,7 +218,7 @@ namespace LegendsRPG.UI
                 () => Push("SUMMON", BuildSummon),
                 () => Push("BAG", BuildBag),
                 () => Push("SHOP", BuildShop),
-                () => Toast("Forge: coming in the equipment update"),
+                () => Push("CAMPAIGN MAP", BuildCampaign),
             };
             for (int i = 0; i < names.Length; i++)
             {
@@ -236,6 +237,52 @@ namespace LegendsRPG.UI
         {
             for (int i = 0; i < DailyMissions.All.Length; i++) if (DailyMissions.CanClaim(i)) return true;
             return false;
+        }
+
+        private void BuildCampaign(RectTransform body)
+        {
+            var tower = GameManager.Instance != null ? GameManager.Instance.Tower : null;
+            int current = tower != null ? tower.CurrentFloor : 1;
+            int unlockedThrough = Mathf.Min(GameConfig.FloorsPerDifficulty, current + 1);
+
+            var intro = MenuTheme.Label(body, "Choose a stage — auto-battle clears the next one when enabled", 28,
+                AnimeTheme.MutedText, TextAnchor.MiddleCenter);
+            intro.rectTransform.offsetMin = new Vector2(0f, 790f);
+            intro.rectTransform.offsetMax = new Vector2(0f, 850f);
+
+            var grid = MenuTheme.ScrollGrid(body, "CampaignStages", Vector2.zero, Vector2.one,
+                new Vector2(180f, 120f), new Vector2(0f, 0f), new Vector2(260f, 142f), new Vector2(20f, 20f), 5);
+            for (int stage = 1; stage <= 20; stage++)
+            {
+                bool boss = stage % GameConfig.BossEveryNFloors == 0;
+                bool open = stage <= unlockedThrough;
+                int selected = stage;
+                Color accent = boss ? AnimeTheme.Gold : (open ? AnimeTheme.Cyan : new Color(0.25f, 0.28f, 0.38f));
+                var card = MenuTheme.Box(grid, "Stage" + stage, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                    accent, true, open);
+                var fill = MenuTheme.Box(card, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f),
+                    open ? AnimeTheme.Panel : AnimeTheme.Ink, true, false);
+                string label = open ? (boss ? "BOSS\n" : "STAGE\n") + stage : "LOCKED";
+                MenuTheme.Label(fill, label, boss ? 28 : 25, open ? accent : AnimeTheme.MutedText, TextAnchor.MiddleCenter, true);
+                MenuTheme.Label(fill, boss ? "BOSS REWARD" : "AUTO FARM", 16, AnimeTheme.Text, TextAnchor.LowerCenter);
+
+                if (open)
+                {
+                    var button = card.gameObject.AddComponent<Button>();
+                    button.targetGraphic = card.GetComponent<Image>();
+                    button.onClick.AddListener(() => StartCampaignStage(selected));
+                }
+            }
+        }
+
+        private void StartCampaignStage(int stage)
+        {
+            if (GameManager.Instance == null || GameManager.Instance.Tower == null) return;
+            GameManager.Instance.Tower.SetFloor(stage, false);
+            SaveSystem.Save(GameManager.Instance.Tower, _team);
+            CloseToBattle();
+            if (GameManager.Instance.Spawner != null) GameManager.Instance.Spawner.StartFloor();
+            GameManager.Instance.SetState(GameManager.GameState.Battle);
         }
 
         private static void Dot(RectTransform parent)
