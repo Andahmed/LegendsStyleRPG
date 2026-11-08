@@ -68,13 +68,13 @@ namespace LegendsRPG.UI
             var b = GachaSystem.Banners[_banner];
 
             var stage = MenuTheme.Framed(body, "Stage", Vector2.zero, Vector2.one,
-                new Vector2(300f, 30f), new Vector2(-640f, -30f), b.theme, new Color(0.07f, 0.05f, 0.04f, 0.96f), 6f);
+                new Vector2(300f, 30f), new Vector2(-640f, -30f), AnimeTheme.Rarity(Rarity.Legendary), AnimeTheme.Panel, 6f);
 
-            var title = MenuTheme.Label(stage, b.name, 56, b.theme, TextAnchor.UpperCenter, true);
+            var title = MenuTheme.Label(stage, b.name, 56, AnimeTheme.Gold, TextAnchor.UpperCenter, true);
             title.rectTransform.offsetMin = new Vector2(6f, 300f);
             title.rectTransform.offsetMax = new Vector2(-6f, 220f);
 
-            var sub = MenuTheme.Label(stage, b.sub, 28, MenuTheme.Parchment, TextAnchor.UpperCenter);
+            var sub = MenuTheme.Label(stage, b.sub, 28, AnimeTheme.Text, TextAnchor.UpperCenter);
             sub.rectTransform.offsetMin = new Vector2(20f, 250f);
             sub.rectTransform.offsetMax = new Vector2(-20f, 200f);
 
@@ -227,13 +227,14 @@ namespace LegendsRPG.UI
                 var r = results[i];
                 Color rc = ItemDatabase.RarityColor(1 + (int)r.hero.rarity);
 
+                rc = AnimeTheme.Rarity(r.hero.rarity);
                 var card = MenuTheme.Box(grid, "Card" + i, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, rc, true, false);
                 var inner = MenuTheme.Box(card, "Fill", Vector2.zero, Vector2.one, new Vector2(5f, 5f), new Vector2(-5f, -5f),
-                    new Color(0.10f, 0.08f, 0.12f, 1f), true, false);
+                    AnimeTheme.Panel, true, false);
 
                 var portrait = MenuTheme.HeroPortrait(inner, new Vector2(0.5f, 0.62f), Vector2.zero, 130f, r.hero, 1);
-                MenuTheme.Stars(inner, Mathf.Clamp((int)r.hero.rarity + 1, 1, 5), new Vector2(0.5f, 0.30f), new Vector2(0f, 6f), 24f);
-                MenuTheme.Label(inner, r.hero.displayName, 28, Color.white, TextAnchor.LowerCenter);
+                AnimeTheme.AddRarityPips(inner, r.hero.rarity, new Vector2(0.5f, 0.30f), new Vector2(-((int)r.hero.rarity * 9.5f), 6f), 5);
+                MenuTheme.Label(inner, r.hero.displayName, 26, AnimeTheme.Text, TextAnchor.LowerCenter);
 
                 if (r.isNew)
                 {
@@ -261,7 +262,7 @@ namespace LegendsRPG.UI
 
                 // cover that hides the card until its reveal moment
                 var cover = MenuTheme.Box(card, "Cover", Vector2.zero, Vector2.one, new Vector2(3f, 3f), new Vector2(-3f, -3f),
-                    new Color(0.09f, 0.07f, 0.10f, 1f), true, false);
+                        AnimeTheme.Ink, true, false);
                 MenuTheme.Label(cover, "?", 90, new Color(1f, 1f, 1f, 0.35f), TextAnchor.MiddleCenter);
                 covers.Add(cover);
             }
