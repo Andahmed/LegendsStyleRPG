@@ -1,5 +1,3 @@
-# Usage (dev):  cp ../config/dev.env.example ../config/dev.env && docker compose up -d --build
-# Usage (prod): docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 services:
   api:
     build:
@@ -7,12 +5,24 @@ services:
       dockerfile: Deployment/docker/Dockerfile
     container_name: legends-api
     env_file:
-      - ../config/dev.env
+      - ../config/dev.env.example
     ports:
       - "8000:8000"
     volumes:
       - api_data:/srv/backend/data
     restart: unless-stopped
 
+  # Production DB (enable when moving past the prototype):
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: legends
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: legends
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
 volumes:
   api_data:
+  # pg_data:

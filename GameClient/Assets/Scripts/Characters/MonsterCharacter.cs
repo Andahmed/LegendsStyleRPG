@@ -48,7 +48,7 @@ namespace LegendsRPG.Characters
             Anim = gameObject.AddComponent<CharacterAnimator>();
 
             var body = CharacterBodyFactory.Build(gameObject, data.element, false, data.scale,
-                data.primaryColor, data.secondaryColor, data.monsterId);
+                data.primaryColor, data.secondaryColor);
             Anim.Torso = body.Torso;
             Anim.Head = body.Head;
             Anim.ArmL = body.ArmL;
@@ -58,6 +58,9 @@ namespace LegendsRPG.Characters
 
             Stats.Init(data.baseHP * hpScale, data.baseAttack * atkScale, data.baseDefense,
                 data.moveSpeed, data.attackSpeed, data.attackRange, data.element, 1);
+
+            // v1.1: small HP bar above every unit (billboarded, code-drawn)
+            gameObject.AddComponent<Combat.UnitHealthBar>().Bind(HP, 1.15f * data.scale, 0.13f, 2.45f * data.scale, false);
 
             HP.Died += HandleDeath;
             transform.position = spawnPos;

@@ -30,6 +30,24 @@ namespace LegendsRPG.Audio
             }
         }
 
+        public static void SetSfxVolume(float v)
+        {
+            if (_instance != null && _instance._uiSource != null)
+            {
+                _instance._uiSource.volume = Mathf.Clamp01(v);
+            }
+        }
+
+        public static float SfxVolume()
+        {
+            return _instance != null && _instance._uiSource != null ? _instance._uiSource.volume : 0.9f;
+        }
+
+        public static float MusicVolume()
+        {
+            return _instance != null && _instance._musicSource != null ? _instance._musicSource.volume : 0.6f;
+        }
+
         private void Awake()
         {
             _instance = this;
@@ -145,6 +163,59 @@ namespace LegendsRPG.Audio
             });
 
             _clips["BGM"] = BuildBgm(9.6f);
+
+            // ---- v1.0 meta sounds ----
+            _clips["Coin"] = Synth(0.35f, t =>
+            {
+                float a = Mathf.Sin(2f * Mathf.PI * 1568f * t) * Mathf.Exp(-t * 14f);
+                float b = Mathf.Sin(2f * Mathf.PI * 2093f * t) * Mathf.Exp(-(t - 0.08f) * 14f) * (t > 0.08f ? 1f : 0f);
+                return (a * 0.5f + b * 0.4f);
+            });
+
+            _clips["Fanfare"] = Synth(1.0f, t =>
+            {
+                float[] notes = { 523.25f, 659.25f, 783.99f, 1046.5f, 1318.5f };
+                int idx = Mathf.Clamp((int)(t / 0.2f), 0, 4);
+                float local = t - idx * 0.2f;
+                float env = Mathf.Exp(-local * 6f) * Mathf.Min(1f, local * 60f);
+                float wave = Mathf.Sin(2f * Mathf.PI * notes[idx] * local)
+                           + 0.4f * Mathf.Sin(2f * Mathf.PI * notes[idx] * 2f * local);
+                return wave * env * 0.22f;
+            });
+
+            _clips["Equip"] = Synth(0.18f, t =>
+            {
+                float clink = Mathf.Sin(2f * Mathf.PI * 2400f * t) * Mathf.Exp(-t * 40f)
+                            + Mathf.Sin(2f * Mathf.PI * 3170f * t) * Mathf.Exp(-t * 55f) * 0.6f;
+                return clink * 0.3f;
+            });
+
+            _clips["Error"] = Synth(0.22f, t =>
+            {
+                float buzz = Mathf.Sin(2f * Mathf.PI * 190f * t) * (0.6f + 0.4f * Mathf.Sign(Mathf.Sin(2f * Mathf.PI * 28f * t)));
+                return buzz * Mathf.Exp(-t * 10f) * 0.25f;
+            });
+
+            _clips["Open"] = Synth(0.24f, t =>
+            {
+                float sweep = Mathf.Sin(2f * Mathf.PI * (500f + 1400f * t / 0.24f) * t);
+                return sweep * Mathf.Exp(-t * 12f) * 0.22f;
+            });
+
+            _clips["Summon"] = Synth(1.4f, t =>
+            {
+                float shimmer = Mathf.Sin(2f * Mathf.PI * (880f + 660f * Mathf.Sin(t * 5f)) * t);
+                float env = Mathf.Min(1f, t * 6f) * Mathf.Exp(-t * 2.2f);
+                float sparkle = Mathf.Sin(2f * Mathf.PI * 2637f * t) * Mathf.Exp(-((t * 3f) % 1f) * 8f) * 0.3f;
+                return (shimmer * 0.4f + sparkle) * env * 0.4f;
+            });
+
+            _clips["Chest"] = Synth(0.6f, t =>
+            {
+                float creak = Mathf.Sin(2f * Mathf.PI * (120f + 340f * t) * t) * Mathf.Exp(-t * 4f);
+                float ding = Mathf.Sin(2f * Mathf.PI * 1568f * (t - 0.35f)) * Mathf.Exp(-(t - 0.35f) * 12f) * (t > 0.35f ? 0.8f : 0f);
+                return creak * 0.3f + ding * 0.35f;
+            });
         }
 
         private delegate float SynthFunc(float t);

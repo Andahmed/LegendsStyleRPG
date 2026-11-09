@@ -23,7 +23,7 @@ class Player(Base):
     level: Mapped[int] = mapped_column(Integer, default=1)
     exp: Mapped[float] = mapped_column(default=0.0)
     is_banned: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=utcnow)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     saves: Mapped[list["PlayerSave"]] = relationship(
         back_populates="player", cascade="all, delete-orphan"
@@ -38,8 +38,8 @@ class AuthToken(Base):
 
     token: Mapped[str] = mapped_column(String(64), primary_key=True)
     player_id: Mapped[int] = mapped_column(ForeignKey("players.id"), index=True)
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=utcnow)
-    expires_at: Mapped[datetime.datetime] = mapped_column(DateTime())
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True))
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
 
     player: Mapped[Player] = relationship(back_populates="tokens")
@@ -55,7 +55,7 @@ class PlayerSave(Base):
     slot: Mapped[int] = mapped_column(Integer, default=0)
     payload: Mapped[dict] = mapped_column(JSON)
     updated_at: Mapped[datetime.datetime] = mapped_column(
-        DateTime(), default=utcnow, onupdate=utcnow
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
     )
 
     player: Mapped[Player] = relationship(back_populates="saves")

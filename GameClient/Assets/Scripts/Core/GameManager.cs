@@ -1,33 +1,32 @@
 using UnityEngine;
-using LegendsRPG.Combat;
+using LegendsRPG.Team;
 
 namespace LegendsRPG.Core
 {
     /// <summary>
     /// Central game manager: owns global state, wires subsystems together,
     /// handles autosave and the lightweight FPS meter used by performance tests.
+    /// v1.0: adds the City state and routes every battle outcome through
+    /// BattleSession (campaign stages, dungeons, arena, guild hunt...).
     /// </summary>
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
 
-        public enum GameState { Boot, Battle, FloorCleared, Paused }
+        public enum GameState { Boot, City, Battle, FloorCleared, Paused }
 
         public GameState State { get; private set; } = GameState.Boot;
 
         public World.TowerSystem Tower;
         public World.WaveSpawner Spawner;
-        public Team.TeamManager Team;
+        public TeamManager Team;
         public UI.HUDController Hud;
         public Audio.AudioSystem Audio;
         public Vfx.VFXFactory Vfx;
-        public int LastRewardGold { get; private set; }
-        public bool LastClearWasBoss { get; private set; }
 
         private float _fpsAccum;
         private int _fpsFrames;
         private float _autosaveTimer;
-        private bool _autoAdvanceQueued;
 
         private void Awake()
         {
@@ -45,15 +44,34 @@ namespace LegendsRPG.Core
         {
             TrackFps();
 
-            if (State == GameState.Battle)
+            _autosaveTimer += Time.unscaledDeltaTime;
+            if (_autosaveTimer >= GameConfig.AutosaveInterval || SaveSystem.ConsumeDirty())
             {
-                _autosaveTimer += Time.deltaTime;
-                if (_autosaveTimer >= GameConfig.AutosaveInterval)
+                if (_autosaveTimer >= 2f)
                 {
                     _autosaveTimer = 0f;
                     SaveSystem.Save(Tower, Team);
                 }
             }
+
+            if (State == GameState.Battle && BattleSession.Active)
+            {
+                CheckTeamWiped();
+            }
+        }
+
+        /// <summary>All heroes down at the same moment = stage failed.</summary>
+        private void CheckTeamWiped()
+        {
+            var team = Team;
+            if (team == null || team.Heroes.Count == 0) return;
+
+            bool allDead = true;
+            foreach (var h in team.Heroes)
+            {
+                if (h != null && !h.HP.IsDead) { allDead = false; break; }
+            }
+            if (allDead) BattleSession.HandleLose();
         }
 
         private void TrackFps()
@@ -75,49 +93,42 @@ namespace LegendsRPG.Core
             State = s;
         }
 
+        /// <summary>All enemies of the wave are dead → battle won.</summary>
         public void OnFloorCleared()
         {
             if (State != GameState.Battle) return;
+
+            if (BattleSession.Active)
+            {
+                State = GameState.City;
+                BattleSession.HandleWin();
+                return;
+            }
+
+            // legacy free-play path (no session — e.g. debug mode)
             State = GameState.FloorCleared;
-            LegendsRPG.Audio.AudioSystem.Play("Victory");
+            Audio.Play("Victory");
             CombatEvents.RaiseNotification("Floor cleared!");
-            DailyMissions.Add(DailyMissions.ClearFloors, 1);
-            int floor = Tower != null ? Tower.CurrentFloor : 1;
-            bool boss = floor % GameConfig.BossEveryNFloors == 0;
-            int reward = 150 + floor * 10 + (boss ? 500 + floor * 20 : 0);
-            LastRewardGold = reward;
-            LastClearWasBoss = boss;
-            Inventory.AddGold(reward);
-            CombatEvents.RaiseNotification(boss ? "BOSS REWARD +" + reward + " GOLD" : "CLEAR REWARD +" + reward + " GOLD");
             if (Tower != null) Tower.AdvanceFloor();
+
+            var loot = Items.InventorySystem.RollFloorReward(Tower.CurrentFloor, (int)Tower.Difficulty);
+            if (loot != null) CombatEvents.RaiseNotification("LOOT: " + loot);
+
             SaveSystem.Save(Tower, Team);
             if (Hud != null) Hud.ShowFloorClearedPanel(true);
-
-            if (!_autoAdvanceQueued && Team.AutoBattleIsEnabled)
-            {
-                _autoAdvanceQueued = true;
-                StartCoroutine(AutoAdvanceRoutine());
-            }
         }
 
         public void StartNextFloor()
         {
-            _autoAdvanceQueued = false;
             if (Hud != null) Hud.ShowFloorClearedPanel(false);
             if (Spawner != null) Spawner.StartFloor();
             State = GameState.Battle;
         }
 
-        private System.Collections.IEnumerator AutoAdvanceRoutine()
-        {
-            yield return new WaitForSecondsRealtime(1.6f);
-            if (State == GameState.FloorCleared && Team.AutoBattleIsEnabled) StartNextFloor();
-            else _autoAdvanceQueued = false;
-        }
-
         public void Pause(bool pause)
         {
-            Time.timeScale = pause ? 0f : 1f;
+            if (pause) Time.timeScale = 0f;
+            else Time.timeScale = UI.HUDController.BattleTimeScale;   // v1.1: resume at the selected battle speed
             State = pause ? GameState.Paused : GameState.Battle;
         }
     }

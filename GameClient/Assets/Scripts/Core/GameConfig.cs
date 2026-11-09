@@ -49,5 +49,16 @@ namespace LegendsRPG.Core
         // ---- Performance ----
         public const int TargetFrameRate = 60;
         public const float AutosaveInterval = 30f;
+
+        // ---- v1.0 City ----
+        public const float CityRadius = 34f;          // walkable plaza radius
+        public const float BuildingRingRadius = 26f;  // where the 10 buildings stand
+        public const float GuildHallOffsetZ = -260f;  // guild hall interior position
+
+        // ---- v1.0 Economy ----
+        public const long SummonCostSingle = 280;
+        public const long SummonCostTen = 2700;
+        public const long FreeDiamondIntervalHours = 8;
+        public const int FreeDiamondAmount = 50;
     }
 }

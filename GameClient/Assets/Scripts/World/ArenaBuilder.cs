@@ -12,11 +12,13 @@ namespace LegendsRPG.World
     public class ArenaBuilder : MonoBehaviour
     {
         private const int Seed = 20260101;
+        public static GameObject ArenaRoot { get; private set; }
 
         public void Build()
         {
             Random.InitState(Seed);
             var arena = new GameObject("Arena");
+            ArenaRoot = arena;
 
             BuildLighting();
             BuildGround(arena.transform);
@@ -24,6 +26,19 @@ namespace LegendsRPG.World
             BuildProps(arena.transform);
             BuildBraziers(arena.transform);
             BuildCampfire(arena.transform);
+        }
+
+        /// <summary>Re-applies the dark battle atmosphere (city switches it back).</summary>
+        public static void ApplyBattleMood()
+        {
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.28f, 0.32f, 0.45f);
+            RenderSettings.ambientEquatorColor = new Color(0.20f, 0.21f, 0.28f);
+            RenderSettings.ambientGroundColor = new Color(0.12f, 0.11f, 0.10f);
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogDensity = 0.012f;
+            RenderSettings.fogColor = new Color(0.05f, 0.06f, 0.10f);
         }
 
         private void BuildLighting()
@@ -41,48 +56,19 @@ namespace LegendsRPG.World
                 var go = new GameObject("Sun");
                 var l = go.AddComponent<Light>();
                 l.type = LightType.Directional;
-                go.transform.rotation = Quaternion.Euler(52f, -35f, 0f);
-            }
-            // tune whichever directional light exists (the bootstrap one included)
-            foreach (var dl in FindObjectsOfType<Light>())
-            {
-                if (dl.type != LightType.Directional) continue;
-                dl.intensity = 1.15f;
-                dl.color = new Color(1f, 0.93f, 0.82f);          // warm key light
-                dl.shadows = LightShadows.Soft;
-                dl.shadowStrength = 0.75f;
-                dl.shadowBias = 0.05f;
-                dl.shadowNormalBias = 0.4f;
-                break;
-            }
-            QualitySettings.shadowDistance = 45f;
-            QualitySettings.shadowCascades = 2;
-            QualitySettings.antiAliasing = 4;
-            QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
-            QualitySettings.pixelLightCount = 6;
-
-            // gradient sky (guarded: shader may be missing in a stripped build)
-            var skySh = Shader.Find("Skybox/Procedural");
-            if (skySh != null)
-            {
-                var sky = new Material(skySh);
-                sky.SetFloat("_AtmosphereThickness", 0.6f);
-                sky.SetColor("_SkyTint", new Color(0.35f, 0.38f, 0.6f));
-                sky.SetColor("_GroundColor", new Color(0.08f, 0.08f, 0.12f));
-                sky.SetFloat("_Exposure", 0.7f);
-                RenderSettings.skybox = sky;
-                var cam = Camera.main;
-                if (cam != null) cam.clearFlags = CameraClearFlags.Skybox;
+                l.intensity = 1.05f;
+                l.shadows = LightShadows.Soft;
+                go.transform.rotation = Quaternion.Euler(55f, -35f, 0f);
             }
 
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.42f, 0.46f, 0.62f);
-            RenderSettings.ambientEquatorColor = new Color(0.30f, 0.31f, 0.40f);
+            RenderSettings.ambientSkyColor = new Color(0.28f, 0.32f, 0.45f);
+            RenderSettings.ambientEquatorColor = new Color(0.20f, 0.21f, 0.28f);
             RenderSettings.ambientGroundColor = new Color(0.12f, 0.11f, 0.10f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogDensity = 0.010f;
-            RenderSettings.fogColor = new Color(0.10f, 0.11f, 0.18f);
+            RenderSettings.fogDensity = 0.012f;
+            RenderSettings.fogColor = new Color(0.05f, 0.06f, 0.10f);
         }
 
         private void BuildGround(Transform parent)
@@ -90,14 +76,14 @@ namespace LegendsRPG.World
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Ground";
             ground.transform.SetParent(parent, false);
-            ground.transform.localScale = new Vector3(5.2f, 1f, 5.2f);   // ~52m x 52m
+            ground.transform.localScale = new Vector3(4.2f, 1f, 4.2f);   // ~42m x 42m
             ground.GetComponent<MeshRenderer>().material = MaterialLibrary.GroundMaterial;
             ground.GetComponent<MeshRenderer>().receiveShadows = true;
         }
 
         private void BuildBoundary(Transform parent)
         {
-            var pillarMat = MaterialLibrary.Solid(new Color(0.42f, 0.38f, 0.36f), 0.15f, 0.2f);
+            var pillarMat = MaterialLibrary.Solid(new Color(0.32f, 0.30f, 0.34f), 0.15f, 0.3f);
             var obeliskMat = MaterialLibrary.Emissive(new Color(0.55f, 0.35f, 0.9f), 0.9f);
 
             int pillars = 28;
@@ -131,21 +117,19 @@ namespace LegendsRPG.World
 
         private void BuildProps(Transform parent)
         {
-            var rockMat = MaterialLibrary.Solid(new Color(0.36f, 0.33f, 0.31f), 0.1f, 0.05f);
+            var rockMat = MaterialLibrary.Solid(new Color(0.26f, 0.25f, 0.28f), 0.1f, 0.05f);
 
             for (int i = 0; i < 14; i++)
             {
                 float a = Random.Range(0f, Mathf.PI * 2f);
-                float r = Random.Range(9f, GameConfig.ArenaRadius - 3f);
+                float r = Random.Range(7f, GameConfig.ArenaRadius - 3f);
                 var rock = GameObject.CreatePrimitive(Random.value > 0.5f ? PrimitiveType.Cube : PrimitiveType.Sphere);
                 Destroy(rock.GetComponent<Collider>());
                 rock.name = "Rock" + i;
                 rock.transform.SetParent(parent, false);
-                Vector3 rp = new Vector3(Mathf.Sin(a) * r, 0f, Mathf.Cos(a) * r);
-                if ((rp - new Vector3(0f, 0f, 8f)).magnitude < 7f) { Destroy(rock); continue; }   // keep the party area clear
-                rock.transform.position = new Vector3(rp.x, Random.Range(0.1f, 0.3f), rp.z);
+                rock.transform.position = new Vector3(Mathf.Sin(a) * r, Random.Range(0.15f, 0.5f), Mathf.Cos(a) * r);
                 rock.transform.rotation = Quaternion.Euler(Random.Range(0f, 90f), Random.Range(0f, 360f), Random.Range(0f, 90f));
-                float s = Random.Range(0.5f, 1.1f);
+                float s = Random.Range(0.5f, 1.4f);
                 rock.transform.localScale = new Vector3(s, s * Random.Range(0.5f, 0.9f), s);
                 rock.GetComponent<MeshRenderer>().material = rockMat;
             }

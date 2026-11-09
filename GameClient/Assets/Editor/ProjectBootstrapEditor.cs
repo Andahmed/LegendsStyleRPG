@@ -1,80 +1,51 @@
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace LegendsRPG.EditorTools
 {
+    /// <summary>
+    /// Automated project bootstrap.
+    /// - On first open: creates Assets/Scenes/Boot.unity containing the GameRoot component
+    ///   and registers it in Build Settings (no manual scene setup required).
+    /// - Provides menu commands: recreate scene, verify structure, build Android APK.
+    /// </summary>
     public static class ProjectBootstrapEditor
     {
-        private const string ScenePath = "Assets/Scenes/Boot.unity";
+        public const string BootScenePath = "Assets/Scenes/Boot.unity";
 
         [InitializeOnLoadMethod]
         private static void OnProjectLoaded()
         {
-            ConfigureAndroid();
-            if (!File.Exists(ScenePath)) CreateBootScene();
-            EnsureSceneInBuildSettings();
-        }
-
-        private static void ConfigureAndroid()
-        {
-            PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
-            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
-            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
-            PlayerSettings.stripEngineCode = false;
-            // landscape only (menu + HUD are laid out for 1920x1080)
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
-            PlayerSettings.allowedAutorotateToPortrait = false;
-            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-            PlayerSettings.allowedAutorotateToLandscapeRight = true;
-            IncludeShaders("Standard", "Legacy Shaders/Particles/Additive", "Sprites/Default", "UI/Default");
-        }
-
-        private static void IncludeShaders(params string[] names)
-        {
-            var gs = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>("ProjectSettings/GraphicsSettings.asset");
-            if (gs == null) return;
-            var so = new SerializedObject(gs);
-            var arr = so.FindProperty("m_AlwaysIncludedShaders");
-            bool changed = false;
-            foreach (var n in names)
-            {
-                var sh = Shader.Find(n);
-                if (sh == null) continue;
-                bool has = false;
-                for (int i = 0; i < arr.arraySize; i++)
-                {
-                    if (arr.GetArrayElementAtIndex(i).objectReferenceValue == sh) { has = true; break; }
-                }
-                if (has) continue;
-                arr.InsertArrayElementAtIndex(arr.arraySize);
-                arr.GetArrayElementAtIndex(arr.arraySize - 1).objectReferenceValue = sh;
-                changed = true;
-            }
-            if (changed)
-            {
-                so.ApplyModifiedProperties();
-                AssetDatabase.SaveAssets();
-            }
+            EnsureBootScene();
         }
 
         [MenuItem("Legends RPG/Setup/Create Boot Scene", priority = 0)]
         private static void CreateBootSceneMenu()
         {
-            CreateBootScene();
-            Debug.Log("[LegendsRPG] Boot scene created at " + ScenePath);
+            EnsureBootScene();
+            Debug.Log("[LegendsRPG] Boot scene ready at " + BootScenePath);
+        }
+
+        /// <summary>
+        /// Creates the Boot scene if it is missing and makes sure it is in the
+        /// build settings. Safe in batchmode (used by BuildTools.PreExport).
+        /// </summary>
+        public static void EnsureBootScene()
+        {
+            if (!File.Exists(BootScenePath))
+            {
+                CreateBootScene();
+            }
+            EnsureSceneInBuildSettings();
         }
 
         private static void CreateBootScene()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             var root = new GameObject("GameRoot");
             root.AddComponent<LegendsRPG.Core.GameRoot>();
 
@@ -86,17 +57,19 @@ namespace LegendsRPG.EditorTools
             lightGo.transform.rotation = Quaternion.Euler(55f, -35f, 0f);
 
             Directory.CreateDirectory("Assets/Scenes");
-            EditorSceneManager.SaveScene(scene, ScenePath);
+            EditorSceneManager.SaveScene(scene, BootScenePath);
             EnsureSceneInBuildSettings();
         }
 
-        private static void EnsureSceneInBuildSettings()
+        public static void EnsureSceneInBuildSettings()
         {
-            if (!File.Exists(ScenePath)) return;
+            if (!File.Exists(BootScenePath)) return;
+
             var current = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-            if (!current.Exists(s => s.path == ScenePath))
+            bool found = current.Exists(s => s.path == BootScenePath);
+            if (!found)
             {
-                current.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
+                current.Insert(0, new EditorBuildSettingsScene(BootScenePath, true));
                 EditorBuildSettings.scenes = current.ToArray();
             }
         }
@@ -118,44 +91,14 @@ namespace LegendsRPG.EditorTools
                     return;
                 }
             }
-            Debug.Log("[LegendsRPG] Project structure OK.");
+            Debug.Log("[LegendsRPG] Project structure OK — all required folders present.");
         }
 
         [MenuItem("Legends RPG/Build/Build Android APK", priority = 20)]
         private static void BuildAndroidApk()
         {
-            EnsureSceneInBuildSettings();
-
-            PlayerSettings.companyName = "LegendsStyleRPG";
-            PlayerSettings.productName = "Legends Reborn Style RPG";
-            PlayerSettings.bundleVersion = "0.5.0";
-            // 11 > versionCode 10 of the v0.4 APK already installed on test devices
-            // (a lower code would be rejected as a "downgrade" on install).
-            PlayerSettings.Android.bundleVersionCode = 11;
-            ConfigureAndroid();
-
-            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-            {
-                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
-            }
-
-            var options = new BuildPlayerOptions
-            {
-                scenes = new[] { ScenePath },
-                locationPathName = "Builds/Android/LegendsRPG-v0.5.0.apk",
-                target = BuildTarget.Android,
-                options = BuildOptions.None
-            };
-
-            var report = BuildPipeline.BuildPlayer(options);
-            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
-            {
-                Debug.Log("[LegendsRPG] APK built: " + report.summary.outputPath);
-            }
-            else
-            {
-                Debug.LogError("[LegendsRPG] APK build FAILED: " + report.summary.result);
-            }
+            // v1.1: delegate to BuildTools so the menu path and the CI path are identical
+            EditorTools.BuildTools.BuildAndroid();
         }
     }
 }

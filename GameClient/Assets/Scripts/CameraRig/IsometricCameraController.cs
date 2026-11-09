@@ -1,14 +1,19 @@
 using UnityEngine;
-using LegendsRPG.Core;
 
 namespace LegendsRPG.Cam
 {
     /// <summary>
     /// Isometric / top-down 3/4 view camera in the style of Legends Reborn.
-    /// - Follows the active hero smoothly.
-    /// - One-finger drag rotates yaw/pitch, two-finger pinch zooms (touch)
-    ///   or mouse drag + wheel in the editor.
-    /// - Adds impact shake used on hits and Ultimate skills.
+    /// v1.1: follows the TEAM CENTER (a focus transform owned by TeamManager)
+    /// — there is no "active hero" to follow and NO finger-drag rotation.
+    /// The angle changes only through the HUD camera buttons:
+    ///  - CycleAngle(): rotate the fixed isometric view in 60° steps,
+    ///  - ResetView(): back to the default angle/zoom.
+    /// Two-finger pinch (or mouse wheel) still zooms.
+    /// The follow uses Time.unscaledDeltaTime so the camera keeps moving while
+    /// the game is paused (Time.timeScale = 0) or during screen transitions,
+    /// and SetTarget(t, snap) can jump instantly on scene transitions.
+    /// Impact shake is kept for hits and Ultimate skills.
     /// </summary>
     public class IsometricCameraController : MonoBehaviour
     {
@@ -16,8 +21,9 @@ namespace LegendsRPG.Cam
 
         private float _yaw = GameConfig.CameraDefaultYaw;
         private float _pitch = GameConfig.CameraDefaultPitch;
-        private float _distance = 16f;
-        private float _yawInput, _pitchInput, _zoomInput;
+        private float _distance = 13f;
+        private float _zoomInput;
+        private bool _snapNext;
         private Vector3 _shakeOffset;
         private float _shakeTimeLeft, _shakeMagnitude;
         private Camera _cam;
@@ -26,27 +32,44 @@ namespace LegendsRPG.Cam
         {
             _cam = GetComponent<Camera>();
             if (_cam == null) _cam = gameObject.AddComponent<Camera>();
-            _cam.fieldOfView = 42f;       // narrower FOV = less perspective distortion
+            _cam.fieldOfView = 50f;
             _cam.nearClipPlane = 0.3f;
             _cam.farClipPlane = 220f;
-            _cam.backgroundColor = new Color(0.10f, 0.11f, 0.18f);
-            _cam.allowHDR = false;
-            _cam.allowMSAA = true;
+            _cam.backgroundColor = new Color(0.05f, 0.06f, 0.10f);
             _cam.clearFlags = CameraClearFlags.SolidColor;
-            if (RenderSettings.skybox != null) _cam.clearFlags = CameraClearFlags.Skybox;   // set by ArenaBuilder
         }
 
-        public void SetTarget(Transform t) { Target = t; }
-
-        public void AddOrbitInput(Vector2 delta)
+        public void SetTarget(Transform t, bool snap = false)
         {
-            _yawInput += delta.x;
-            _pitchInput -= delta.y;
+            Target = t;
+            if (snap) _snapNext = true;
+        }
+
+        /// <summary>Kept for existing callers (guild hall, battle session): jump to the target.</summary>
+        public void SnapToTarget()
+        {
+            _snapNext = true;
         }
 
         public void AddZoomInput(float delta)
         {
             _zoomInput += delta;
+        }
+
+        /// <summary>HUD "angle" button: rotates the fixed isometric view by 60° per press.</summary>
+        public void CycleAngle()
+        {
+            _yaw += 60f;
+            Audio.AudioSystem.Play("UI");
+        }
+
+        /// <summary>HUD "reset" button: back to the default isometric angle and zoom.</summary>
+        public void ResetView()
+        {
+            _yaw = GameConfig.CameraDefaultYaw;
+            _pitch = GameConfig.CameraDefaultPitch;
+            _distance = 13f;
+            Audio.AudioSystem.Play("UI");
         }
 
         public void Shake(float duration, float magnitude)
@@ -57,20 +80,18 @@ namespace LegendsRPG.Cam
 
         private void LateUpdate()
         {
-            // consume queued input
-            float rotSpeed = 2.2f;
-            _yaw += _yawInput * rotSpeed;
-            _pitch = Mathf.Clamp(_pitch + _pitchInput * rotSpeed * 0.7f,
-                GameConfig.CameraMinPitch, GameConfig.CameraMaxPitch);
+            // consume queued zoom
             _distance = Mathf.Clamp(_distance + _zoomInput, GameConfig.CameraMinDistance, GameConfig.CameraMaxDistance);
-            _yawInput = 0f; _pitchInput = 0f; _zoomInput = 0f;
+            _zoomInput = 0f;
 
             if (Target == null) return;
 
             Vector3 dir = DirectionFromAngles(_yaw, _pitch);
             Vector3 focus = Target.position + Vector3.up * 1.6f;
             Vector3 desired = focus + dir * _distance;
-            float lerp = 1f - Mathf.Exp(-GameConfig.CameraFollowLerp * Time.deltaTime);
+            // unscaled: screens pause the game (Time.timeScale = 0) — the camera must still follow
+            float lerp = _snapNext ? 1f : 1f - Mathf.Exp(-GameConfig.CameraFollowLerp * Time.unscaledDeltaTime);
+            _snapNext = false;
             transform.position = Vector3.Lerp(transform.position, desired, lerp);
 
             UpdateShake();

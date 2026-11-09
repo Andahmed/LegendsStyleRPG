@@ -176,6 +176,11 @@ namespace LegendsRPG.Vfx
                     Burst(ps, 18, 0.45f, 3.8f, 0.32f);
                     break;
 
+                case "water_bolt":
+                    Burst(ps, 24, 0.5f, 4.2f, 0.3f);
+                    main.gravityModifier = 0.35f;
+                    break;
+
                 case "heal":
                     RisingMotes(ps, 22, 0.9f, 1.6f, 0.22f);
                     break;
@@ -271,7 +276,7 @@ namespace LegendsRPG.Vfx
             em.SetBursts(new[] { new ParticleSystem.Burst(0f, count) });
 
             var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.shapeType = ParticleSystemShapeType.Cylinder;
             shape.radius = 0.5f;
         }
 

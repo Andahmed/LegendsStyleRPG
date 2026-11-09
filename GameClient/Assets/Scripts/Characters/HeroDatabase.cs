@@ -10,24 +10,7 @@ namespace LegendsRPG.Characters
     /// </summary>
     public static class HeroDatabase
     {
-        private static List<HeroData> _all;
-
-        /// <summary>The full roster (cached) — every summonable hero.</summary>
-        public static List<HeroData> AllHeroes
-        {
-            get
-            {
-                if (_all == null) _all = BuildRoster();
-                return _all;
-            }
-        }
-
         public static List<HeroData> CreateDefaultRoster()
-        {
-            return AllHeroes;
-        }
-
-        private static List<HeroData> BuildRoster()
         {
             var list = new List<HeroData>();
 
@@ -79,167 +62,164 @@ namespace LegendsRPG.Characters
                 MakeSkill("verda_s2", "Life Bloom", SkillKind.HealAlly, ElementType.Nature, 3.0f, 6f, 0f, "heal"),
                 MakeSkill("verda_ult", "Worldspring", SkillKind.UltimateAoe, ElementType.Nature, 2.6f, 15f, 0f, "ultimate", 4.5f)));
 
-            // ============================================================
-            //  v0.4 summon pool — 14 additional heroes (roster total: 20)
-            // ============================================================
-
-            // --- Common ---
-            AddRosterHero(list, "bram_ironvow", "Bram", HeroClass.Warrior, ElementType.Fire, Rarity.Common,
-                110, 12, 9, 5.0f, 1.05f, 2.2f,
-                new Color(0.80f, 0.45f, 0.20f), new Color(0.30f, 0.26f, 0.22f),
-                "Cinder Cleave", "Ember Burst", "Flame Wall");
-            AddRosterHero(list, "pell_mossfoot", "Pell", HeroClass.Healer, ElementType.Nature, Rarity.Common,
-                120, 10, 8, 4.9f, 0.95f, 7f,
-                new Color(0.45f, 0.70f, 0.35f), new Color(0.28f, 0.24f, 0.18f),
-                "Thorn Dart", "Mending Spores", "Grove Blessing");
-            AddRosterHero(list, "juno_glint", "Juno", HeroClass.Archer, ElementType.Lightning, Rarity.Common,
-                95, 12, 5, 5.4f, 1.30f, 8f,
-                new Color(0.95f, 0.80f, 0.35f), new Color(0.24f, 0.25f, 0.30f),
-                "Spark Shot", "Static Field", "Sky Piercer");
-
-            // --- Rare ---
-            AddRosterHero(list, "tamsin_dusk", "Tamsin", HeroClass.Assassin, ElementType.Dark, Rarity.Rare,
-                100, 16, 5, 5.9f, 1.45f, 2.1f,
-                new Color(0.40f, 0.30f, 0.60f), new Color(0.15f, 0.14f, 0.20f),
-                "Umbral Stab", "Night Bolt", "Veil of Dusk");
-            AddRosterHero(list, "odo_shieldhand", "Odo", HeroClass.Paladin, ElementType.Light, Rarity.Rare,
-                175, 12, 13, 4.7f, 0.90f, 2.2f,
-                new Color(0.90f, 0.85f, 0.60f), new Color(0.32f, 0.30f, 0.26f),
-                "Blessed Bash", "Sanctuary", "Aegis Verdict");
-            AddRosterHero(list, "wren_hailcaller", "Wren", HeroClass.Mage, ElementType.Ice, Rarity.Rare,
-                105, 15, 6, 4.9f, 0.95f, 7.5f,
-                new Color(0.45f, 0.75f, 0.90f), new Color(0.20f, 0.24f, 0.32f),
-                "Hail Spike", "Frost Ring", "Whiteout");
-            AddRosterHero(list, "maro_tidebind", "Maro", HeroClass.Mage, ElementType.Water, Rarity.Rare,
-                108, 15, 6, 4.8f, 0.95f, 7.5f,
-                new Color(0.35f, 0.60f, 0.95f), new Color(0.18f, 0.22f, 0.30f),
-                "Tide Bolt", "Riptide", "Maelstrom");
-
-            // --- Epic ---
-            AddRosterHero(list, "iskra_cinder", "Iskra", HeroClass.Warrior, ElementType.Fire, Rarity.Epic,
-                155, 17, 10, 5.3f, 1.20f, 2.4f,
-                new Color(0.95f, 0.50f, 0.15f), new Color(0.28f, 0.22f, 0.20f),
-                "Cinder Edge", "Pyre Wave", "Ashfall Reckoning");
-            AddRosterHero(list, "fenn_lorekeeper", "Fenn", HeroClass.Healer, ElementType.Light, Rarity.Epic,
-                135, 12, 9, 5.0f, 1.00f, 7f,
-                new Color(0.95f, 0.90f, 0.70f), new Color(0.30f, 0.28f, 0.22f),
-                "Lumen Dart", "Dawn Mend", "Aurora Veil");
-            AddRosterHero(list, "vashta_nightpine", "Vashta", HeroClass.Archer, ElementType.Nature, Rarity.Epic,
-                115, 17, 6, 5.5f, 1.35f, 8.5f,
-                new Color(0.40f, 0.75f, 0.45f), new Color(0.22f, 0.26f, 0.20f),
-                "Bramble Shot", "Overgrowth", "Wildhunt Volley");
-            AddRosterHero(list, "korrag_deepfury", "Korrag", HeroClass.Warrior, ElementType.Water, Rarity.Epic,
-                165, 16, 11, 5.1f, 1.10f, 2.4f,
-                new Color(0.30f, 0.55f, 0.85f), new Color(0.20f, 0.24f, 0.30f),
-                "Tidebreaker", "Whirlpool Strike", "Ocean's Wrath");
-
-            // --- Legendary ---
-            AddRosterHero(list, "lyra_dawnveil", "Lyra", HeroClass.Paladin, ElementType.Light, Rarity.Legendary,
-                190, 15, 15, 4.8f, 0.95f, 2.3f,
-                new Color(1f, 0.90f, 0.60f), new Color(0.34f, 0.30f, 0.24f),
-                "Radiant Smite", "Guardian Light", "Sunfall Judgement");
-            AddRosterHero(list, "morvath_ashen", "Morvath", HeroClass.Mage, ElementType.Dark, Rarity.Legendary,
-                120, 20, 7, 4.9f, 0.95f, 7.5f,
-                new Color(0.50f, 0.30f, 0.80f), new Color(0.14f, 0.12f, 0.20f),
-                "Grave Bolt", "Wither Wave", "Eternal Night");
-
-            // --- Mythic ---
-            AddRosterHero(list, "seraphel", "Seraphel", HeroClass.Assassin, ElementType.Lightning, Rarity.Mythic,
-                110, 25, 6, 6.2f, 1.55f, 2.1f,
-                new Color(0.65f, 0.85f, 1f), new Color(0.18f, 0.20f, 0.30f),
-                "Storm Fang", "Thunderbind", "Tempest Execution");
+            // 7..62 — formula-generated roster: 7 elements x 8 heroes = 56 more.
+            // Deterministic (no Random) so hero ids stay stable across saves.
+            list.AddRange(CreateGeneratedRoster());
 
             return list;
         }
 
-        // ---- v0.4 compact roster helpers ----
-        private static HeroData AddRosterHero(List<HeroData> list, string id, string name, HeroClass cls,
-            ElementType el, Rarity r, float hp, float atk, float def, float ms, float aspd, float range,
-            Color primary, Color secondary, string s1, string s2, string ult)
+        // ================= generated roster (data-driven, zero duplication) =================
+
+        private static readonly ElementType[] GenElements =
         {
-            var h = MakeHero(id, name, cls, el, r,
-                hp, atk, def, ms, aspd, range,
-                hp * 0.11f, atk * 0.14f, def * 0.13f,
-                primary, secondary,
-                ClassSkill(cls, el, 1, s1),
-                ClassSkill(cls, el, 2, s2),
-                ClassSkill(cls, el, 3, ult));
-            list.Add(h);
-            return h;
+            ElementType.Fire, ElementType.Water, ElementType.Nature, ElementType.Ice,
+            ElementType.Lightning, ElementType.Dark, ElementType.Light
+        };
+
+        private static readonly string[][] GenNames =
+        {
+            new[] { "Ember", "Ash", "Cinder", "Blaze", "Pyra", "Magma", "Scorch", "Ignis" },
+            new[] { "Marina", "Coral", "Tide", "Brine", "Mistral", "Rill", "Undine", "Nautis" },
+            new[] { "Fern", "Thorne", "Briar", "Sage", "Willow", "Moss", "Rosethorn", "Verdling" },
+            new[] { "Frost", "Snowe", "Glacia", "Rime", "Crystal", "Boreal", "Sleet", "Winter" },
+            new[] { "Volt", "Storm", "Static", "Bolt", "Tempest", "Spark", "Thunder", "Galvan" },
+            new[] { "Umbra", "Shade", "Dusk", "Raven", "Noctis", "Hex", "Eclipse", "Nyxar" },
+            new[] { "Lux", "Dawn", "Aurora", "Radiant", "Sol", "Gleam", "Halo", "Lumen" }
+        };
+
+        private static readonly string[] GenSurnames =
+            { "blade", "song", "fang", "veil", "heart", "wind", "oath", "ward" };
+
+        private static readonly Rarity[] GenRarities =
+        {
+            Rarity.Common, Rarity.Common, Rarity.Rare, Rarity.Rare,
+            Rarity.Epic, Rarity.Epic, Rarity.Legendary, Rarity.Mythic
+        };
+
+        private static readonly float[] RarityStatMult = { 0.85f, 1.0f, 1.15f, 1.3f, 1.5f };
+
+        private static List<HeroData> CreateGeneratedRoster()
+        {
+            var roster = new List<HeroData>();
+
+            for (int e = 0; e < GenElements.Length; e++)
+            {
+                ElementType el = GenElements[e];
+                for (int i = 0; i < 8; i++)
+                {
+                    HeroClass cls = (HeroClass)((i + e) % 6);   // every element covers all 6 classes
+                    Rarity rarity = GenRarities[i];
+                    string name = GenNames[e][i] + " " + GenSurnames[(i + e) % GenSurnames.Length];
+                    roster.Add(MakeGeneratedHero(el, i, cls, rarity, name));
+                }
+            }
+            return roster;
         }
 
-        /// <summary>Builds a class-appropriate skill set: [1] signature move,
-        /// [2] secondary, [3] ultimate — balanced close to the hand-made heroes.</summary>
-        private static SkillData ClassSkill(HeroClass cls, ElementType el, int tier, string displayName)
+        private static HeroData MakeGeneratedHero(ElementType el, int idx,
+            HeroClass cls, Rarity rarity, string name)
         {
-            SkillKind kind;
-            float power, cooldown, castRange;
+            int rarityIdx = (int)rarity;
+            float m = RarityStatMult[rarityIdx];
 
+            // class archetype (level-1 stats before rarity scaling)
+            float hp, atk, def, ms, aspd, range, hpLv, atkLv, defLv;
             switch (cls)
             {
                 case HeroClass.Mage:
-                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateAoe;
-                    power = tier == 1 ? 2.1f : tier == 2 ? 1.7f : 3.8f;
-                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 6f : 15f;
-                    castRange = tier == 1 ? 10f : 0f;
+                    hp = 110; atk = 20; def = 6; ms = 4.9f; aspd = 0.95f; range = 7.5f;
+                    hpLv = 13; atkLv = 2.9f; defLv = 0.8f; break;
+                case HeroClass.Archer:
+                    hp = 105; atk = 17; def = 6; ms = 5.6f; aspd = 1.35f; range = 8.0f;
+                    hpLv = 12; atkLv = 2.4f; defLv = 0.8f; break;
+                case HeroClass.Paladin:
+                    hp = 185; atk = 13; def = 14; ms = 4.7f; aspd = 0.9f; range = 2.2f;
+                    hpLv = 19; atkLv = 1.7f; defLv = 1.5f; break;
+                case HeroClass.Assassin:
+                    hp = 95; atk = 22; def = 5; ms = 6.1f; aspd = 1.5f; range = 2.1f;
+                    hpLv = 12; atkLv = 2.5f; defLv = 0.7f; break;
+                case HeroClass.Healer:
+                    hp = 130; atk = 12; def = 9; ms = 5.0f; aspd = 1.0f; range = 7.0f;
+                    hpLv = 15; atkLv = 1.8f; defLv = 1.0f; break;
+                default: // Warrior
+                    hp = 150; atk = 15; def = 11; ms = 5.2f; aspd = 1.1f; range = 2.4f;
+                    hpLv = 17; atkLv = 2.2f; defLv = 1.2f; break;
+            }
+
+            hp *= m; atk *= m; def *= m; hpLv *= m; atkLv *= m; defLv *= m;
+
+            Color primary = ElementalMatrix.GetElementColor(el);
+            primary = Color.Lerp(primary, Color.white, (idx % 3) * 0.08f);
+            Color secondary = Color.Lerp(primary, new Color(0.16f, 0.17f, 0.2f), 0.6f);
+
+            string id = "gen_" + el.ToString().ToLower() + "_" + idx;
+            float powerScale = 1f + 0.06f * rarityIdx;
+
+            SkillData s1, s2, ult;
+            switch (cls)
+            {
+                case HeroClass.Mage:
+                    s1 = GenSkill(id, "_s1", "Element Bolt", SkillKind.Projectile, el, powerScale, 4f, 9f, ProjKey(el));
+                    s2 = GenSkill(id, "_s2", "Element Burst", SkillKind.AoEBurst, el, 1.6f * powerScale, 6.5f, 0f, NovaKey(el), 4.2f);
+                    ult = GenSkill(id, "_ult", "Cataclysm", SkillKind.UltimateAoe, el, 3.4f * powerScale, 15f, 0f, "ultimate", 5f);
                     break;
                 case HeroClass.Archer:
-                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateNuke;
-                    power = tier == 1 ? 1.8f : tier == 2 ? 1.5f : 5.2f;
-                    cooldown = tier == 1 ? 3f : tier == 2 ? 5f : 16f;
-                    castRange = tier == 1 ? 11f : tier == 3 ? 12f : 0f;
+                    s1 = GenSkill(id, "_s1", "Piercing Shot", SkillKind.Projectile, el, powerScale, 3.6f, 10f, ProjKey(el));
+                    s2 = GenSkill(id, "_s2", "Volley", SkillKind.AoEBurst, el, 1.5f * powerScale, 6f, 0f, NovaKey(el), 4f);
+                    ult = GenSkill(id, "_ult", "Deadeye Mark", SkillKind.UltimateNuke, el, 5.0f * powerScale, 15f, 11f, "ultimate");
                     break;
                 case HeroClass.Paladin:
-                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.HealAlly : SkillKind.UltimateAoe;
-                    power = tier == 1 ? 2.0f : tier == 2 ? 2.4f : 3.2f;
-                    cooldown = tier == 1 ? 4.5f : tier == 2 ? 7f : 15f;
-                    castRange = tier == 1 ? 2.6f : 0f;
+                    s1 = GenSkill(id, "_s1", "Shield Bash", SkillKind.MeleeStrike, el, 2.0f * powerScale, 4.2f, 2.6f, "slash");
+                    s2 = GenSkill(id, "_s2", "Blessing", SkillKind.HealAlly, el, 2.4f * powerScale, 7f, 0f, "heal");
+                    ult = GenSkill(id, "_ult", "Sanctuary", SkillKind.UltimateAoe, el, 3.2f * powerScale, 15f, 0f, "ultimate", 5f);
                     break;
                 case HeroClass.Assassin:
-                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.Projectile : SkillKind.UltimateNuke;
-                    power = tier == 1 ? 2.6f : tier == 2 ? 1.7f : 5.6f;
-                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 4.5f : 16f;
-                    castRange = tier == 1 ? 2.3f : tier == 2 ? 8f : 3f;
+                    s1 = GenSkill(id, "_s1", "Quick Cut", SkillKind.MeleeStrike, el, 2.4f * powerScale, 3.2f, 2.3f, "slash");
+                    s2 = GenSkill(id, "_s2", "Poison Dart", SkillKind.Projectile, el, 1.8f * powerScale, 5f, 8f, ProjKey(el));
+                    ult = GenSkill(id, "_ult", "Death Mark", SkillKind.UltimateNuke, el, 5.4f * powerScale, 15f, 3.5f, "ultimate");
                     break;
                 case HeroClass.Healer:
-                    kind = tier == 1 ? SkillKind.Projectile : tier == 2 ? SkillKind.HealAlly : SkillKind.UltimateAoe;
-                    power = tier == 1 ? 1.6f : tier == 2 ? 3.0f : 2.6f;
-                    cooldown = tier == 1 ? 3.5f : tier == 2 ? 6f : 15f;
-                    castRange = tier == 1 ? 9f : 0f;
+                    s1 = GenSkill(id, "_s1", "Nature's Gift", SkillKind.HealAlly, el, 2.6f * powerScale, 5.5f, 0f, "heal");
+                    s2 = GenSkill(id, "_s2", "Pacify", SkillKind.AoEBurst, el, 1.3f * powerScale, 6f, 0f, NovaKey(el), 3.8f);
+                    ult = GenSkill(id, "_ult", "Renewal Wave", SkillKind.UltimateAoe, el, 2.8f * powerScale, 15f, 0f, "ultimate", 5f);
                     break;
                 default: // Warrior
-                    kind = tier == 1 ? SkillKind.MeleeStrike : tier == 2 ? SkillKind.AoEBurst : SkillKind.UltimateAoe;
-                    power = tier == 1 ? 2.2f : tier == 2 ? 1.7f : 3.6f;
-                    cooldown = tier == 1 ? 4f : tier == 2 ? 6f : 14f;
-                    castRange = tier == 1 ? 2.8f : 0f;
+                    s1 = GenSkill(id, "_s1", "Heavy Slash", SkillKind.MeleeStrike, el, 2.2f * powerScale, 4f, 2.8f, "slash");
+                    s2 = GenSkill(id, "_s2", "Cleave", SkillKind.AoEBurst, el, 1.6f * powerScale, 6.5f, 0f, NovaKey(el), 4f);
+                    ult = GenSkill(id, "_ult", "War Cry", SkillKind.UltimateAoe, el, 3.4f * powerScale, 15f, 0f, "ultimate", 4.8f);
                     break;
             }
 
-            string vfx = tier == 3 ? "ultimate" : VfxFor(kind, el);
-            return MakeSkill("gen_" + cls + "_" + tier + "_" + el, displayName, kind, el, power, cooldown, castRange, vfx);
+            return MakeHero(id, name, cls, el, rarity,
+                Mathf.RoundToInt(hp), Mathf.RoundToInt(atk), Mathf.RoundToInt(def),
+                ms, aspd, range, Mathf.RoundToInt(hpLv), atkLv, defLv,
+                primary, secondary, s1, s2, ult);
         }
 
-        private static string VfxFor(SkillKind kind, ElementType el)
+        private static string ProjKey(ElementType el)
         {
-            switch (kind)
+            switch (el)
             {
-                case SkillKind.MeleeStrike: return "slash";
-                case SkillKind.HealAlly: return "heal";
-                case SkillKind.AoEBurst: return "ice_nova";
-                case SkillKind.Projectile:
-                    switch (el)
-                    {
-                        case ElementType.Fire: return "fireball";
-                        case ElementType.Ice: return "ice_shard";
-                        case ElementType.Water: return "ice_shard";
-                        case ElementType.Lightning: return "lightning";
-                        case ElementType.Light: return "lightning";
-                        case ElementType.Nature: return "nature_bolt";
-                        case ElementType.Dark: return "dark_bolt";
-                        default: return "fireball";
-                    }
-                default: return "hit";
+                case ElementType.Fire: return "fireball";
+                case ElementType.Water: return "water_bolt";
+                case ElementType.Nature: return "nature_bolt";
+                case ElementType.Lightning: return "lightning";
+                case ElementType.Dark: return "dark_bolt";
+                case ElementType.Light: return "cast";
+                default: return "ice_shard";
             }
+        }
+
+        private static string NovaKey(ElementType el)
+        {
+            return (el == ElementType.Fire || el == ElementType.Dark) ? "explosion" : "ice_nova";
+        }
+
+        private static SkillData GenSkill(string heroId, string suffix, string name, SkillKind kind,
+            ElementType el, float power, float cooldown, float range, string vfxKey, float aoeRadius = 0f)
+        {
+            return MakeSkill(heroId + suffix, name, kind, el, power, cooldown, range, vfxKey, aoeRadius);
         }
 
         public static Dictionary<string, MonsterData> CreateMonsters()
@@ -265,6 +245,22 @@ namespace LegendsRPG.Characters
             map["wraith"] = MakeMonster("wraith", "Night Wraith", ElementType.Dark, false,
                 58, 14, 2, 4.2f, 1.2f, 2.0f, 0.9f, 34f,
                 new Color(0.45f, 0.3f, 0.65f), new Color(0.18f, 0.16f, 0.22f));
+
+            map["storm_hawk"] = MakeMonster("storm_hawk", "Storm Hawk", ElementType.Lightning, false,
+                52, 15, 2, 5.4f, 1.3f, 2.6f, 0.85f, 36f,
+                new Color(0.9f, 0.85f, 0.3f), new Color(0.2f, 0.22f, 0.3f));
+
+            map["coral_crab"] = MakeMonster("coral_crab", "Coral Crab", ElementType.Water, false,
+                95, 10, 8, 2.8f, 0.7f, 2.0f, 1.0f, 30f,
+                new Color(0.95f, 0.55f, 0.5f), new Color(0.25f, 0.45f, 0.65f));
+
+            map["vine_spider"] = MakeMonster("vine_spider", "Vine Spider", ElementType.Nature, false,
+                66, 12, 4, 4.4f, 1.25f, 2.2f, 0.95f, 32f,
+                new Color(0.3f, 0.6f, 0.3f), new Color(0.2f, 0.3f, 0.18f));
+
+            map["sun_eagle"] = MakeMonster("sun_eagle", "Sun Eagle", ElementType.Light, false,
+                74, 13, 5, 5.0f, 1.2f, 2.4f, 1.05f, 38f,
+                new Color(0.98f, 0.9f, 0.55f), new Color(0.5f, 0.42f, 0.25f));
 
             map["boss_titan"] = MakeMonster("boss_titan", "Ember Titan", ElementType.Fire, true,
                 520, 20, 12, 2.6f, 0.6f, 2.8f, 2.4f, 220f,

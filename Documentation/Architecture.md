@@ -39,15 +39,30 @@
 | Folder | Responsibility | Key classes |
 |--------|----------------|-------------|
 | `Core` | bootstrapping, state, config, save | `GameRoot`, `GameManager`, `GameConfig`, `SaveSystem`, `ObjectPool` |
-| `CameraRig` | isometric camera: follow/orbit/zoom/shake | `IsometricCameraController` |
-| `InputControl` | touch joystick, gestures, editor fallback | `TouchInputController` |
+| `CameraRig` | isometric camera: follows the team center, fixed-angle buttons, zoom, shake | `IsometricCameraController` |
+| `InputControl` | pinch zoom only — all battle input is uGUI (portraits/buttons) | `TouchInputController` |
 | `Characters` | stats, HP, movement, procedural rigs, hero & monster logic, roster data | `HeroCharacter`, `MonsterCharacter`, `CharacterStats`, `Health`, `CharacterMotor`, `CharacterAnimator`, `CharacterBodyFactory`, `HeroData`, `MonsterData`, `HeroDatabase` |
-| `Combat` | damage pipeline, elements, skills, projectiles, popups | `CombatUtil`, `ElementalMatrix`, `SkillData`, `SkillCaster`, `Projectile`, `DamagePopup`, `CombatEvents` |
-| `Team` | 6-hero team, switching, AI, auto battle | `TeamManager`, `TeamAIBrain`, `AutoBattleController` |
+| `Combat` | damage pipeline, elements, skills, projectiles, popups, unit HP bars | `CombatUtil`, `ElementalMatrix`, `SkillData`, `SkillCaster`, `Projectile`, `DamagePopup`, `CombatEvents`, `UnitHealthBar` |
+| `Team` | hero team, full-battle AI (no switching), auto skills | `TeamManager`, `TeamAIBrain`, `AutoSkills` |
+| `Items` | 235 formula-generated items (weapons/armor/amulets/wings/pets/mounts × 5 rarities), ownership, equipping, loot rolls, wing & pet visuals | `ItemData`, `ItemDatabase`, `InventorySystem`, `WingVisual`, `PetOrb` |
 | `World` | arena construction, waves, experience tower | `ArenaBuilder`, `WaveSpawner`, `TowerSystem` |
 | `VFX` | procedural particles & materials | `VFXFactory`, `MaterialLibrary` |
 | `UI` | code-built HUD | `UIBuilder`, `HUDController` |
 | `Audio` | runtime-synthesized SFX/BGM | `AudioSystem` |
+
+## v1.1 combat model (Legends Reborn style — final design decision)
+
+- Every hero is fully autonomous: `TeamAIBrain` hunts the nearest monster,
+  chases it, holds a front (melee) / back (ranged) formation around the team
+  center and always auto-attacks. There is no joystick, no manual attack and
+  no active-hero switching.
+- The player controls: tapping a ready portrait (fires that hero's Ultimate
+  when its Rage bar is full — the portrait glows), the AUTO toggle (auto-casts
+  skills + ultimates), battle speed x1/x2/x3, pause, and the side camera
+  buttons (angle / reset — the camera never rotates by dragging).
+- The camera follows `TeamManager.FocusTransform` (live centroid of alive
+  heroes) and its follow uses `Time.unscaledDeltaTime` so it keeps moving
+  while the game is paused.
 
 ## Damage formula (single source of truth — `CombatUtil.DealDamage`)
 
@@ -59,6 +74,23 @@ final = base
 ```
 
 Element wheel: Fire ▸ Ice ▸ Nature ▸ Water ▸ Fire; Lightning ▸ Water, Nature ▸ Lightning; Light ↔ Dark.
+
+## Items & equipment (formula-driven, zero duplication)
+
+```
+235 items = 6 categories × (8 templates or 7 pet elements) × 5 rarities
+rarity stat multiplier  = {1.0, 1.4, 1.9, 2.6, 3.5}
+weapon ATK(base)        = 4 + 1.5 × templateIndex
+armor HP(base)          = 30 + 10 × templateIndex
+mount SPD(base)         = 0.7 + 0.12 × templateIndex
+loot roll (floor clear) = 30% + 3%/difficulty, rarity odds shift with floor/50
+```
+
+Slots per hero: Weapon · Armor · Amulet · Wings · Pet · Mount (6). Equipping calls
+`CharacterStats.AddEquipmentBonus` (real stat change + HP bar sync) and spawns
+procedural visuals: flapping `WingVisual` panels + an orbiting `PetOrb`.
+Ownership and per-hero loadouts persist in the save file (schema v2,
+backward-compatible: v1 saves load with empty inventories and get the starter kit).
 
 ## Tower progression (formula-driven, zero duplication)
 
@@ -80,14 +112,15 @@ expScale = difficultyExp[...] × (1 + 0.01 × (floor-1))
 
 1. `GameRoot.Awake` (Boot scene) → builds AudioSystem → ObjectPool → VFXFactory
 2. `ArenaBuilder.Build()` — arena, lights, fog, props
-3. Camera → GameManager + Team/Tower/Wave/AutoBattle components
-4. `SaveSystem.Load()` → roster → `TeamManager.CreateTeam` → camera target
-5. HUD build + input wiring → `WaveSpawner.StartFloor()` → battle state
+3. Camera → GameManager + Team/Tower/Wave/AutoSkills components
+4. `SaveSystem.Load()` → `InventorySystem.Initialize()` (items + starter kit)
+   → roster (62 heroes) → `TeamManager.CreateTeam` (equipment applied per hero) → camera follows the team center
+5. HUD build + pinch-zoom wiring → `WaveSpawner.StartFloor()` → battle state
 
 ## Extension points (per roadmap)
 
 - 0.2: swap `CharacterAnimator` for Animator+FBX/GLB clips (same Play* API); add quality settings presets.
-- 0.3: team roster UI screens; TeamAIBrain already powers non-active heroes.
-- 0.4: `CharacterStats.AddEquipmentBonus` + `StatBonus` already implemented for items/wings/pets.
+- 0.3: team roster UI screens; since v1.1 `TeamAIBrain` powers every hero (full auto combat); `InventorySystem` already exposes `GetEquippedName/IsOwned/Equip` for an inventory UI.
+- 0.4: `CharacterStats.AddEquipmentBonus` + `StatBonus` implemented AND live via `InventorySystem` (6 slots, loot, persistence).
 - 0.5: `TowerSystem.SetDifficulty/Floor` already drives everything; UI screens only.
 - Online: replace `SaveSystem` local persistence with backend sync via `ApiClient` (schema-compatible JSON).

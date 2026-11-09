@@ -88,75 +88,31 @@ namespace LegendsRPG.Vfx
             {
                 if (_ground != null) return _ground;
 
-                // Stone-tile floor: soft noise, darker grout lines, per-tile tint variation.
-                int size = 256, tile = 32;
-                var tex = new Texture2D(size, size, TextureFormat.RGB24, true)
+                int size = 64;
+                var tex = new Texture2D(size, size, TextureFormat.RGB24, false)
                 {
                     wrapMode = TextureWrapMode.Repeat,
-                    filterMode = FilterMode.Trilinear,
-                    anisoLevel = 4
+                    filterMode = FilterMode.Point
                 };
-                var baseA = new Color(0.30f, 0.30f, 0.36f);
-                var grout = new Color(0.12f, 0.12f, 0.16f);
-                for (int ty = 0; ty < size / tile; ty++)
+                var a = new Color(0.16f, 0.17f, 0.20f);
+                var b = new Color(0.20f, 0.21f, 0.25f);
+                for (int y = 0; y < size; y++)
                 {
-                    for (int tx = 0; tx < size / tile; tx++)
+                    for (int x = 0; x < size; x++)
                     {
-                        float tint = 0.85f + 0.3f * Mathf.PerlinNoise(tx * 3.7f + 11f, ty * 3.7f + 5f);
-                        for (int y = 0; y < tile; y++)
-                        {
-                            for (int x = 0; x < tile; x++)
-                            {
-                                int px = tx * tile + x, py = ty * tile + y;
-                                float n = Mathf.PerlinNoise(px * 0.09f, py * 0.09f) * 0.18f
-                                        + Mathf.PerlinNoise(px * 0.5f, py * 0.5f) * 0.05f;
-                                Color c = baseA * (tint + n);
-                                int edge = Mathf.Min(Mathf.Min(x, tile - 1 - x), Mathf.Min(y, tile - 1 - y));
-                                if (edge < 2) c = Color.Lerp(grout, c, edge * 0.5f);
-                                c.a = 1f;
-                                tex.SetPixel(px, py, c);
-                            }
-                        }
+                        bool checker = ((x / 8) + (y / 8)) % 2 == 0;
+                        tex.SetPixel(x, y, checker ? a : b);
                     }
                 }
-                tex.Apply(true);
+                tex.Apply();
 
                 _ground = new Material(StandardShader);
                 _ground.mainTexture = tex;
-                _ground.mainTextureScale = new Vector2(10f, 10f);
-                _ground.SetFloat("_Glossiness", 0.18f);
-                _ground.SetFloat("_Metallic", 0f);
-                _ground.color = Color.white;
+                _ground.mainTextureScale = new Vector2(14f, 14f);
+                _ground.SetFloat("_Glossiness", 0.08f);
+                _ground.color = new Color(0.9f, 0.9f, 0.95f);
                 return _ground;
             }
-        }
-
-        /// <summary>Soft round glow texture used for the hero ground rings and blob shadows.</summary>
-        private static Texture2D _ringTex;
-        private static Material _ringMat;
-        public static Material RingMaterial(Color color)
-        {
-            if (_ringTex == null)
-            {
-                int n = 128;
-                _ringTex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
-                for (int y = 0; y < n; y++)
-                    for (int x = 0; x < n; x++)
-                    {
-                        float d = Vector2.Distance(new Vector2(x, y), new Vector2(n / 2f, n / 2f)) / (n / 2f);
-                        float ring = Mathf.Clamp01(1f - Mathf.Abs(d - 0.82f) * 14f);
-                        float fill = d < 0.82f ? 0.18f * (1f - d) : 0f;
-                        float a = Mathf.Clamp01(ring + fill);
-                        _ringTex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
-                    }
-                _ringTex.Apply();
-            }
-            var sh = Shader.Find("Legacy Shaders/Particles/Alpha Blended");
-            if (sh == null) sh = Shader.Find("Sprites/Default");
-            var m = new Material(sh);
-            m.mainTexture = _ringTex;
-            m.color = color;
-            return m;
         }
 
         public static Color ElementColor(ElementType el)

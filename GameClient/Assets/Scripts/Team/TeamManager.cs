@@ -8,8 +8,12 @@ using LegendsRPG.Core;
 namespace LegendsRPG.Team
 {
     /// <summary>
-    /// Manages the 6-hero team: formation spawning, active-hero switching,
-    /// AI control for non-active heroes, death respawn and EXP sharing.
+    /// Manages the hero team: formation spawning, death respawn and EXP sharing.
+    /// v1.1 (Legends Reborn style): there is NO player-controlled active hero
+    /// and NO switching during combat — every hero runs TeamAIBrain. The old
+    /// ActiveHero meaning is now the internal "focus hero" (first alive one),
+    /// kept only so screens that need a representative hero keep working;
+    /// the battle camera follows FocusTransform (the live team center) instead.
     /// </summary>
     public class TeamManager : MonoBehaviour
     {
@@ -17,25 +21,68 @@ namespace LegendsRPG.Team
 
         public List<HeroCharacter> Heroes { get; } = new List<HeroCharacter>();
         public List<string> UnlockedHeroes { get; } = new List<string>();
+        public Vector3 BasePosition { get; set; }
 
-        /// <summary>Full roster injected by GameRoot — used by RebuildTeam (summon / loadout edits).</summary>
-        public List<HeroData> Roster { get; set; }
-        public int ActiveIndex { get; private set; }
+        /// <summary>
+        /// Internal focus hero (first alive) for screens/UI only — NOT
+        /// player-controlled, and NOT the camera target (the camera follows
+        /// FocusTransform, the live team center).
+        /// </summary>
         public HeroCharacter ActiveHero
         {
             get
             {
-                if (ActiveIndex >= 0 && ActiveIndex < Heroes.Count) return Heroes[ActiveIndex];
-                return null;
+                for (int i = 0; i < Heroes.Count; i++)
+                {
+                    if (Heroes[i] != null && Heroes[i].HP != null && !Heroes[i].HP.IsDead) return Heroes[i];
+                }
+                return Heroes.Count > 0 ? Heroes[0] : null;
             }
         }
-        public Vector3 BasePosition { get; private set; }
-        public bool AutoBattleIsEnabled { get { return _autoBattle != null && _autoBattle.Enabled; } }
 
-        public event Action<int> OnActiveChanged;
         public event Action<HeroCharacter> HeroRespawned;
 
-        private AutoBattleController _autoBattle;
+        private Transform _focus;           // live team center — battle camera target
+        private AutoSkills _autoSkills;     // kept for symmetric wiring; consumed by TeamAIBrain
+
+        /// <summary>Live team center (centroid of alive heroes) — the camera's follow target.</summary>
+        public Transform FocusTransform
+        {
+            get
+            {
+                if (_focus == null)
+                {
+                    var go = new GameObject("TeamFocus");
+                    _focus = go.transform;
+                }
+                return _focus;
+            }
+        }
+
+        /// <summary>Centroid of the alive heroes (falls back to any hero, then to BasePosition).</summary>
+        public Vector3 TeamCenter
+        {
+            get
+            {
+                Vector3 sum = Vector3.zero;
+                int n = 0;
+                for (int i = 0; i < Heroes.Count; i++)
+                {
+                    var h = Heroes[i];
+                    if (h == null || h.HP == null || h.HP.IsDead) continue;
+                    sum += h.transform.position;
+                    n++;
+                }
+                if (n == 0)
+                {
+                    for (int i = 0; i < Heroes.Count; i++)
+                    {
+                        if (Heroes[i] != null) { sum += Heroes[i].transform.position; n++; }
+                    }
+                }
+                return n > 0 ? sum / n : BasePosition;
+            }
+        }
 
         private void Awake()
         {
@@ -55,8 +102,8 @@ namespace LegendsRPG.Team
             Heroes.Clear();
             UnlockedHeroes.Clear();
 
-            // In the shipped prototype all six demo heroes are unlocked so the
-            // switching / team systems can be tested. Flip this flag to false
+            // In the shipped prototype the full roster (62 heroes) is unlocked so the
+            // team systems can be tested. Flip this flag to false
             // to restore "player starts with one hero" per the design document.
             if (demoUnlockAll)
             {
@@ -67,142 +114,94 @@ namespace LegendsRPG.Team
                 foreach (var id in SaveSystem.Current.unlockedHeroIds) UnlockedHeroes.Add(id);
             }
 
+            // v1.0: honor the player's chosen formation order
+            var ordered = OrderRosterByTeam(roster);
+
             int slot = 0;
-
-            // spawn order: the saved team loadout first, then any other unlocked heroes
-            var ordered = new List<HeroData>();
-            var loadout = SaveSystem.Current.teamLoadout;
-            for (int i = 0; i < loadout.Count; i++)
-            {
-                var d = FindInRoster(roster, loadout[i]);
-                if (d != null && UnlockedHeroes.Contains(loadout[i]) && ordered.IndexOf(d) < 0) ordered.Add(d);
-            }
-            foreach (var data in roster)
-            {
-                if (UnlockedHeroes.Contains(data.heroId) && ordered.IndexOf(data) < 0) ordered.Add(data);
-            }
-
             foreach (var data in ordered)
             {
+                if (!UnlockedHeroes.Contains(data.heroId)) continue;
                 if (slot >= GameConfig.TeamSize) break;
 
                 var go = new GameObject("HeroRoot_" + data.displayName);
                 var hero = go.AddComponent<HeroCharacter>();
-                hero.Setup(data, Inventory.HeroLevel(data.heroId), slot, FormationPosition(slot));
+                int level = Mathf.Max(1, SaveSystem.Current.playerLevel);
+                hero.Setup(data, level, slot, FormationPosition(slot));
+                Items.InventorySystem.ApplyToHero(hero);   // equipment stats + wings/pet visuals
                 go.AddComponent<TeamAIBrain>().Bind(hero, this);
 
                 var health = hero.HP;
                 var captured = hero;
                 health.Died += delegate { OnHeroDied(captured); };
 
-                // v0.5: per-hero level persistence + equipment bonuses
-                string heroKey = data.heroId;
-                hero.Stats.OnLevelUp += lv => Inventory.SetHeroLevel(heroKey, lv);
-                Equipment.Apply(hero);
-
                 Heroes.Add(hero);
                 slot++;
             }
 
-            ActiveIndex = 0;
-            ApplyActiveState();
+            UpdateFocus();
+        }
+
+        /// <summary>Orders the roster by the saved team formation (drag order).</summary>
+        private List<HeroData> OrderRosterByTeam(List<HeroData> roster)
+        {
+            var ids = SaveSystem.Current.teamHeroIds;
+            var map = new Dictionary<string, HeroData>();
+            foreach (var r in roster) map[r.heroId] = r;
+
+            var result = new List<HeroData>();
+            if (ids != null)
+            {
+                foreach (var id in ids)
+                {
+                    if (map.ContainsKey(id) && UnlockedHeroes.Contains(id))
+                    {
+                        result.Add(map[id]);
+                        map.Remove(id);
+                    }
+                }
+            }
+            foreach (var kv in map)
+            {
+                if (UnlockedHeroes.Contains(kv.Key)) result.Add(kv.Value);
+            }
+            return result;
+        }
+
+        /// <summary>Enables/disables the AI brains (city walking vs battle AI).</summary>
+        public void SetBrainsEnabled(bool enabled)
+        {
+            foreach (var h in Heroes)
+            {
+                if (h == null) continue;
+                var brain = h.GetComponent<TeamAIBrain>();
+                if (brain != null) brain.enabled = enabled;
+            }
         }
 
         public Vector3 FormationPosition(int slot)
         {
-            // two rows of three, 2.6m apart, so heroes never overlap
-            float x = (slot % 3 - 1) * 2.6f;
-            float z = -(slot / 3) * 2.6f;
-            return BasePosition + new Vector3(x, 0f, z);
+            float angle = slot * 60f * Mathf.Deg2Rad;
+            return BasePosition + new Vector3(Mathf.Sin(angle) * 1.6f, 0f, Mathf.Cos(angle) * 1.6f);
         }
 
-        /// <summary>Respawns the whole team from the roster + current save state.
-        /// Called after summoning heroes or editing the team loadout in the UI.</summary>
-        public void RebuildTeam()
-        {
-            if (BasePosition == Vector3.zero && Heroes.Count == 0)
-            {
-                // CreateTeam never ran (should not happen) — nothing sane to rebuild from
-                return;
-            }
-            var roster = Roster != null && Roster.Count > 0 ? Roster : HeroDatabase.AllHeroes;
-            CreateTeam(roster, BasePosition, false);
-        }
-
-        private static HeroData FindInRoster(List<HeroData> roster, string heroId)
-        {
-            for (int i = 0; i < roster.Count; i++)
-            {
-                if (roster[i].heroId == heroId) return roster[i];
-            }
-            return null;
-        }
-
-        public void SwitchTo(int index)
-        {
-            if (index < 0 || index >= Heroes.Count) return;
-            var target = Heroes[index];
-            if (target == null || target.HP.IsDead) return;
-
-            ActiveIndex = index;
-            ApplyActiveState();
-            CombatEvents.RaiseNotification("Switched to " + target.Data.displayName);
-
-            var cam = Camera.main != null ? Camera.main.GetComponent<Cam.IsometricCameraController>() : null;
-            if (cam != null) cam.SetTarget(target.transform);
-        }
-
-        public void SwitchNext()
-        {
-            int n = Heroes.Count;
-            for (int step = 1; step <= n; step++)
-            {
-                int idx = (ActiveIndex + step) % n;
-                var h = Heroes[idx];
-                if (h != null && !h.HP.IsDead)
-                {
-                    SwitchTo(idx);
-                    return;
-                }
-            }
-        }
-
-        private void ApplyActiveState()
-        {
-            for (int i = 0; i < Heroes.Count; i++)
-            {
-                if (Heroes[i] != null) Heroes[i].SetActive(i == ActiveIndex);
-            }
-            if (OnActiveChanged != null) OnActiveChanged(ActiveIndex);
-        }
-
+        // v1.1: no manual driving in Update — the only job here is keeping the
+        // team-center focus point on the centroid of the alive heroes.
         private void Update()
         {
-            if (Heroes.Count == 0) return;
-
-            var input = InputCtl.TouchInputController.Instance;
-            bool attackHeld = (input != null && input.AttackHeldState) || UI.HUDController.AttackButtonHeld;
-
-            var active = ActiveHero;
-            bool autoOn = _autoBattle != null && _autoBattle.Enabled;
-
-            if (active != null && !active.HP.IsDead)
-            {
-                if (autoOn)
-                {
-                    _autoBattle.DriveActiveHero(active);
-                }
-                else
-                {
-                    Vector2 stick = input != null ? input.MoveVector : Vector2.zero;
-                    active.ManualTick(stick, attackHeld);
-                }
-            }
+            UpdateFocus();
         }
 
-        public void SetAutoBattle(AutoBattleController auto)
+        private void UpdateFocus()
         {
-            _autoBattle = auto;
+            if (_focus == null) return;      // created lazily by FocusTransform on first request
+            if (Heroes.Count > 0) _focus.position = TeamCenter;
+        }
+
+        public void SetAutoSkills(AutoSkills auto)
+        {
+            // v1.1: AUTO is a global toggle consumed by TeamAIBrain directly; the
+            // reference is kept so the GameRoot wiring stays symmetric.
+            _autoSkills = auto;
         }
 
         public void ShareEXP(float total)
@@ -239,12 +238,6 @@ namespace LegendsRPG.Team
             hero.HP.Revive(0.6f);
             hero.Motor.Teleport(BasePosition + Vector3.right * 2f);
             hero.Motor.Stop();
-
-            // switching away if the dead hero was active
-            if (Heroes[ActiveIndex] == hero)
-            {
-                SwitchNext();
-            }
 
             if (HeroRespawned != null) HeroRespawned(hero);
         }

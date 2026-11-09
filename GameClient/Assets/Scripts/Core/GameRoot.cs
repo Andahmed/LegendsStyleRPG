@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using LegendsRPG.Audio;
 using LegendsRPG.Cam;
 using LegendsRPG.Characters;
 using LegendsRPG.Combat;
-using LegendsRPG.Core;
-using LegendsRPG.InputCtl;
+using LegendsRPG.Social;
 using LegendsRPG.Team;
 using LegendsRPG.UI;
 using LegendsRPG.Vfx;
@@ -15,8 +15,9 @@ namespace LegendsRPG.Core
 {
     /// <summary>
     /// Single entry point placed in the Boot scene by the editor bootstrap.
-    /// Builds the entire playable prototype at runtime: audio, arena, camera,
-    /// team, tower, waves, input and HUD. Nothing requires manual scene setup.
+    /// v1.0: boots into the full game — city, all meta systems, battle arena,
+    /// 3D guild hall, city HUD, screens and notifications. Nothing requires
+    /// manual scene setup.
     /// </summary>
     public class GameRoot : MonoBehaviour
     {
@@ -33,12 +34,7 @@ namespace LegendsRPG.Core
             DontDestroyOnLoad(gameObject);
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-            Screen.autorotateToPortrait = false;
-            Screen.autorotateToPortraitUpsideDown = false;
-            Screen.autorotateToLandscapeLeft = true;
-            Screen.autorotateToLandscapeRight = true;
-            Screen.orientation = ScreenOrientation.LandscapeLeft;
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            Screen.orientation = ScreenOrientation.Portrait;
 #endif
 
             BuildGame();
@@ -46,9 +42,9 @@ namespace LegendsRPG.Core
 
         private void BuildGame()
         {
-            // 1) audio + pools + vfx
+            // ============ 1) core services ============
             var audioGo = new GameObject("AudioSystem");
-            audioGo.AddComponent<AudioSystem>();
+            var audio = audioGo.AddComponent<AudioSystem>();
             if (GetComponent<AudioListener>() == null && Object.FindObjectOfType<AudioListener>() == null)
             {
                 audioGo.AddComponent<AudioListener>();
@@ -60,64 +56,106 @@ namespace LegendsRPG.Core
             var vfxGo = new GameObject("VFXFactory");
             vfxGo.AddComponent<VFXFactory>();
 
-            // 2) arena
-            var arena = new GameObject("ArenaBuilder");
-            arena.AddComponent<ArenaBuilder>().Build();
+            // ============ 2) save + every meta system ============
+            SaveSystem.Load();
+            Items.InventorySystem.Initialize();
 
-            // 3) camera
+            Economy.ReadFrom(SaveSystem.Current);
+            PlayerProfile.ReadFrom(SaveSystem.Current);
+            HeroProgress.ReadFrom(SaveSystem.Current);
+            TechSystem.ReadFrom(SaveSystem.Current);
+            ForgeSystem.ReadFrom(SaveSystem.Current);
+            QuestSystem.ReadFrom(SaveSystem.Current);
+            ShopSystem.ReadFrom(SaveSystem.Current);
+            SignInSystem.ReadFrom(SaveSystem.Current);
+            LimitedEvent.ReadFrom(SaveSystem.Current);
+            MerchantSystem.ReadFrom(SaveSystem.Current);
+            SummonSystem.ReadFrom(SaveSystem.Current);
+            CampaignSystem.ReadFrom(SaveSystem.Current);
+            ContinentGateSystem.ReadFrom(SaveSystem.Current);
+            DungeonSystem.ReadFrom(SaveSystem.Current);
+            ArenaSystem.ReadFrom(SaveSystem.Current);
+            MineSystem.ReadFrom(SaveSystem.Current);
+            BeastSystem.ReadFrom(SaveSystem.Current);
+            BeastSystem.EnsureDefaults();
+            GuildSystem.ReadFrom(SaveSystem.Current);
+            AFKReward.ReadFrom(SaveSystem.Current);
+            QuestSystem.DailyReset();
+            GuildSystem.DailyGiftCheck();
+
+            GfxSettings.ApplyFromSave();
+            AudioSystem.SetMusicVolume(SaveSystem.Current.musicVolume);
+            AudioSystem.SetSfxVolume(SaveSystem.Current.sfxVolume);
+
+            // ============ 3) battle arena (far from the city) ============
+            WaveSpawner.ArenaCenter = new Vector3(0f, 0f, BattleSession.ArenaOffsetZ);
+            var arenaGo = new GameObject("ArenaBuilder");
+            arenaGo.AddComponent<ArenaBuilder>().Build();
+            if (ArenaBuilder.ArenaRoot != null)
+            {
+                ArenaBuilder.ArenaRoot.transform.position = new Vector3(0f, 0f, BattleSession.ArenaOffsetZ);
+            }
+
+            // ============ 4) the 3D city ============
+            var cityGo = new GameObject("CityBuilder");
+            cityGo.AddComponent<CityBuilder>().Build();
+
+            // ============ 5) camera with 3D-click support ============
             var camGo = new GameObject("BattleCamera");
             var camera = camGo.AddComponent<IsometricCameraController>();
             camGo.tag = "MainCamera";
+            camGo.AddComponent<PhysicsRaycaster>();   // lets CityBuilding receive clicks
 
-            // 4) manager + systems
+            // ============ 6) manager + battle systems ============
             var managerGo = new GameObject("GameManager");
             var gm = managerGo.AddComponent<GameManager>();
 
             var team = managerGo.AddComponent<TeamManager>();
             var tower = managerGo.AddComponent<TowerSystem>();
             var spawner = managerGo.AddComponent<WaveSpawner>();
-            var auto = managerGo.AddComponent<AutoBattleController>();
+            var auto = managerGo.AddComponent<AutoSkills>();   // v1.1: auto-casts skills/ults (no manual drive)
 
             gm.Team = team;
             gm.Tower = tower;
             gm.Spawner = spawner;
-            gm.Audio = audioGo.GetComponent<AudioSystem>();
+            gm.Audio = audio;
             gm.Vfx = vfxGo.GetComponent<VFXFactory>();
+            team.SetAutoSkills(auto);
 
-            team.SetAutoBattle(auto);
-
-            // 5) input
-            var inputGo = new GameObject("TouchInput");
-            inputGo.AddComponent<TouchInputController>();
-
-            // 6) save + roster + team
-            SaveSystem.Load();
-            var roster = HeroDatabase.CreateDefaultRoster();
+            // ============ 7) monsters (incl. arena shadows + guild boss) ============
             var monsters = HeroDatabase.CreateMonsters();
-            // v0.4: the save drives unlocks (player starts with Kael and summons
-            // the rest) — demoUnlockAll is off so the gacha loop is real.
-            team.Roster = roster;
-            team.CreateTeam(roster, new Vector3(0f, 0f, 8f), demoUnlockAll: false);
+            ArenaSystem.RegisterShadows(monsters);
+            monsters["guild_hunt_boss"] = MakeGuildBoss();
+            spawner.Init(monsters);
 
-            camera.SetTarget(team.ActiveHero != null ? team.ActiveHero.transform : null);
+            // ============ 8) the hero party lives in the city ============
+            var roster = HeroDatabase.CreateDefaultRoster();
+            team.CreateTeam(roster, CityBuilder.CitySpawnPoint, demoUnlockAll: false);
+            team.SetBrainsEnabled(false);   // peaceful walking in the city
+            camera.SetTarget(team.FocusTransform);   // v1.1: camera follows the team center
+            camera.SnapToTarget();
 
-            // 7) HUD
+            // ============ 9) battle HUD (hidden until a battle starts) ============
             var hudGo = new GameObject("HUD");
             var hud = hudGo.AddComponent<HUDController>();
             hud.Build(team, camera);
             gm.Hud = hud;
+            hud.SetBattleHudVisible(false, "");
 
-            // 8) wiring
-            var input = inputGo.GetComponent<TouchInputController>();
-            input.DragRotate += camera.AddOrbitInput;
-            input.PinchZoom += camera.AddZoomInput;
+            // ============ 10) UI manager: all screens + city HUD ============
+            var uiGo = new GameObject("UIManager");
+            var ui = uiGo.AddComponent<UIManager>();
+            ui.BuildAll();
 
-            // 9) tower + first floor
-            spawner.Init(monsters);
+            // ============ 11) input wiring ============
+            var inputGo = new GameObject("TouchInput");
+            var input = inputGo.AddComponent<TouchInputController>();
+            input.PinchZoom += camera.AddZoomInput;   // v1.1: pinch zoom only — no drag rotation
+
+            // ============ 12) tower restore ============
             tower.RestoreFromSave();
-            tower.FloorStarted += (floor, diff) => { };
 
-            // subscribe camera juice to combat events
+            // ============ 13) combat juice + guild hunt damage tracking ============
             CombatEvents.DamageDealt += info =>
             {
                 if (info.isCrit || (info.isSkill && info.amount > 25f))
@@ -126,33 +164,67 @@ namespace LegendsRPG.Core
                 }
             };
 
-            spawner.StartFloor();
-            gm.SetState(GameManager.GameState.Battle);
-
-            // 10) main menu (battle stays paused until the player presses ENTER BATTLE)
-            var menuGo = new GameObject("MenuController");
-            var menu = menuGo.AddComponent<MenuController>();
-            menu.Build(team, hud);
-
-            // 11) main hub (v0.3): 3D diorama + full hub UI. The hub is the home screen now.
-            var hubSceneGo = new GameObject("HubScene");
-            var hubCenter = hubSceneGo.AddComponent<LegendsRPG.World.HubScene>().Build(team);
-
-            var hubGo = new GameObject("HubScreen");
-            var hub = hubGo.AddComponent<LegendsRPG.UI.HubScreen>();
-            hub.Build(team, hud, menu);
-            hub.ManagementRouter = id =>
+            long huntDamage = 0;
+            CombatEvents.DamageDealt += info =>
             {
-                menu.Open();          // pauses time, hides HUD, opens the management screen
-                menu.ShowScreen(id);  // jump straight to the requested screen
-                return true;
+                if (BattleSession.Active && BattleSession.Current != null &&
+                    BattleSession.Current.type == BattleSession.BattleType.GuildHunt)
+                {
+                    huntDamage += Mathf.Max(0, Mathf.RoundToInt(info.amount));
+                }
             };
-            hub.Open();
-            camera.SetTarget(hubCenter);
+            BattleSession.BattleEnded += (win, cfg) =>
+            {
+                if (cfg != null && cfg.type == BattleSession.BattleType.GuildHunt)
+                {
+                    if (huntDamage > 0) GuildSystem.RecordHuntDamage(huntDamage);
+                    huntDamage = 0;
+                }
+            };
 
-            Debug.Log("[LegendsRPG] Prototype booted. Team=" + team.Heroes.Count +
-                      " heroes, Floor=" + tower.CurrentFloor +
-                      ", SavePath=" + SaveSystem.GetSavePathForDocs());
+            // AUTO (auto skills) ON by default — the player can switch it off to
+            // fire the ultimates manually from the portraits
+            auto.SetEnabled(true);
+
+            // ============ 14) start in the city ============
+            gm.SetState(GameManager.GameState.City);
+            CityBuilder.ApplyCityMood();
+
+            // welcome the new player
+            if (SaveSystem.Current.playerLevel <= 1 && CampaignSystem.ClearedStageCount() == 0)
+            {
+                ui.Notify("Welcome, " + PlayerProfile.Name + "! Tap the glowing buildings to begin.");
+            }
+
+            Debug.Log("[LegendsRPG] v1.0 booted. Heroes=" + team.Heroes.Count +
+                      "/" + SaveSystem.Current.unlockedHeroIds.Count +
+                      ", Gold=" + Economy.Gold + ", Dia=" + Economy.Diamonds +
+                      ", Campaign=" + CampaignSystem.ClearedStageCount() +
+                      ", Guild=" + (GuildSystem.InGuild ? GuildSystem.GuildName : "none") +
+                      ", Save=" + SaveSystem.GetSavePathForDocs());
+        }
+
+        /// <summary>Guild hunt boss scales with guild level so hunts stay relevant.</summary>
+        private static MonsterData MakeGuildBoss()
+        {
+            var m = ScriptableObject.CreateInstance<MonsterData>();
+            m.monsterId = "guild_hunt_boss";
+            m.displayName = "Ember Titan";
+            m.element = ElementType.Fire;
+            m.isBoss = true;
+            m.baseHP = 420f;
+            m.baseAttack = 26f;
+            m.baseDefense = 14f;
+            m.moveSpeed = 2.8f;
+            m.attackSpeed = 0.7f;
+            m.attackRange = 3f;
+            m.scale = 2.6f;
+            m.expReward = 200f;
+            m.primaryColor = new Color(0.95f, 0.4f, 0.15f);
+            m.secondaryColor = new Color(0.25f, 0.2f, 0.18f);
+            m.aggroRadius = 30f;
+            m.attackVfxKey = "explosion";
+            return m;
         }
     }
 }

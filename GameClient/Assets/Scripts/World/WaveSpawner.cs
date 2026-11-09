@@ -16,6 +16,19 @@ namespace LegendsRPG.World
     {
         public event Action<int, bool> WaveStarted;   // (count, isBossFloor)
 
+        // ---- v1.0 battle-session overrides ----
+        public static Vector3 ArenaCenter = new Vector3(0f, 0f, 600f);
+        public string ForcedMonsterKey = "";
+        public int ForcedMonsterCount = 0;
+        public float ExtraHpScale = 1f;
+        public float ExtraAtkScale = 1f;
+
+        /// <summary>Registers a runtime MonsterData (e.g. arena shadows, guild boss).</summary>
+        public void AddMonster(MonsterData data)
+        {
+            if (_monsters != null && data != null) _monsters[data.monsterId] = data;
+        }
+
         private readonly List<MonsterCharacter> _alive = new List<MonsterCharacter>();
         private Dictionary<string, MonsterData> _monsters;
         private Transform _container;
@@ -35,24 +48,28 @@ namespace LegendsRPG.World
 
             ClearLeftovers();
 
-            bool bossFloor = tower.CurrentFloor % GameConfig.BossEveryNFloors == 0;
-            int count = bossFloor ? 2 : Mathf.Min(3 + (tower.CurrentFloor - 1) / 4, 9);
+            bool bossFloor = tower.CurrentFloor % GameConfig.BossEveryNFloors == 0 || !string.IsNullOrEmpty(ForcedMonsterKey);
+            int count = ForcedMonsterCount > 0 ? ForcedMonsterCount
+                : bossFloor ? 2 : Mathf.Min(3 + (tower.CurrentFloor - 1) / 4, 9);
 
             _clearing = false;
             _alive.Clear();
             _waveActive = true;
 
-            string[] pool = { "goblin", "wolf", "shaman", "golem", "wraith" };
+            string[] pool = { "goblin", "wolf", "shaman", "golem", "wraith",
+                              "storm_hawk", "coral_crab", "vine_spider", "sun_eagle" };
 
             for (int i = 0; i < count; i++)
             {
                 float angle = (i * 360f / count + tower.CurrentFloor * 17f) * Mathf.Deg2Rad;
                 float radius = bossFloor ? 6f : 9f + (i % 3) * 1.6f;
-                Vector3 pos = new Vector3(Mathf.Sin(angle) * radius, 0f, Mathf.Cos(angle) * radius);
+                Vector3 pos = ArenaCenter + new Vector3(Mathf.Sin(angle) * radius, 0f, Mathf.Cos(angle) * radius);
 
-                string key = bossFloor
-                    ? (tower.CurrentFloor % 20 == 0 ? "boss_lich" : "boss_titan")
-                    : pool[(tower.CurrentFloor + i) % pool.Length];
+                string key = !string.IsNullOrEmpty(ForcedMonsterKey)
+                    ? ForcedMonsterKey
+                    : bossFloor
+                        ? (tower.CurrentFloor % 20 == 0 ? "boss_lich" : "boss_titan")
+                        : pool[(tower.CurrentFloor + i) % pool.Length];
 
                 SpawnMonster(key, pos);
             }
@@ -70,8 +87,9 @@ namespace LegendsRPG.World
 
             var go = new GameObject("MonsterRoot");
             var m = go.AddComponent<MonsterCharacter>();
-            m.Setup(data, TowerSystem.CurrentHpScale, TowerSystem.CurrentAtkScale,
-                TowerSystem.CurrentExpScale, pos);
+            float hpS = TowerSystem.CurrentHpScale * ExtraHpScale;
+            float atkS = TowerSystem.CurrentAtkScale * ExtraAtkScale;
+            m.Setup(data, hpS, atkS, TowerSystem.CurrentExpScale, pos);
             go.transform.SetParent(_container, false);
 
             m.MonsterDied += OnMonsterDied;
