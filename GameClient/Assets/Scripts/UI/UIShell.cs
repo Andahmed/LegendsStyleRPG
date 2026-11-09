@@ -118,46 +118,48 @@ namespace LegendsRPG.UI
 
         /// <summary>Full-width button laid out inside rows.</summary>
         public static Button CreateRowButton(Transform parent, string label, UnityAction onClick,
-            Color color, float height = 84f, float width = 320f, int fontSize = 30)
-        {
-            var go = new GameObject("Btn_" + label);
-            var rt = go.AddComponent<RectTransform>();
-            rt.SetParent(parent, false);
+    Color color, float height = 84f, float width = 320f, int fontSize = 30)
+{
+    var go = new GameObject("Btn_" + label);
+    var rt = go.AddComponent<RectTransform>();
+    rt.SetParent(parent, false);
 
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.preferredHeight = height;
+    var le = go.AddComponent<LayoutElement>();
+    le.preferredWidth = width;
+    le.preferredHeight = height;
 
-            var img = go.AddComponent<Image>();
-            img.sprite = UIBuilder.SolidSprite;
-            img.color = color;
-            img.raycastTarget = true;
+    var img = go.AddComponent<Image>();
+    img.sprite = UIBuilder.SolidSprite;
+    img.color = color;
+    img.raycastTarget = true;
 
-            var btn = go.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.highlightedColor = color * 1.25f;
-            colors.pressedColor = color * 0.8f;
-            btn.colors = colors;
-            if (onClick != null) btn.onClick.AddListener(onClick);
+    var btn = go.AddComponent<Button>();
+    btn.targetGraphic = img;
+    var colors = btn.colors;
+    colors.normalColor = Color.white;
+    colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+    colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+    btn.colors = colors;
+    if (onClick != null) btn.onClick.AddListener(onClick);
 
-            var labelObject = new GameObject("Label");
-            var labelRect = labelObject.AddComponent<RectTransform>();
-            labelRect.SetParent(rt, false);
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = Vector2.zero;
-            labelRect.offsetMax = Vector2.zero;
+    var lgo = new GameObject("Label");
+    var lrt = lgo.AddComponent<RectTransform>();
+    lrt.SetParent(rt, false);
+    lrt.anchorMin = Vector2.zero;
+    lrt.anchorMax = Vector2.one;
+    lrt.offsetMin = Vector2.zero;
+    lrt.offsetMax = Vector2.zero;
 
-            var t = labelObject.AddComponent<Text>();
-            t.font = UIBuilder.BuiltinFont;
-            t.text = label;
-            t.fontSize = fontSize;
-            t.color = Color.white;
-            t.alignment = TextAnchor.MiddleCenter;
-            t.raycastTarget = false;
+    var t = lgo.AddComponent<Text>();
+    t.font = UIBuilder.BuiltinFont;
+    t.text = label;
+    t.fontSize = fontSize;
+    t.color = Color.white;
+    t.alignment = TextAnchor.MiddleCenter;
+    t.raycastTarget = false;
 
-            return btn;
-        }
+    return btn;
+}
 
         public static Text AddChildText(RectTransform parent, string name, string value, int size,
             Color color, TextAnchor align, bool expand = false, float width = 240f)
