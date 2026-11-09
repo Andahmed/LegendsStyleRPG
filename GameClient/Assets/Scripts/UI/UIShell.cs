@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using LegendsRPG.Core;
 using LegendsRPG.Team;
 using LegendsRPG.World;
+using LegendsRPG.Audio;
 
 namespace LegendsRPG.UI
 {
@@ -21,17 +22,22 @@ namespace LegendsRPG.UI
         {
             var root = UIBuilder.CreatePanel(parent, name, new Color(0, 0, 0, 0), anchorMin, anchorMax, offsetMin, offsetMax);
 
-            var img = root.gameObject.AddComponent<Image>();
-            img.sprite = UIBuilder.SolidSprite;
-            img.color = new Color(0, 0, 0, 0);
-            img.raycastTarget = true;
+            // CreatePanel already adds an Image; configure it instead of
+            // adding a second Graphic to the same GameObject.
+            var img = root.GetComponent<Image>();
+            if (img != null)
+            {
+                img.sprite = UIBuilder.SolidSprite;
+                img.color = new Color(0, 0, 0, 0);
+                img.raycastTarget = true;
+            }
 
             var scroll = root.gameObject.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity = 24f;
 
-            var mask = root.gameObject.AddComponent<RectMask2D>();
+            root.gameObject.AddComponent<RectMask2D>();
 
             var content = new GameObject("Content");
             var rt = content.AddComponent<RectTransform>();
@@ -252,7 +258,12 @@ namespace LegendsRPG.UI
 
         private static void DestroySafe(GameObject go)
         {
-            if (Application.isPlaying) UnityEngine.Object.Destroy(go);
+            if (go == null) return;
+
+            if (Application.isPlaying)
+                UnityEngine.Object.Destroy(go);
+            else
+                UnityEngine.Object.DestroyImmediate(go);
         }
     }
 
@@ -280,11 +291,25 @@ namespace LegendsRPG.UI
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
         }
 
         public void BuildAll()
         {
+            // Prevent duplicate canvases and UI event subscriptions.
+            if (_screenCanvas != null) return;
+
             var canvas = UIBuilder.CreateCanvas("ScreenCanvas");
             canvas.sortingOrder = 10;  // full-screen panels above everything
             _screenCanvas = canvas.transform;
@@ -355,11 +380,11 @@ namespace LegendsRPG.UI
 
         public void OpenGuildTab(string tab)
         {
-            var gs = _screens["guild"] as GuildScreen;
-            if (gs != null)
-            {
-                gs.RequestTab(tab);
-            }
+            ScreenBase screen;
+            var gs = _screens.TryGetValue("guild", out screen) ? screen as GuildScreen : null;
+            if (gs == null) return;
+
+            gs.RequestTab(tab);
             Open("guild");
         }
 
@@ -371,13 +396,16 @@ namespace LegendsRPG.UI
             if (_current != null && _current != s) _current.Close();
             _current = s;
             s.Open();
-            Audio.AudioSystem.Play("Open");
+            AudioSystem.Play("Open");
         }
 
         public void OpenHeroDetail(string heroId)
         {
-            var hd = _screens["hero_detail"] as HeroDetailScreen;
-            if (hd != null) hd.SetHero(heroId);
+            ScreenBase screen;
+            var hd = _screens.TryGetValue("hero_detail", out screen) ? screen as HeroDetailScreen : null;
+            if (hd == null) return;
+
+            hd.SetHero(heroId);
             Open("hero_detail");
         }
 
@@ -388,7 +416,7 @@ namespace LegendsRPG.UI
                 _current.Close();
                 _current = null;
             }
-            Audio.AudioSystem.Play("UI");
+            AudioSystem.Play("UI");
         }
 
         public void CloseAll()
@@ -448,7 +476,8 @@ namespace LegendsRPG.UI
                 new Vector2(0.5f, 0.5f), new Vector2(-210f, -160f), new Color(0.16f, 0.5f, 0.3f, 0.98f),
                 Color.white, 40, () =>
                 {
-                    _resultPanel.gameObject.SetActive(false);
+                    if (_resultPanel != null) _resultPanel.gameObject.SetActive(false);
+                    ExitBattleMode();
                 });
 
             _resultRetryBtn = UIBuilder.CreateButton(_resultPanel, "RetryBtn", "RETRY", new Vector2(380f, 120f),
@@ -462,9 +491,16 @@ namespace LegendsRPG.UI
 
         public void ShowBattleResult(bool win, string title, string[] lines)
         {
+            if (_resultPanel == null || _resultTitle == null || _resultLines == null ||
+                _resultRetryBtn == null) return;
+
             _resultTitle.text = win ? "VICTORY!" : "DEFEAT";
             _resultTitle.color = win ? new Color(1f, 0.85f, 0.3f) : new Color(0.95f, 0.4f, 0.35f);
-            _resultLines.text = (string.IsNullOrEmpty(title) ? "" : title + "\n\n") + string.Join("\n", lines);
+
+            string resultDetails = lines == null || lines.Length == 0
+                ? string.Empty
+                : string.Join("\n", lines);
+            _resultLines.text = (string.IsNullOrEmpty(title) ? "" : title + "\n\n") + resultDetails;
             _resultRetryBtn.gameObject.SetActive(true);
             _resultPanel.gameObject.SetActive(true);
             _resultPanel.SetAsLastSibling();
