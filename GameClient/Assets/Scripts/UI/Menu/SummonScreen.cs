@@ -17,7 +17,7 @@ namespace LegendsRPG.UI
     /// Results appear on a full-screen overlay and flip open one card at a time
     /// (unscaled time — the battle is paused while any menu is open).
     /// </summary>
-    public static class SummonScreen
+    public static class MenuSummonScreen
     {
         private static int _banner = (int)BannerId.Advanced;
         private static MenuController _menu;
