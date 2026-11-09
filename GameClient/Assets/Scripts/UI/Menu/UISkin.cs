@@ -86,6 +86,9 @@ namespace LegendsRPG.UI
         /// <summary>Assigns a skin sprite as a 9-slice and keeps its borders at a sensible on-screen size.</summary>
         public static void Apply(Image img, Sprite sprite, float targetBorderPx = 26f)
         {
+            // Missing optional art should leave the existing UI unchanged.
+            if (img == null || sprite == null) return;
+
             img.sprite = sprite;
             img.type = Image.Type.Sliced;
             float b = Mathf.Max(sprite.border.x, sprite.border.w);
