@@ -140,7 +140,15 @@ namespace LegendsRPG.UI
             btn.colors = colors;
             if (onClick != null) btn.onClick.AddListener(onClick);
 
-            var t = go.AddComponent<Text>();
+            var labelObject = new GameObject("Label");
+            var labelRect = labelObject.AddComponent<RectTransform>();
+            labelRect.SetParent(rt, false);
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+
+            var t = labelObject.AddComponent<Text>();
             t.font = UIBuilder.BuiltinFont;
             t.text = label;
             t.fontSize = fontSize;
