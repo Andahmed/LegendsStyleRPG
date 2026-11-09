@@ -176,6 +176,30 @@ namespace LegendsRPG.Core
             public int pullsWithoutEpic = 0;
             public int pullsWithoutLegendary = 0;
             public int totalPulls = 0;
+
+            // legacy (menu UI / Inventory / DailyMissions / DailyShop / Equipment / Gacha / Idle)
+            public int gems = 0;
+            public List<string> itemIds = new List<string>();
+            public List<int> itemCounts = new List<int>();
+            public string dayKey = "";
+            public List<int> missionProgress = new List<int>();
+            public List<int> missionClaimed = new List<int>();
+            public List<string> shopKeys = new List<string>();
+            public List<int> shopCounts = new List<int>();
+            public int merchantBoughtCount = 0;
+            public List<string> levelHeroIds = new List<string>();
+            public List<int> levelValues = new List<int>();
+            public List<string> equipHero = new List<string>();
+            public List<int> equipSlot = new List<int>();
+            public List<string> equipItem = new List<string>();
+            public List<int> gachaPity = new List<int>();
+            public int gachaTotalPulls = 0;
+            public string wishElement = "";
+            public List<string> teamLoadout = new List<string>();
+            public int idlePendingGold = 0;
+            public int idlePendingExp = 0;
+            public int idlePendingSeconds = 0;
+            public string idleLastUtc = "";
         }
 
         private static string FilePath
@@ -245,6 +269,23 @@ namespace LegendsRPG.Core
             if (Current.campaignStars == null) Current.campaignStars = new List<CampaignStarSave>();
             if (Current.continentStars == null) Current.continentStars = new List<CampaignStarSave>();
             if (Current.beasts == null) Current.beasts = new List<BeastSave>();
+            if (Current.itemIds == null) Current.itemIds = new List<string>();
+            if (Current.itemCounts == null) Current.itemCounts = new List<int>();
+            if (Current.missionProgress == null) Current.missionProgress = new List<int>();
+            if (Current.missionClaimed == null) Current.missionClaimed = new List<int>();
+            if (Current.shopKeys == null) Current.shopKeys = new List<string>();
+            if (Current.shopCounts == null) Current.shopCounts = new List<int>();
+            if (Current.levelHeroIds == null) Current.levelHeroIds = new List<string>();
+            if (Current.levelValues == null) Current.levelValues = new List<int>();
+            if (Current.equipHero == null) Current.equipHero = new List<string>();
+            if (Current.equipSlot == null) Current.equipSlot = new List<int>();
+            if (Current.equipItem == null) Current.equipItem = new List<string>();
+            if (Current.gachaPity == null) Current.gachaPity = new List<int>();
+            while (Current.gachaPity.Count < 3) Current.gachaPity.Add(0);
+            if (Current.teamLoadout == null) Current.teamLoadout = new List<string>();
+            if (Current.dayKey == null) Current.dayKey = "";
+            if (Current.wishElement == null) Current.wishElement = "";
+            if (Current.idleLastUtc == null) Current.idleLastUtc = "";
 
             if (Current.gold <= 0) Current.gold = 2500;
             if (Current.diamonds <= 0) Current.diamonds = 600;
