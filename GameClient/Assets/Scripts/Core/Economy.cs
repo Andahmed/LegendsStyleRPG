@@ -100,7 +100,7 @@ namespace LegendsRPG.Core
     {
         public static event Action Changed;
 
-        public static int Gold { get { return SaveSystem.Current.gold; } }
+        public static int Gold { get { return (int)System.Math.Min(SaveSystem.Current.gold, (long)int.MaxValue); } }
         public static int Gems { get { return SaveSystem.Current.gems; } }
 
         public static void MigrateAndSeed()

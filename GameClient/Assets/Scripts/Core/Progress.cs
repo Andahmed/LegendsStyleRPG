@@ -40,7 +40,7 @@ namespace LegendsRPG.Core
             long real = (long)Mathf.CeilToInt(amount * GoldBonus);
             Gold += real;
             LifetimeGoldEarned += real;
-            QuestSystem.ReportProgress("earn_gold", real);
+            QuestSystem.ReportProgress("earn_gold", (int)Math.Min(real, (long)int.MaxValue));
             Notify(source + " +" + Format(real) + " Gold");
         }
 

@@ -26,7 +26,7 @@ namespace LegendsRPG.Characters
     public static class CharacterBodyFactory
     {
         public static BodyRefs Build(GameObject root, ElementType element, bool isHero,
-            float scale, Color primary, Color secondary)
+            float scale, Color primary, Color secondary, string artSlot = null)
         {
             var refs = new BodyRefs();
             var bodyMat = MaterialLibrary.Solid(primary, 0.35f, 0.15f);

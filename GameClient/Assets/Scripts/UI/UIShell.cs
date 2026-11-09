@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using LegendsRPG.Core;
 using LegendsRPG.Team;
 using LegendsRPG.World;
+using LegendsRPG.Audio;
 
 namespace LegendsRPG.UI
 {
@@ -21,17 +22,22 @@ namespace LegendsRPG.UI
         {
             var root = UIBuilder.CreatePanel(parent, name, new Color(0, 0, 0, 0), anchorMin, anchorMax, offsetMin, offsetMax);
 
-            var img = root.gameObject.AddComponent<Image>();
-            img.sprite = UIBuilder.SolidSprite;
-            img.color = new Color(0, 0, 0, 0);
-            img.raycastTarget = true;
+            // CreatePanel already adds an Image; configure it instead of
+            // adding a second Graphic to the same GameObject.
+            var img = root.GetComponent<Image>();
+            if (img != null)
+            {
+                img.sprite = UIBuilder.SolidSprite;
+                img.color = new Color(0, 0, 0, 0);
+                img.raycastTarget = true;
+            }
 
             var scroll = root.gameObject.AddComponent<ScrollRect>();
             scroll.horizontal = false;
             scroll.movementType = ScrollRect.MovementType.Clamped;
             scroll.scrollSensitivity = 24f;
 
-            var mask = root.gameObject.AddComponent<RectMask2D>();
+            root.gameObject.AddComponent<RectMask2D>();
 
             var content = new GameObject("Content");
             var rt = content.AddComponent<RectTransform>();
@@ -74,7 +80,7 @@ namespace LegendsRPG.UI
 
             var layout = row.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleLeft;
-            layout.childControlWidth = false;
+            layout.childControlWidth = true;
             layout.childControlHeight = true;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
@@ -112,38 +118,48 @@ namespace LegendsRPG.UI
 
         /// <summary>Full-width button laid out inside rows.</summary>
         public static Button CreateRowButton(Transform parent, string label, UnityAction onClick,
-            Color color, float height = 84f, float width = 320f, int fontSize = 30)
-        {
-            var go = new GameObject("Btn_" + label);
-            var rt = go.AddComponent<RectTransform>();
-            rt.SetParent(parent, false);
+    Color color, float height = 84f, float width = 320f, int fontSize = 30)
+{
+    var go = new GameObject("Btn_" + label);
+    var rt = go.AddComponent<RectTransform>();
+    rt.SetParent(parent, false);
 
-            var le = go.AddComponent<LayoutElement>();
-            le.preferredWidth = width;
-            le.preferredHeight = height;
+    var le = go.AddComponent<LayoutElement>();
+    le.preferredWidth = width;
+    le.preferredHeight = height;
 
-            var img = go.AddComponent<Image>();
-            img.sprite = UIBuilder.SolidSprite;
-            img.color = color;
-            img.raycastTarget = true;
+    var img = go.AddComponent<Image>();
+    img.sprite = UIBuilder.SolidSprite;
+    img.color = color;
+    img.raycastTarget = true;
 
-            var btn = go.AddComponent<Button>();
-            var colors = btn.colors;
-            colors.highlightedColor = color * 1.25f;
-            colors.pressedColor = color * 0.8f;
-            btn.colors = colors;
-            if (onClick != null) btn.onClick.AddListener(onClick);
+    var btn = go.AddComponent<Button>();
+    btn.targetGraphic = img;
+    var colors = btn.colors;
+    colors.normalColor = Color.white;
+    colors.highlightedColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+    colors.pressedColor = new Color(0.7f, 0.7f, 0.7f, 1f);
+    btn.colors = colors;
+    if (onClick != null) btn.onClick.AddListener(onClick);
 
-            var t = go.AddComponent<Text>();
-            t.font = UIBuilder.BuiltinFont;
-            t.text = label;
-            t.fontSize = fontSize;
-            t.color = Color.white;
-            t.alignment = TextAnchor.MiddleCenter;
-            t.raycastTarget = false;
+    var lgo = new GameObject("Label");
+    var lrt = lgo.AddComponent<RectTransform>();
+    lrt.SetParent(rt, false);
+    lrt.anchorMin = Vector2.zero;
+    lrt.anchorMax = Vector2.one;
+    lrt.offsetMin = Vector2.zero;
+    lrt.offsetMax = Vector2.zero;
 
-            return btn;
-        }
+    var t = lgo.AddComponent<Text>();
+    t.font = UIBuilder.BuiltinFont;
+    t.text = label;
+    t.fontSize = fontSize;
+    t.color = Color.white;
+    t.alignment = TextAnchor.MiddleCenter;
+    t.raycastTarget = false;
+
+    return btn;
+}
 
         public static Text AddChildText(RectTransform parent, string name, string value, int size,
             Color color, TextAnchor align, bool expand = false, float width = 240f)
@@ -252,7 +268,12 @@ namespace LegendsRPG.UI
 
         private static void DestroySafe(GameObject go)
         {
-            if (Application.isPlaying) UnityEngine.Object.Destroy(go);
+            if (go == null) return;
+
+            if (Application.isPlaying)
+                UnityEngine.Object.Destroy(go);
+            else
+                UnityEngine.Object.DestroyImmediate(go);
         }
     }
 
@@ -280,11 +301,25 @@ namespace LegendsRPG.UI
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
         }
 
         public void BuildAll()
         {
+            // Prevent duplicate canvases and UI event subscriptions.
+            if (_screenCanvas != null) return;
+
             var canvas = UIBuilder.CreateCanvas("ScreenCanvas");
             canvas.sortingOrder = 10;  // full-screen panels above everything
             _screenCanvas = canvas.transform;
@@ -355,11 +390,11 @@ namespace LegendsRPG.UI
 
         public void OpenGuildTab(string tab)
         {
-            var gs = _screens["guild"] as GuildScreen;
-            if (gs != null)
-            {
-                gs.RequestTab(tab);
-            }
+            ScreenBase screen;
+            var gs = _screens.TryGetValue("guild", out screen) ? screen as GuildScreen : null;
+            if (gs == null) return;
+
+            gs.RequestTab(tab);
             Open("guild");
         }
 
@@ -371,13 +406,16 @@ namespace LegendsRPG.UI
             if (_current != null && _current != s) _current.Close();
             _current = s;
             s.Open();
-            Audio.AudioSystem.Play("Open");
+            AudioSystem.Play("Open");
         }
 
         public void OpenHeroDetail(string heroId)
         {
-            var hd = _screens["hero_detail"] as HeroDetailScreen;
-            if (hd != null) hd.SetHero(heroId);
+            ScreenBase screen;
+            var hd = _screens.TryGetValue("hero_detail", out screen) ? screen as HeroDetailScreen : null;
+            if (hd == null) return;
+
+            hd.SetHero(heroId);
             Open("hero_detail");
         }
 
@@ -388,7 +426,7 @@ namespace LegendsRPG.UI
                 _current.Close();
                 _current = null;
             }
-            Audio.AudioSystem.Play("UI");
+            AudioSystem.Play("UI");
         }
 
         public void CloseAll()
@@ -448,7 +486,8 @@ namespace LegendsRPG.UI
                 new Vector2(0.5f, 0.5f), new Vector2(-210f, -160f), new Color(0.16f, 0.5f, 0.3f, 0.98f),
                 Color.white, 40, () =>
                 {
-                    _resultPanel.gameObject.SetActive(false);
+                    if (_resultPanel != null) _resultPanel.gameObject.SetActive(false);
+                    ExitBattleMode();
                 });
 
             _resultRetryBtn = UIBuilder.CreateButton(_resultPanel, "RetryBtn", "RETRY", new Vector2(380f, 120f),
@@ -462,9 +501,16 @@ namespace LegendsRPG.UI
 
         public void ShowBattleResult(bool win, string title, string[] lines)
         {
+            if (_resultPanel == null || _resultTitle == null || _resultLines == null ||
+                _resultRetryBtn == null) return;
+
             _resultTitle.text = win ? "VICTORY!" : "DEFEAT";
             _resultTitle.color = win ? new Color(1f, 0.85f, 0.3f) : new Color(0.95f, 0.4f, 0.35f);
-            _resultLines.text = (string.IsNullOrEmpty(title) ? "" : title + "\n\n") + string.Join("\n", lines);
+
+            string resultDetails = lines == null || lines.Length == 0
+                ? string.Empty
+                : string.Join("\n", lines);
+            _resultLines.text = (string.IsNullOrEmpty(title) ? "" : title + "\n\n") + resultDetails;
             _resultRetryBtn.gameObject.SetActive(true);
             _resultPanel.gameObject.SetActive(true);
             _resultPanel.SetAsLastSibling();
@@ -735,7 +781,7 @@ namespace LegendsRPG.UI
             var pending = AFKReward.Pending();
             _afkText.text = Economy.Format(pending.gold) + " gold  •  " + pending.diamonds + " dia  •  " +
                             Economy.Format(pending.exp) + " xp";
-            _afkFill.sizeDelta = new Vector2(380f * AFKReward.CapRatio(), 0f);
+            _afkFill.rectTransform.sizeDelta = new Vector2(380f * AFKReward.CapRatio(), 0f);
 
             _signinDot.text = SignInSystem.CanClaimToday() ? "!" : "";
             _questDot.text = QuestSystem.ClaimableCount() > 0 ? "!" : "";

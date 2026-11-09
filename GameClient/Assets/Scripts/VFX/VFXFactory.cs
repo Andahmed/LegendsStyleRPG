@@ -276,7 +276,8 @@ namespace LegendsRPG.Vfx
             em.SetBursts(new[] { new ParticleSystem.Burst(0f, count) });
 
             var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Cylinder;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 0f;
             shape.radius = 0.5f;
         }
 

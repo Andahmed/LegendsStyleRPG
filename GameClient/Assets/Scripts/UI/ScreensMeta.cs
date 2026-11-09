@@ -450,7 +450,7 @@ namespace LegendsRPG.UI
             if (_listContent == null) return;
             for (int i = _listContent.childCount - 1; i >= 0; i--)
             {
-                Object.Destroy(_listContent.GetChild(i).gameObject);
+                UnityEngine.Object.Destroy(_listContent.GetChild(i).gameObject);
             }
 
             var channel = _channel == 0 ? ChatSystem.World : ChatSystem.Guild;

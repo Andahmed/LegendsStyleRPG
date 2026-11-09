@@ -19,8 +19,8 @@ namespace LegendsRPG.Cam
     {
         public Transform Target;
 
-        private float _yaw = GameConfig.CameraDefaultYaw;
-        private float _pitch = GameConfig.CameraDefaultPitch;
+        private float _yaw = LegendsRPG.Core.GameConfig.CameraDefaultYaw;
+        private float _pitch = LegendsRPG.Core.GameConfig.CameraDefaultPitch;
         private float _distance = 13f;
         private float _zoomInput;
         private bool _snapNext;
@@ -66,8 +66,8 @@ namespace LegendsRPG.Cam
         /// <summary>HUD "reset" button: back to the default isometric angle and zoom.</summary>
         public void ResetView()
         {
-            _yaw = GameConfig.CameraDefaultYaw;
-            _pitch = GameConfig.CameraDefaultPitch;
+            _yaw = LegendsRPG.Core.GameConfig.CameraDefaultYaw;
+            _pitch = LegendsRPG.Core.GameConfig.CameraDefaultPitch;
             _distance = 13f;
             Audio.AudioSystem.Play("UI");
         }
@@ -81,7 +81,7 @@ namespace LegendsRPG.Cam
         private void LateUpdate()
         {
             // consume queued zoom
-            _distance = Mathf.Clamp(_distance + _zoomInput, GameConfig.CameraMinDistance, GameConfig.CameraMaxDistance);
+            _distance = Mathf.Clamp(_distance + _zoomInput, LegendsRPG.Core.GameConfig.CameraMinDistance, LegendsRPG.Core.GameConfig.CameraMaxDistance);
             _zoomInput = 0f;
 
             if (Target == null) return;
@@ -90,7 +90,7 @@ namespace LegendsRPG.Cam
             Vector3 focus = Target.position + Vector3.up * 1.6f;
             Vector3 desired = focus + dir * _distance;
             // unscaled: screens pause the game (Time.timeScale = 0) — the camera must still follow
-            float lerp = _snapNext ? 1f : 1f - Mathf.Exp(-GameConfig.CameraFollowLerp * Time.unscaledDeltaTime);
+            float lerp = _snapNext ? 1f : 1f - Mathf.Exp(-LegendsRPG.Core.GameConfig.CameraFollowLerp * Time.unscaledDeltaTime);
             _snapNext = false;
             transform.position = Vector3.Lerp(transform.position, desired, lerp);
 

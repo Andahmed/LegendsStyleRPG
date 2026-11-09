@@ -32,8 +32,8 @@ namespace LegendsRPG.Characters
         public float MoveSpeed = 5f;
         public float AttackSpeed = 1f;     // attacks per second
         public float AttackRange = 2.2f;
-        public float CritChance = GameConfig.CritDefaultChance;
-        public float CritDamage = GameConfig.CritDefaultDamage;
+        public float CritChance = LegendsRPG.Core.GameConfig.CritDefaultChance;
+        public float CritDamage = LegendsRPG.Core.GameConfig.CritDefaultDamage;
 
         [NonSerialized] public List<StatBonus> EquipmentBonuses = new List<StatBonus>();
 
@@ -77,7 +77,7 @@ namespace LegendsRPG.Characters
         // ---- EXP / levels ----
         public static float NeededExp(int level)
         {
-            return GameConfig.ExpBase * Mathf.Pow(level, GameConfig.ExpGrowth);
+            return LegendsRPG.Core.GameConfig.ExpBase * Mathf.Pow(level, LegendsRPG.Core.GameConfig.ExpGrowth);
         }
 
         public void GrantExp(float amount)

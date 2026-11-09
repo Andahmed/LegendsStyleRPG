@@ -41,6 +41,38 @@ namespace LegendsRPG.UI
             }
         }
 
+        private static Sprite _rounded;
+
+        public static Sprite RoundedSprite
+        {
+            get
+            {
+                if (_rounded == null)
+                {
+                    const int size = 64;
+                    const int r = 16;
+                    var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                    tex.wrapMode = TextureWrapMode.Clamp;
+                    tex.filterMode = FilterMode.Bilinear;
+                    for (int y = 0; y < size; y++)
+                    {
+                        for (int x = 0; x < size; x++)
+                        {
+                            float cx = Mathf.Clamp(x, r, size - 1 - r);
+                            float cy = Mathf.Clamp(y, r, size - 1 - r);
+                            float d = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+                            float a = Mathf.Clamp01(r - d + 0.5f);
+                            tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                        }
+                    }
+                    tex.Apply();
+                    _rounded = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f),
+                        100f, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
+                }
+                return _rounded;
+            }
+        }
+
         public static Canvas CreateCanvas(string name)
         {
             var go = new GameObject(name);

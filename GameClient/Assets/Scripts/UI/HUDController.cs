@@ -358,6 +358,11 @@ namespace LegendsRPG.UI
         }
 
         /// <summary>City mode hides the whole battle HUD; battle mode shows it (and resets the timer).</summary>
+        public void SetVisible(bool visible)
+        {
+            if (_canvas != null) _canvas.gameObject.SetActive(visible);
+        }
+
         public void SetBattleHudVisible(bool visible, string title)
         {
             if (_canvas != null) _canvas.gameObject.SetActive(visible);
@@ -390,7 +395,7 @@ namespace LegendsRPG.UI
             if (GameManager.Instance == null || GameManager.Instance.Tower == null) return;
             var tower = GameManager.Instance.Tower;
             if (_floorText != null) _floorText.text = "Floor " + tower.CurrentFloor;
-            if (_difficultyText != null) _difficultyText.text = TowerSystem.DifficultyName(tower.Difficulty).ToUpper();
+            if (_difficultyText != null) _difficultyText.text = World.TowerSystem.DifficultyName(tower.Difficulty).ToUpper();
 
             _fpsRefresh += Time.unscaledDeltaTime;
             if (_fpsRefresh >= 0.5f)

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using LegendsRPG.InputCtl;
 using LegendsRPG.Audio;
 using LegendsRPG.Cam;
 using LegendsRPG.Characters;

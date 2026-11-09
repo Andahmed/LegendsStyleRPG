@@ -111,6 +111,16 @@ namespace LegendsRPG.Characters
             }
         }
 
+        public void ManualTick(Vector2 stick, bool attack)
+        {
+            if (HP == null || HP.IsDead) return;
+            bool moving = stick.sqrMagnitude > 0.01f;
+            if (moving) Motor.Move(new Vector3(stick.x, 0f, stick.y).normalized, Stats.MoveSpeed);
+            else Motor.Stop();
+            Anim.SetMoving(moving);
+            if (attack) TryBasicAttack();
+        }
+
         public bool TryBasicAttack()
         {
             if (_attackCooldown > 0f) return false;
