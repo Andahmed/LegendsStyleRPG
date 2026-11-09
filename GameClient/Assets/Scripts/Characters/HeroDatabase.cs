@@ -10,6 +10,17 @@ namespace LegendsRPG.Characters
     /// </summary>
     public static class HeroDatabase
     {
+        private static List<HeroData> _allHeroes;
+
+        public static List<HeroData> AllHeroes
+        {
+            get
+            {
+                if (_allHeroes == null) _allHeroes = CreateDefaultRoster();
+                return _allHeroes;
+            }
+        }
+
         public static List<HeroData> CreateDefaultRoster()
         {
             var list = new List<HeroData>();
