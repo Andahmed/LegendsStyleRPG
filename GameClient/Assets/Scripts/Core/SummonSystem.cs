@@ -148,7 +148,7 @@ namespace LegendsRPG.Core
             HeroData data = null;
             foreach (var h in roster) if (h.heroId == heroId) { data = h; break; }
 
-            CombatEvents.RaiseNotification("NEW HERO: " + (data != null ? data.displayName : heroId));
+            Combat.CombatEvents.RaiseNotification("NEW HERO: " + (data != null ? data.displayName : heroId));
             Audio.AudioSystem.Play("Fanfare");
             OnChanged?.Invoke();
         }
