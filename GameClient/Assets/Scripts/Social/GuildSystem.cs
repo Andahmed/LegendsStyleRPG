@@ -389,7 +389,7 @@ namespace LegendsRPG.Social
             GuildLevel = Mathf.Max(1, s.guildLevel);
             GuildFunds = Math.Max(0, s.guildFunds);
             HuntBossMaxHp = Math.Max(100000, s.huntBossMaxHp);
-            HuntBossHp = Mathf.Clamp(s.huntBossHp, 0, HuntBossMaxHp);
+            HuntBossHp = Math.Min(Math.Max(0L, s.huntBossHp), HuntBossMaxHp);
             TechAttack = Mathf.Max(0, s.guildTechA);
             TechDefense = Mathf.Max(0, s.guildTechD);
             TechHp = Mathf.Max(0, s.guildTechH);
