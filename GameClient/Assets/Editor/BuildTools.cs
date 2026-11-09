@@ -6,7 +6,7 @@ using UnityEngine;
 namespace LegendsRPG.EditorTools
 {
     /// <summary>
-    /// v1.1: CI-friendly build entry points for Unity Cloud Build (Build
+    /// v1.2: CI-friendly build entry points for Unity Cloud Build (Build
     /// Automation) and local batchmode builds — no editor window needed.
     ///
     /// Unity Cloud Build setup:
@@ -19,7 +19,7 @@ namespace LegendsRPG.EditorTools
     public static class BuildTools
     {
         private const string OutputDir = "Builds/Android";
-        private const string ApkName = "LegendsRPG-v1.1.0.apk";
+        private const string ApkName = "LegendsRPG-v1.2.0.apk";
 
         /// <summary>
         /// Cloud Build "Pre-export method": guarantees the Boot scene exists and
@@ -80,8 +80,8 @@ namespace LegendsRPG.EditorTools
         {
             PlayerSettings.companyName = "LegendsStyleRPG";
             PlayerSettings.productName = "Legends Reborn Style RPG";
-            PlayerSettings.bundleVersion = "1.1.0";
-            PlayerSettings.Android.bundleVersionCode = 12;
+            PlayerSettings.bundleVersion = "1.2.0";
+            PlayerSettings.Android.bundleVersionCode = 13;
 
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.legends.stylerpg");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
