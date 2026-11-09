@@ -781,7 +781,7 @@ namespace LegendsRPG.UI
             var pending = AFKReward.Pending();
             _afkText.text = Economy.Format(pending.gold) + " gold  •  " + pending.diamonds + " dia  •  " +
                             Economy.Format(pending.exp) + " xp";
-            _afkFill.sizeDelta = new Vector2(380f * AFKReward.CapRatio(), 0f);
+            _afkFill.rectTransform.sizeDelta = new Vector2(380f * AFKReward.CapRatio(), 0f);
 
             _signinDot.text = SignInSystem.CanClaimToday() ? "!" : "";
             _questDot.text = QuestSystem.ClaimableCount() > 0 ? "!" : "";
