@@ -275,7 +275,7 @@ namespace LegendsRPG.Core
             {
                 // take back the duplicate refund before re-rolling the slot
                 Inventory.ConsumeItem("hero_essence", old.essence);
-                s.gold = Mathf.Max(0, s.gold - old.goldBack);
+                s.gold = System.Math.Max(0L, s.gold - old.goldBack);
             }
             var upgraded = Apply(PickHero(floor));
             upgraded.pityHit = old.pityHit;
