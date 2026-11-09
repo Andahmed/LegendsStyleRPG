@@ -158,7 +158,7 @@ namespace LegendsRPG.UI
 
         private void BuildSummon(RectTransform body)
         {
-            SummonScreen.Build(this, body);
+            MenuSummonScreen.Build(this, body);
         }
 
         private void Toast(string msg)
