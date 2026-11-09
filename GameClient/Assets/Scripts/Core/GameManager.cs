@@ -108,11 +108,11 @@ namespace LegendsRPG.Core
             // legacy free-play path (no session — e.g. debug mode)
             State = GameState.FloorCleared;
             Audio.Play("Victory");
-            CombatEvents.RaiseNotification("Floor cleared!");
+            Combat.CombatEvents.RaiseNotification("Floor cleared!");
             if (Tower != null) Tower.AdvanceFloor();
 
             var loot = Items.InventorySystem.RollFloorReward(Tower.CurrentFloor, (int)Tower.Difficulty);
-            if (loot != null) CombatEvents.RaiseNotification("LOOT: " + loot);
+            if (loot != null) Combat.CombatEvents.RaiseNotification("LOOT: " + loot);
 
             SaveSystem.Save(Tower, Team);
             if (Hud != null) Hud.ShowFloorClearedPanel(true);
