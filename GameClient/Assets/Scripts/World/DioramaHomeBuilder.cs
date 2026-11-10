@@ -341,6 +341,14 @@ namespace LegendsRPG.World
             return go;
         }
 
+        // Overload: lets callers pass a Color (e.g. the landmark accent) instead of a Material.
+        private static GameObject MakeChild(Transform parent, PrimitiveType type, string name,
+            Vector3 pos, Vector3 scale, Color color)
+        {
+            return MakeChild(parent, type, name, pos, scale,
+                Vfx.MaterialLibrary.Solid(color, 0.5f, 0.2f));
+        }
+
         private static Color Accent(int i)
         {
             switch (i)
