@@ -1,4 +1,5 @@
 using UnityEngine;
+using LegendsRPG.Art;
 using LegendsRPG.Core;
 using LegendsRPG.Vfx;
 
