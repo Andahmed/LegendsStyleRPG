@@ -26,6 +26,15 @@ namespace LegendsRPG.World
             _configured = true;
         }
 
+        private static uint ReadUInt32LittleEndian(byte[] bytes, int offset)
+        {
+            return (uint)(
+                bytes[offset] |
+                (bytes[offset + 1] << 8) |
+                (bytes[offset + 2] << 16) |
+                (bytes[offset + 3] << 24));
+        }
+
         private IEnumerator Start()
         {
             if (!_configured) yield break;
@@ -46,11 +55,37 @@ namespace LegendsRPG.World
             if (asset == null || asset.bytes == null || asset.bytes.Length < 20)
                 return false;
 
+            // The delivered GLBs contain zero padding after their header-declared
+            // totalLength. GLB parsers should receive exactly the declared container,
+            // not those unrelated trailing bytes.
+            byte[] glbBytes = asset.bytes;
+            if (glbBytes[0] != (byte)'g' || glbBytes[1] != (byte)'l' ||
+                glbBytes[2] != (byte)'T' || glbBytes[3] != (byte)'F')
+                return false;
+
+            uint version = ReadUInt32LittleEndian(glbBytes, 4);
+            uint declaredLength = ReadUInt32LittleEndian(glbBytes, 8);
+            if (version != 2 || declaredLength < 20 || declaredLength > glbBytes.Length)
+            {
+                Debug.LogWarning("[LegendsRPG] Diorama GLB '" + _modelId +
+                    "' has an invalid GLB v2 header.", this);
+                return false;
+            }
+
+            if (declaredLength < glbBytes.Length)
+            {
+                var trimmed = new byte[(int)declaredLength];
+                System.Buffer.BlockCopy(glbBytes, 0, trimmed, 0, trimmed.Length);
+                glbBytes = trimmed;
+                Debug.Log("[LegendsRPG] Trimmed zero padding from Diorama GLB '" +
+                    _modelId + "' to its declared length (" + declaredLength + " bytes).", this);
+            }
+
             var importer = new GltfImport();
             GameObject modelRoot = null;
             try
             {
-                bool loaded = await importer.LoadGltfBinary(asset.bytes);
+                bool loaded = await importer.LoadGltfBinary(glbBytes);
                 if (!loaded || this == null) return false;
 
                 modelRoot = new GameObject("DioramaGLB_" + _modelId);
