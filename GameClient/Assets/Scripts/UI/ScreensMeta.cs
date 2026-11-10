@@ -174,7 +174,15 @@ namespace LegendsRPG.UI
                         : today ? new Color(0.75f, 0.55f, 0.1f, 0.97f)
                         : new Color(0.2f, 0.22f, 0.3f, 0.97f);
 
-                    var txt = cell.AddComponent<Text>();
+                    var labelGo = new GameObject("Label");
+                    var labelRt = labelGo.AddComponent<RectTransform>();
+                    labelRt.SetParent(cell.transform, false);
+                    labelRt.anchorMin = Vector2.zero;
+                    labelRt.anchorMax = Vector2.one;
+                    labelRt.offsetMin = Vector2.zero;
+                    labelRt.offsetMax = Vector2.zero;
+
+                    var txt = labelGo.AddComponent<Text>();
                     txt.font = UIBuilder.BuiltinFont;
                     txt.text = SignInSystem.DayTitle(d) + "\n" + (claimed ? "CLAIMED" : today ? "TAP TO CLAIM!" : "locked");
                     txt.fontSize = 24;
@@ -183,6 +191,7 @@ namespace LegendsRPG.UI
                     txt.raycastTarget = false;
 
                     var btn = cell.AddComponent<Button>();
+                    btn.targetGraphic = img;
                     btn.interactable = today;
                     btn.onClick.AddListener(() =>
                     {
