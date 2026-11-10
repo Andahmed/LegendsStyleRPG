@@ -303,6 +303,7 @@ namespace LegendsRPG.World
         public const int AttemptsPerRegionPerDay = 1;
         private static string _day = "";
         private static readonly int[] Attempts = new int[ContinentGateSystem.Regions];
+        private static readonly bool[] RewardClaimed = new bool[ContinentGateSystem.Regions];
         private static readonly string[] BossNames =
         {
             "Elderroot, Worldheart Guardian", "Solkar, Cinderstorm Dragon",
@@ -329,7 +330,11 @@ namespace LegendsRPG.World
             string today = DateTime.UtcNow.ToString("yyyyMMdd");
             if (_day == today) return;
             _day = today;
-            for (int i = 0; i < Attempts.Length; i++) Attempts[i] = 0;
+            for (int i = 0; i < Attempts.Length; i++)
+            {
+                Attempts[i] = 0;
+                RewardClaimed[i] = false;
+            }
             SaveSystem.MarkDirty();
             OnChanged?.Invoke();
         }
@@ -382,6 +387,9 @@ namespace LegendsRPG.World
 
         private static void ApplyWin(int region)
         {
+            if (region < 1 || region > RewardClaimed.Length || RewardClaimed[region - 1]) return;
+            // Set the claim flag before changing balances so a victory retry cannot duplicate rewards.
+            RewardClaimed[region - 1] = true;
             long gold = 9000L + region * 4500L;
             int diamonds = 120 + region * 35;
             int shards = 3 + region;
@@ -410,14 +418,21 @@ namespace LegendsRPG.World
             DailyReset();
             s.worldBossDay = _day;
             s.worldBossAttempts = new List<int>(Attempts);
+            s.worldBossRewardsClaimed = new List<int>();
+            for (int i = 0; i < RewardClaimed.Length; i++)
+                s.worldBossRewardsClaimed.Add(RewardClaimed[i] ? 1 : 0);
         }
 
         public static void ReadFrom(SaveSystem.SaveData s)
         {
             _day = s.worldBossDay ?? "";
             for (int i = 0; i < Attempts.Length; i++)
+            {
                 Attempts[i] = s.worldBossAttempts != null && i < s.worldBossAttempts.Count
                     ? Mathf.Clamp(s.worldBossAttempts[i], 0, AttemptsPerRegionPerDay) : 0;
+                RewardClaimed[i] = s.worldBossRewardsClaimed != null &&
+                    i < s.worldBossRewardsClaimed.Count && s.worldBossRewardsClaimed[i] != 0;
+            }
             DailyReset();
         }
     }
