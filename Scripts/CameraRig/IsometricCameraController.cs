@@ -51,6 +51,28 @@ namespace LegendsRPG.Cam
             _snapNext = true;
         }
 
+        /// <summary>Locks the home camera to a portrait tabletop composition.</summary>
+        public void SetDioramaView(Transform target)
+        {
+            Target = target;
+            _yaw = 0f;
+            _pitch = 48f;
+            _distance = 22f;
+            _zoomInput = 0f;
+            _snapNext = true;
+        }
+
+        /// <summary>Restores the normal battle camera framing.</summary>
+        public void SetBattleView(Transform target)
+        {
+            Target = target;
+            _yaw = GameConfig.CameraDefaultYaw;
+            _pitch = GameConfig.CameraDefaultPitch;
+            _distance = 13f;
+            _zoomInput = 0f;
+            _snapNext = true;
+        }
+
         public void AddZoomInput(float delta)
         {
             _zoomInput += delta;
