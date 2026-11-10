@@ -294,6 +294,128 @@ namespace LegendsRPG.World
     }
 
     // ====================================================================
+    // WORLD BOSSES — one persistent daily challenge for each endgame region.
+    // ====================================================================
+    public static class WorldBossSystem
+    {
+        public const int AttemptsPerRegionPerDay = 1;
+        private static string _day = "";
+        private static readonly int[] Attempts = new int[ContinentGateSystem.Regions];
+        private static readonly string[] BossNames =
+        {
+            "Elderroot, Worldheart Guardian", "Solkar, Cinderstorm Dragon",
+            "Glacielle, Queen of the White Maw", "Tempestrix, Skybreaker",
+            "Malachar, Sovereign of the Void"
+        };
+
+        public static event Action OnChanged;
+
+        public static string BossName(int region)
+        {
+            return BossNames[Mathf.Clamp(region - 1, 0, BossNames.Length - 1)];
+        }
+
+        public static int AttemptsLeft(int region)
+        {
+            DailyReset();
+            if (region < 1 || region > Attempts.Length) return 0;
+            return Mathf.Max(0, AttemptsPerRegionPerDay - Attempts[region - 1]);
+        }
+
+        public static void DailyReset()
+        {
+            string today = DateTime.UtcNow.ToString("yyyyMMdd");
+            if (_day == today) return;
+            _day = today;
+            for (int i = 0; i < Attempts.Length; i++) Attempts[i] = 0;
+            SaveSystem.MarkDirty();
+            OnChanged?.Invoke();
+        }
+
+        public static void Start(int region)
+        {
+            DailyReset();
+            if (region < 1 || region > ContinentGateSystem.Regions) return;
+            if (!ContinentGateSystem.IsUnlocked(region, 1))
+            {
+                CombatEvents.RaiseNotification("Conquer the region gate to unlock its World Boss.");
+                Audio.AudioSystem.Play("Error");
+                return;
+            }
+            if (AttemptsLeft(region) <= 0)
+            {
+                CombatEvents.RaiseNotification("This region's World Boss attempt is used for today.");
+                Audio.AudioSystem.Play("Error");
+                return;
+            }
+
+            var cfg = new Core.BattleSession.Config
+            {
+                type = Core.BattleSession.BattleType.WorldBoss,
+                title = "WORLD BOSS — " + BossName(region),
+                floor = 220 + region * 22,
+                difficulty = 3,
+                boss = true,
+                hpScale = 1.15f + (region - 1) * 0.16f,
+                atkScale = 1.10f + (region - 1) * 0.08f,
+                forcedMonsterKey = "world_boss_" + region,
+                monsterCount = 1,
+                region = region
+            };
+            cfg.onWin = () => ApplyWin(region);
+            Core.BattleSession.Start(cfg);
+            // Only consume an attempt after BattleSession confirms that combat actually started.
+            if (Core.BattleSession.Active && object.ReferenceEquals(Core.BattleSession.Current, cfg))
+            {
+                Attempts[region - 1]++;
+                SaveSystem.MarkDirty();
+                OnChanged?.Invoke();
+            }
+        }
+
+        private static void ApplyWin(int region)
+        {
+            long gold = 9000L + region * 4500L;
+            int diamonds = 120 + region * 35;
+            int shards = 3 + region;
+            Core.Economy.AddGold(gold, "World Boss");
+            Core.Economy.AddDiamonds(diamonds, "World Boss");
+            string itemId = Items.ItemDatabase.RollRandomItemId();
+            Items.InventorySystem.Grant(itemId);
+            Core.ForgeSystem.GrantShards(shards);
+            if (region == ContinentGateSystem.Regions)
+                Core.PlayerProfile.UnlockTitle("World Guardian");
+
+            SaveSystem.MarkDirty();
+            OnChanged?.Invoke();
+            UI.UIManager.Instance.ShowBattleResult(true, BossName(region) + " defeated!",
+                new[]
+                {
+                    "+" + Core.Economy.Format(gold) + " Gold",
+                    "+" + diamonds + " Diamonds",
+                    "+1 " + (Items.ItemDatabase.Get(itemId) != null ? Items.ItemDatabase.Get(itemId).displayName : "Equipment"),
+                    "+" + shards + " Forge Shards"
+                });
+        }
+
+        public static void WriteInto(SaveSystem.SaveData s)
+        {
+            DailyReset();
+            s.worldBossDay = _day;
+            s.worldBossAttempts = new List<int>(Attempts);
+        }
+
+        public static void ReadFrom(SaveSystem.SaveData s)
+        {
+            _day = s.worldBossDay ?? "";
+            for (int i = 0; i < Attempts.Length; i++)
+                Attempts[i] = s.worldBossAttempts != null && i < s.worldBossAttempts.Count
+                    ? Mathf.Clamp(s.worldBossAttempts[i], 0, AttemptsPerRegionPerDay) : 0;
+            DailyReset();
+        }
+    }
+
+    // ====================================================================
     // DUNGEONS — Gold & EXP dungeons, 2 entries/day each, 3 difficulties.
     // ====================================================================
     public static class DungeonSystem
