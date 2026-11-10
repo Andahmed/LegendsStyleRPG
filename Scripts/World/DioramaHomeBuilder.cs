@@ -64,7 +64,7 @@ namespace LegendsRPG.World
 
         private void BuildRoom()
         {
-            var wall = Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 5.0f, -9.3f),
+            Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 5.0f, -9.3f),
                 new Vector3(13f, 12f, 0.55f), _darkWood);
             var trim = Vfx.MaterialLibrary.Solid(new Color(0.48f, 0.27f, 0.12f), 0.55f, 0.3f);
             Make(PrimitiveType.Cube, "WallTrim", new Vector3(0f, 10.7f, -8.95f), new Vector3(13f, 0.28f, 0.25f), trim);
@@ -144,10 +144,10 @@ namespace LegendsRPG.World
 
             for (int i = 0; i < 8; i++)
             {
-                float x = (i % 2 == 0) ? -4.05f : 4.05f;
+                float x = (i % 2 == 0) ? -4.3f : 4.3f;
                 float z = -7.0f + (i / 2) * 4.65f;
                 Make(PrimitiveType.Sphere, "MapHill" + i, new Vector3(x, 1.78f, z),
-                    new Vector3(0.95f, 0.38f + (i % 2) * 0.12f, 0.9f), _grass);
+                    new Vector3(0.8f, 0.32f + (i % 2) * 0.1f, 0.8f), _grass);
             }
             var mountain = Vfx.MaterialLibrary.Solid(new Color(0.42f, 0.43f, 0.39f), 0.75f, 0.15f);
             for (int i = 0; i < 2; i++)
