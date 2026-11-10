@@ -37,7 +37,7 @@ namespace LegendsRPG.Cam
             _cam.fieldOfView = 50f;
             _cam.nearClipPlane = 0.3f;
             _cam.farClipPlane = 220f;
-            // Soft blue backdrop remains visible around the diorama and in the legacy-city fallback.
+            // Soft blue backdrop frames the tabletop diorama and legacy city.
             _cam.backgroundColor = new Color(0.48f, 0.68f, 0.84f);
             _cam.clearFlags = CameraClearFlags.SolidColor;
         }
@@ -54,11 +54,13 @@ namespace LegendsRPG.Cam
             _snapNext = true;
         }
 
-        /// <summary>Locks the home camera to a wide landscape tabletop composition.</summary>
+        /// <summary>Locks the home camera to the wide tabletop composition.</summary>
         public void SetDioramaView(Transform target)
         {
             Target = target;
-            _yaw = 90f;
+            // DioramaHomeBuilder rotates its long map axis onto world X, so yaw 0
+            // keeps that long axis horizontal in the landscape camera view.
+            _yaw = 0f;
             _pitch = 48f;
             _distance = 17.5f;
             _zoomInput = 0f;
@@ -66,7 +68,7 @@ namespace LegendsRPG.Cam
             _snapNext = true;
         }
 
-        /// <summary>Restores the normal battle camera framing.</summary>
+        /// <summary>Restores normal battle camera framing and controls.</summary>
         public void SetBattleView(Transform target)
         {
             Target = target;
