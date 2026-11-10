@@ -57,7 +57,15 @@ namespace LegendsRPG.UI
                         : boss ? new Color(0.55f, 0.25f, 0.15f, 0.97f)
                         : new Color(0.3f, 0.35f, 0.5f, 0.97f);
 
-                    var txt = cell.AddComponent<Text>();
+                    var labelGo = new GameObject("Label");
+                    var labelRt = labelGo.AddComponent<RectTransform>();
+                    labelRt.SetParent(cell.transform, false);
+                    labelRt.anchorMin = Vector2.zero;
+                    labelRt.anchorMax = Vector2.one;
+                    labelRt.offsetMin = Vector2.zero;
+                    labelRt.offsetMax = Vector2.zero;
+
+                    var txt = labelGo.AddComponent<Text>();
                     txt.font = UIBuilder.BuiltinFont;
                     txt.text = _chapter + "-" + stage + (boss ? "\nBOSS" : "") + "\n" +
                                (unlocked ? new string('*', stars) + new string('.', 3 - stars) : "LOCKED");
@@ -67,6 +75,7 @@ namespace LegendsRPG.UI
                     txt.raycastTarget = false;
 
                     var btn = cell.AddComponent<Button>();
+                    btn.targetGraphic = img;
                     btn.onClick.AddListener(() =>
                     {
                         if (!unlocked)
@@ -287,7 +296,15 @@ namespace LegendsRPG.UI
                         : cleared ? new Color(0.15f, 0.42f, 0.3f, 0.97f)
                         : new Color(0.25f, 0.45f, 0.42f, 0.97f);
 
-                    var txt = cell.AddComponent<Text>();
+                    var labelGo = new GameObject("Label");
+                    var labelRt = labelGo.AddComponent<RectTransform>();
+                    labelRt.SetParent(cell.transform, false);
+                    labelRt.anchorMin = Vector2.zero;
+                    labelRt.anchorMax = Vector2.one;
+                    labelRt.offsetMin = Vector2.zero;
+                    labelRt.offsetMax = Vector2.zero;
+
+                    var txt = labelGo.AddComponent<Text>();
                     txt.font = UIBuilder.BuiltinFont;
                     txt.text = stage + (stage == ContinentGateSystem.StagesPerRegion ? "\nBOSS" : "") + "\n" + (unlocked ? (cleared ? "DONE" : "READY") : "LOCK");
                     txt.fontSize = 26;
@@ -296,6 +313,7 @@ namespace LegendsRPG.UI
                     txt.raycastTarget = false;
 
                     var btn = cell.AddComponent<Button>();
+                    btn.targetGraphic = img;
                     btn.onClick.AddListener(() =>
                     {
                         Manager.CloseScreen();
