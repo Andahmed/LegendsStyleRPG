@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace LegendsRPG.UI
 {
     /// <summary>
-    /// Code-first uGUI construction helpers (portrait 1080x1920 canvas).
+    /// Code-first uGUI construction helpers (landscape 1920x1080 canvas).
     /// Uses the built-in runtime font — the Arabic localization pass will
     /// switch to TextMeshPro with an Arabic font + reshaper in a later phase.
     /// </summary>
@@ -81,8 +81,8 @@ namespace LegendsRPG.UI
 
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080f, 1920f);
-            scaler.matchWidthOrHeight = 0.5f;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.matchWidthOrHeight = 1f;
 
             go.AddComponent<GraphicRaycaster>();
 
@@ -93,6 +93,19 @@ namespace LegendsRPG.UI
                 es.AddComponent<StandaloneInputModule>();
             }
             return canvas;
+        }
+
+        public static RectTransform CreateSafeArea(Transform parent, string name = "SafeArea")
+        {
+            var go = new GameObject(name);
+            var rt = go.AddComponent<RectTransform>();
+            rt.SetParent(parent, false);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            go.AddComponent<SafeAreaFitter>();
+            return rt;
         }
 
         public static RectTransform CreatePanel(Transform parent, string name, Color color,
