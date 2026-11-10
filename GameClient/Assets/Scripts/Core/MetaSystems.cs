@@ -259,7 +259,7 @@ namespace LegendsRPG.Core
                     {
                         key = r.key, itemId = r.itemId, heroId = r.heroId,
                         heroShardsFor = r.heroShards, goldCost = r.goldCost,
-                        diamondCost = r.diamondCost, discount = r.discount, bought = r.bought
+                        diamondCost = r.diamondCost, discountPct = r.discount, bought = r.bought
                     });
                 }
             }
@@ -483,6 +483,8 @@ namespace LegendsRPG.Core
     // ====================================================================
     public static class MerchantSystem
     {
+        public static event Action OnChanged;
+
         public class Offer
         {
             public string label;
