@@ -325,7 +325,7 @@ namespace LegendsRPG.World
                 {
                     var dir = cam.transform.position - child.position;
                     dir.y = 0f;
-                    if (dir.sqrMagnitude > 0.01f) child.rotation = Quaternion.LookRotation(dir.normalized);
+                    if (dir.sqrMagnitude > 0.01f) child.rotation = Quaternion.LookRotation(-dir.normalized);
                 }
             }
         }
