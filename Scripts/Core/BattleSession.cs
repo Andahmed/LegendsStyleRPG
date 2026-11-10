@@ -114,8 +114,7 @@ namespace LegendsRPG.Core
             var cam = Camera.main != null ? Camera.main.GetComponent<Cam.IsometricCameraController>() : null;
             if (cam != null)
             {
-                cam.SetTarget(team.FocusTransform);   // v1.1: camera follows the team center
-                cam.SnapToTarget();
+                cam.SetBattleView(team.FocusTransform);
             }
 
             // dark battle atmosphere
@@ -240,8 +239,12 @@ namespace LegendsRPG.Core
             if (cam != null)
             {
                 var homeTarget = DioramaHomeBuilder.IsActive ? DioramaHomeBuilder.HomeCameraTarget : team.FocusTransform;
-                cam.SetTarget(homeTarget);
-                cam.SnapToTarget();
+                if (DioramaHomeBuilder.IsActive) cam.SetDioramaView(homeTarget);
+                else
+                {
+                    cam.SetTarget(homeTarget);
+                    cam.SnapToTarget();
+                }
             }
 
             Time.timeScale = 1f;
