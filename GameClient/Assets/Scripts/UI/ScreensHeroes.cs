@@ -283,8 +283,16 @@ namespace LegendsRPG.UI
                 img.sprite = UIBuilder.SolidSprite;
                 img.color = data != null ? SummonScreen.RarityColor(data.rarity) : new Color(0.2f, 0.2f, 0.25f, 0.9f);
                 var btn = slot.AddComponent<Button>();
+                btn.targetGraphic = img;
 
-                var lbl = slot.AddComponent<Text>();
+                var labelGo = new GameObject("Label");
+                var labelRt = labelGo.AddComponent<RectTransform>();
+                labelRt.SetParent(slot.transform, false);
+                labelRt.anchorMin = Vector2.zero;
+                labelRt.anchorMax = Vector2.one;
+                labelRt.offsetMin = Vector2.zero;
+                labelRt.offsetMax = Vector2.zero;
+                var lbl = labelGo.AddComponent<Text>();
                 lbl.font = UIBuilder.BuiltinFont;
                 lbl.text = data != null ? data.displayName : "Empty";
                 lbl.fontSize = 24;
@@ -348,7 +356,14 @@ namespace LegendsRPG.UI
                     img.sprite = UIBuilder.SolidSprite;
                     img.color = new Color(0.15f, 0.16f, 0.22f, 0.98f);
 
-                    var txt = cell.AddComponent<Text>();
+                    var labelGo = new GameObject("Label");
+                    var labelRt = labelGo.AddComponent<RectTransform>();
+                    labelRt.SetParent(cell.transform, false);
+                    labelRt.anchorMin = Vector2.zero;
+                    labelRt.anchorMax = Vector2.one;
+                    labelRt.offsetMin = Vector2.zero;
+                    labelRt.offsetMax = Vector2.zero;
+                    var txt = labelGo.AddComponent<Text>();
                     txt.font = UIBuilder.BuiltinFont;
                     int stars = HeroProgress.StarsOf(hero.heroId);
                     txt.text = hero.displayName + "\nLv." + HeroProgress.LevelOf(hero.heroId) + " " +
@@ -360,6 +375,7 @@ namespace LegendsRPG.UI
                     txt.raycastTarget = false;
 
                     var detail = cell.AddComponent<Button>();
+                    detail.targetGraphic = img;
                     detail.onClick.AddListener(() =>
                     {
                         // if a slot is being picked, fill it
