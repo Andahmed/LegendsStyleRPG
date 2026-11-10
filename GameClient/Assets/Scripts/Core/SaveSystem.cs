@@ -322,7 +322,10 @@ namespace LegendsRPG.Core
         {
             try
             {
-                if (tower != null)
+                // A mid-battle autosave must not record a campaign, dungeon or
+                // World Boss floor as Tower progress. Tower progress is committed
+                // after BattleSession restores the saved Tower state on victory.
+                if (tower != null && !BattleSession.Active)
                 {
                     Current.activeDifficulty = (int)tower.Difficulty;
                     TowerProgress tp = null;
