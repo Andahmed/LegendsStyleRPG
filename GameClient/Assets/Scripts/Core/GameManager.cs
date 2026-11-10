@@ -107,7 +107,7 @@ namespace LegendsRPG.Core
 
             // legacy free-play path (no session — e.g. debug mode)
             State = GameState.FloorCleared;
-            Audio.Play("Victory");
+            LegendsRPG.Audio.AudioSystem.Play("Victory");
             Combat.CombatEvents.RaiseNotification("Floor cleared!");
             if (Tower != null) Tower.AdvanceFloor();
 
