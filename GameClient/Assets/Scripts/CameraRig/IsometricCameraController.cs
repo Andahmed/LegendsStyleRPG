@@ -51,6 +51,17 @@ namespace LegendsRPG.Cam
             _snapNext = true;
         }
 
+        /// <summary>Restores the wide tabletop framing used by the home diorama.</summary>
+        public void SetDioramaView(Transform target)
+        {
+            Target = target;
+            _yaw = 0f;
+            _pitch = 48f;
+            _distance = 17.5f;
+            _zoomInput = 0f;
+            _snapNext = true;
+        }
+
         public void AddZoomInput(float delta)
         {
             _zoomInput += delta;
