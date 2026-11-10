@@ -56,7 +56,9 @@ namespace LegendsRPG.World
                 modelRoot = new GameObject("DioramaGLB_" + _modelId);
                 modelRoot.transform.SetParent(transform, false);
                 modelRoot.transform.localPosition = Vector3.zero;
-                modelRoot.transform.localRotation = Quaternion.identity;
+                // These five supplied GLBs were exported with +Z as their up axis.
+                // Convert them to Unity's +Y-up scene before measuring bounds or placing them.
+                modelRoot.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
                 modelRoot.transform.localScale = Vector3.one;
 
                 bool instantiated = await importer.InstantiateMainSceneAsync(modelRoot.transform);
@@ -89,15 +91,19 @@ namespace LegendsRPG.World
                 for (int i = 1; i < renderers.Length; i++)
                     bounds.Encapsulate(renderers[i].bounds);
 
-                // Match the existing landmark convention: center on its pedestal,
-                // with the lowest point just above the pedestal surface.
+                // The supplied models already include their own stone/metal bases.
+                // Ground those bases directly on the tabletop, then remove the temporary
+                // wooden display pedestal together with the fallback model.
+                const float groundOffset = 0.06f;
                 modelRoot.transform.position += new Vector3(
                     transform.position.x - bounds.center.x,
-                    transform.position.y + 0.46f - bounds.min.y,
+                    transform.position.y + groundOffset - bounds.min.y,
                     transform.position.z - bounds.center.z);
 
                 if (_fallback != null)
                     Destroy(_fallback.gameObject);
+
+                RemoveLegacyPedestal();
 
                 // Keep the importer alive while its generated meshes/materials are in use.
                 _liveImports.Add(importer);
@@ -112,6 +118,17 @@ namespace LegendsRPG.World
             finally
             {
                 if (importer != null) importer.Dispose();
+            }
+        }
+
+        private void RemoveLegacyPedestal()
+        {
+            string[] names = { "PedestalBase", "PedestalGoldTrim", "PedestalTop" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                var part = transform.Find(names[i]);
+                if (part != null)
+                    Destroy(part.gameObject);
             }
         }
 
