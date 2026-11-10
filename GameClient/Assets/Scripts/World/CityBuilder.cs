@@ -592,9 +592,9 @@ namespace LegendsRPG.World
                 var cam = Camera.main.transform;
                 var toCamera = cam.position - _label.transform.position;
                 if (toCamera.sqrMagnitude > 0.01f)
-                    // TextMesh's readable face points along the camera view direction.
-                    // Using the opposite vector avoids the mirrored back-face labels seen in Home.
-                    _label.transform.rotation = Quaternion.LookRotation(-toCamera.normalized, cam.up);
+                    // TextMesh front faces local +Z; point that face toward the camera.
+                    // Keep the same forward-facing billboard direction as the known-good main branch.
+                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, cam.up);
             }
 
             // hover / ready pulse
