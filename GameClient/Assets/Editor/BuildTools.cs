@@ -90,10 +90,12 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
 
-            // The game code itself forces portrait at runtime (GameRoot.Awake) —
-            // keep the player settings consistent with the code. If a landscape
-            // release is wanted, change BOTH this and GameRoot together.
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            // Landscape UI is built against a 1920x1080 reference canvas.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
         }
     }
 }
