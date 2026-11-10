@@ -562,7 +562,8 @@ namespace LegendsRPG.World
             // floating 3D label
             var labelGo = new GameObject("Label3D");
             labelGo.transform.SetParent(transform, false);
-            labelGo.transform.localPosition = new Vector3(0f, 7.6f, 0f);
+            float labelHeight = colliderSize.y > 7f ? 7.6f : colliderCenter.y + colliderSize.y * 0.5f + 0.25f;
+            labelGo.transform.localPosition = new Vector3(0f, labelHeight, 0f);
             _label = labelGo.AddComponent<TextMesh>();
             _label.text = label;
             _label.fontSize = 48;
