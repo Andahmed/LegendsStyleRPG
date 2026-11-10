@@ -565,12 +565,14 @@ namespace LegendsRPG.World
             // floating 3D label
             var labelGo = new GameObject("Label3D");
             labelGo.transform.SetParent(transform, false);
-            float labelHeight = colliderSize.y >= 7f ? 7.6f : colliderCenter.y + colliderSize.y * 0.5f + 0.25f;
+            float labelHeight = colliderSize.y >= 7f ? 7.6f : colliderCenter.y + colliderSize.y * 0.5f + 0.55f;
             labelGo.transform.localPosition = new Vector3(0f, labelHeight, 0f);
             _label = labelGo.AddComponent<TextMesh>();
             _label.text = label;
             _label.fontSize = 44;
-            _label.characterSize = 0.20f;
+            // Diorama landmarks are close together: keep their world labels compact.
+            // The legacy full-size city still gets a larger sign for readability.
+            _label.characterSize = colliderSize.x > 7f ? 0.13f : 0.075f;
             _label.anchor = TextAnchor.MiddleCenter;
             _label.alignment = TextAlignment.Center;
             _label.color = accent;
@@ -590,7 +592,9 @@ namespace LegendsRPG.World
                 var cam = Camera.main.transform;
                 var toCamera = cam.position - _label.transform.position;
                 if (toCamera.sqrMagnitude > 0.01f)
-                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, Vector3.up);
+                    // TextMesh front faces local +Z; point that face toward the camera.
+                    // Keep the same forward-facing billboard direction as the known-good main branch.
+                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, cam.up);
             }
 
             // hover / ready pulse
