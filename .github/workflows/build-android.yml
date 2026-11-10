@@ -3,6 +3,9 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
+    # GitHub Actions requires its own UNITY_LICENSE secret. The project uses
+    # Unity Cloud Build by default, so keep this optional job skipped until enabled.
+    if: ${{ vars.ENABLE_GITHUB_UNITY_BUILD == 'true' }}
     name: Build Unity Android APK
     runs-on: ubuntu-latest
     steps:
