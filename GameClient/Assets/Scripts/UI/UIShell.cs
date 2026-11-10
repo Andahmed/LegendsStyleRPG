@@ -660,11 +660,11 @@ namespace LegendsRPG.UI
                 Color.white, 36, () => _manager.Open("shop"));
         }
 
-        // ---------------- event column (left side) ----------------
+        // ---------------- event column (right side) ----------------
         private void BuildEventColumn()
         {
             var col = UIBuilder.CreateFreeRect(_root, "EventColumn", new Vector2(120f, 560f),
-                new Vector2(0f, 0.5f), new Vector2(65f, 130f));
+                new Vector2(1f, 0.5f), new Vector2(-65f, 130f));
 
             MakeEventButton(col, "SIGN-IN", new Color(0.85f, 0.45f, 0.15f, 0.95f), new Vector2(0f, 0f),
                 () => _manager.Open("signin"), out _signinDot);
@@ -692,7 +692,7 @@ namespace LegendsRPG.UI
         private void BuildSideButtons()
         {
             var col = UIBuilder.CreateFreeRect(_root, "SideColumn", new Vector2(120f, 300f),
-                new Vector2(1f, 0.5f), new Vector2(-65f, 160f));
+                new Vector2(0f, 0.5f), new Vector2(65f, -120f));
 
             UIBuilder.CreateButton(col, "SettingsBtn", "SET", new Vector2(110f, 110f),
                 new Vector2(0f, 0f), new Vector2(0f, 0f), new Color(0.3f, 0.32f, 0.4f, 0.95f),
