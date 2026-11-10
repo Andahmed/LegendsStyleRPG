@@ -483,8 +483,6 @@ namespace LegendsRPG.Core
     // ====================================================================
     public static class MerchantSystem
     {
-        public static event Action OnChanged;
-
         public class Offer
         {
             public string label;
@@ -497,6 +495,8 @@ namespace LegendsRPG.Core
             public int diamondGrant;
             public bool bought;
         }
+
+        public static event Action OnChanged;
 
         private static readonly List<Offer> _offers = new List<Offer>();
         private static DateTime _refreshUtc = DateTime.MinValue;

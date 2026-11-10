@@ -95,7 +95,7 @@ namespace LegendsRPG.EditorTools
         }
 
         [MenuItem("Legends RPG/Build/Build Android APK", priority = 20)]
-        private static void BuildAndroidApk()
+        public static void BuildAndroidApk()
         {
             // v1.2: delegate to BuildTools so the menu path and the CI path are identical
             BuildTools.BuildAndroid();

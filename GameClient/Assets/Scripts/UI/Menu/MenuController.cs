@@ -489,7 +489,6 @@ namespace LegendsRPG.UI
                     else if (teamBtnCanAdd) s.teamLoadout.Add(heroId);
                     else return;
                     SaveSystem.Save(GameManager.Instance != null ? GameManager.Instance.Tower : null, _team);
-                    if (TeamManager.InstanceRef != null) TeamManager.InstanceRef.RebuildTeam();
                     Refresh();
                 });
         }

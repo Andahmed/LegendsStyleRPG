@@ -268,7 +268,6 @@ namespace LegendsRPG.Core
             {
                 if (go != null && go.GetComponent<MonsterCharacter>() != null) Add(KillMonsters, 1);
             };
-            if (team != null) team.OnActiveChanged += i => Add(SwitchHeroes, 1);
         }
 
         private static void Fit()

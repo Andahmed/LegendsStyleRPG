@@ -264,25 +264,6 @@ namespace LegendsRPG.UI
             return outer;
         }
 
-        public static void AddRarityPips(Transform parent, LegendsRPG.Characters.Rarity rarity,
-            Vector2 anchor, Vector2 pos, int maxPips)
-        {
-            AddRarityPips(parent, (int)rarity, anchor, pos, maxPips);
-        }
-
-        public static void AddRarityPips(Transform parent, int rarity, Vector2 anchor, Vector2 pos, int maxPips)
-        {
-            int count = Mathf.Clamp(rarity + 1, 1, maxPips);
-            float spacing = 12f;
-            float total = (count - 1) * spacing;
-            for (int i = 0; i < count; i++)
-            {
-                Circle(parent, "RarityPip" + i, anchor,
-                    pos + new Vector2(-total * 0.5f + i * spacing, 0f),
-                    8f, Gold);
-            }
-        }
-
         /// <summary>Round hero portrait (element-coloured) with level badge.</summary>
         public static RectTransform HeroPortrait(Transform parent, Vector2 anchor, Vector2 pos, float diameter,
             Characters.HeroData data, int level)
@@ -293,7 +274,7 @@ namespace LegendsRPG.UI
                 Color.Lerp(data.primaryColor, Color.black, 0.45f));
             var glow = Circle(body, "Glow", new Vector2(0.5f, 0.5f), Vector2.zero, diameter * 0.66f, el);
             Label(glow, data.displayName.Substring(0, 1), Mathf.RoundToInt(diameter * 0.42f), Color.white, TextAnchor.MiddleCenter, true);
-            AddRarityPips(ring, data.rarity, new Vector2(0.5f, 0f), new Vector2(-((int)data.rarity * 9.5f), diameter * 0.10f), 5);
+            AnimeTheme.AddRarityPips(ring, data.rarity, new Vector2(0.5f, 0f), new Vector2(-((int)data.rarity * 9.5f), diameter * 0.10f), 5);
             if (level > 0)
             {
                 var badge = Circle(ring, "Lv", new Vector2(1f, 0f), new Vector2(-diameter * 0.12f, diameter * 0.12f), diameter * 0.36f, Color.black);

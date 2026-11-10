@@ -281,7 +281,6 @@ namespace LegendsRPG.Core
             if (Current.equipSlot == null) Current.equipSlot = new List<int>();
             if (Current.equipItem == null) Current.equipItem = new List<string>();
             if (Current.gachaPity == null) Current.gachaPity = new List<int>();
-            while (Current.gachaPity.Count < 3) Current.gachaPity.Add(0);
             if (Current.teamLoadout == null) Current.teamLoadout = new List<string>();
             if (Current.dayKey == null) Current.dayKey = "";
             if (Current.wishElement == null) Current.wishElement = "";

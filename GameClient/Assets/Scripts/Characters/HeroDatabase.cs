@@ -12,6 +12,7 @@ namespace LegendsRPG.Characters
     {
         private static List<HeroData> _allHeroes;
 
+        /// <summary>Cached default roster (built once on first access).</summary>
         public static List<HeroData> AllHeroes
         {
             get

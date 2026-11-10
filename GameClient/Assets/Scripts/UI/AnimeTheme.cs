@@ -29,11 +29,11 @@ namespace LegendsRPG.UI
         {
             switch (rarity)
             {
-                case LegendsRPG.Characters.Rarity.Common: return new Color(0.58f, 0.65f, 0.76f);
-                case LegendsRPG.Characters.Rarity.Rare: return new Color(0.26f, 0.68f, 1f);
-                case LegendsRPG.Characters.Rarity.Epic: return new Color(0.72f, 0.35f, 1f);
-                case LegendsRPG.Characters.Rarity.Legendary: return new Color(1f, 0.55f, 0.18f);
-                case LegendsRPG.Characters.Rarity.Mythic: return new Color(1f, 0.25f, 0.55f);
+                case Characters.Rarity.Common: return new Color(0.58f, 0.65f, 0.76f);
+                case Characters.Rarity.Rare: return new Color(0.26f, 0.68f, 1f);
+                case Characters.Rarity.Epic: return new Color(0.72f, 0.35f, 1f);
+                case Characters.Rarity.Legendary: return new Color(1f, 0.55f, 0.18f);
+                case Characters.Rarity.Mythic: return new Color(1f, 0.25f, 0.55f);
                 default: return Gold;
             }
         }
