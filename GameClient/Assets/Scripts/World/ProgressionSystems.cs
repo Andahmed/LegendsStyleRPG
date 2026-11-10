@@ -375,7 +375,7 @@ namespace LegendsRPG.World
             if (Core.BattleSession.Active && object.ReferenceEquals(Core.BattleSession.Current, cfg))
             {
                 Attempts[region - 1]++;
-                SaveSystem.MarkDirty();
+                SaveSystem.SaveNow();
                 OnChanged?.Invoke();
             }
         }
@@ -401,7 +401,7 @@ namespace LegendsRPG.World
             if (region == ContinentGateSystem.Regions)
                 Core.PlayerProfile.UnlockTitle("World Guardian");
 
-            SaveSystem.MarkDirty();
+            SaveSystem.SaveNow();
             OnChanged?.Invoke();
             UI.UIManager.Instance.ShowBattleResult(true, BossName(region) + " defeated!",
                 new[]
