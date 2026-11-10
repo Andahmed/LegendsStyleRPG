@@ -102,9 +102,21 @@ namespace LegendsRPG.Core
                 ArenaBuilder.ArenaRoot.transform.position = new Vector3(0f, 0f, BattleSession.ArenaOffsetZ);
             }
 
-            // ============ 4) the 3D city ============
-            var cityGo = new GameObject("CityBuilder");
-            cityGo.AddComponent<CityBuilder>().Build();
+            // ============ 4) static tabletop home (legacy city is fallback) ============
+            Transform homeCameraTarget = null;
+            CityWalker.Enabled = false;
+            try
+            {
+                var homeGo = new GameObject("DioramaHomeBuilder");
+                homeCameraTarget = homeGo.AddComponent<DioramaHomeBuilder>().Build();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("[LegendsRPG] Diorama home failed; restoring legacy city. " + ex);
+                CityWalker.Enabled = true;
+                var fallbackCity = new GameObject("CityBuilder_Fallback");
+                fallbackCity.AddComponent<CityBuilder>().Build();
+            }
 
             // ============ 5) camera with 3D-click support ============
             var camGo = new GameObject("BattleCamera");
@@ -137,9 +149,14 @@ namespace LegendsRPG.Core
             // ============ 8) the hero party lives in the city ============
             var roster = HeroDatabase.CreateDefaultRoster();
             team.CreateTeam(roster, CityBuilder.CitySpawnPoint, demoUnlockAll: false);
-            team.SetBrainsEnabled(false);   // peaceful walking in the city
-            camera.SetTarget(team.FocusTransform);   // v1.1: camera follows the team center
-            camera.SnapToTarget();
+            team.SetBrainsEnabled(false);
+            team.SetVisualsVisible(homeCameraTarget == null); // hide the party only while the tabletop home is active
+            if (homeCameraTarget != null) camera.SetDioramaView(homeCameraTarget);
+            else
+            {
+                camera.SetTarget(team.FocusTransform);
+                camera.SnapToTarget();
+            }
 
             // ============ 9) battle HUD (hidden until a battle starts) ============
             var hudGo = new GameObject("HUD");
@@ -194,7 +211,8 @@ namespace LegendsRPG.Core
 
             // ============ 14) start in the city ============
             gm.SetState(GameManager.GameState.City);
-            CityBuilder.ApplyCityMood();
+            if (DioramaHomeBuilder.IsActive) DioramaHomeBuilder.ApplyMood();
+            else CityBuilder.ApplyCityMood();
 
             // welcome the new player
             if (SaveSystem.Current.playerLevel <= 1 && CampaignSystem.ClearedStageCount() == 0)
