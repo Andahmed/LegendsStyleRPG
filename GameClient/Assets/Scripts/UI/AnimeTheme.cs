@@ -29,13 +29,19 @@ namespace LegendsRPG.UI
         {
             switch (rarity)
             {
-                case Rarity.Common: return new Color(0.58f, 0.65f, 0.76f);
-                case Rarity.Rare: return new Color(0.26f, 0.68f, 1f);
-                case Rarity.Epic: return new Color(0.72f, 0.35f, 1f);
-                case Rarity.Legendary: return new Color(1f, 0.55f, 0.18f);
-                case Rarity.Mythic: return new Color(1f, 0.25f, 0.55f);
+                case LegendsRPG.Characters.Rarity.Common: return new Color(0.58f, 0.65f, 0.76f);
+                case LegendsRPG.Characters.Rarity.Rare: return new Color(0.26f, 0.68f, 1f);
+                case LegendsRPG.Characters.Rarity.Epic: return new Color(0.72f, 0.35f, 1f);
+                case LegendsRPG.Characters.Rarity.Legendary: return new Color(1f, 0.55f, 0.18f);
+                case LegendsRPG.Characters.Rarity.Mythic: return new Color(1f, 0.25f, 0.55f);
                 default: return Gold;
             }
+        }
+
+        public static void AddRarityPips(Transform parent, LegendsRPG.Characters.Rarity rarity,
+            Vector2 anchor, Vector2 pos, int maxPips)
+        {
+            MenuTheme.AddRarityPips(parent, (int)rarity, anchor, pos, maxPips);
         }
 
         public static Color Element(ElementType element)
