@@ -172,20 +172,31 @@ namespace LegendsRPG.World
 
         private void BuildNatureDressing()
         {
-            // Six lightweight nature props around the map edge; procedural map remains the fallback.
-            string[] props = { "CommonTree_1", "PineTree_2", "BirchTree_1", "Bush_1", "Rock_2", "TreeStump" };
+            // Curated edge foliage uses only FBX names verified in the Resources tree.
+            // The center lanes remain open so landmarks and touch targets stay readable.
+            string[] props =
+            {
+                "CommonTree_1", "PineTree_2", "BirchTree_1", "Willow_1",
+                "Bush_1", "TreeStump", "Flowers", "Rock_Moss_2", "Plant_3", "Rock_2"
+            };
             Vector3[] positions =
             {
-                new Vector3(-4.15f, 1.58f, -6.85f),
-                new Vector3(4.15f, 1.58f, -6.85f),
-                new Vector3(-4.15f, 1.58f, 6.85f),
-                new Vector3(4.15f, 1.58f, 6.85f),
-                new Vector3(-4.15f, 1.58f, 2.9f),
-                new Vector3(4.15f, 1.58f, -2.9f)
+                new Vector3(-4.25f, 1.58f, -6.85f),
+                new Vector3(4.25f, 1.58f, -6.85f),
+                new Vector3(-4.25f, 1.58f, 6.85f),
+                new Vector3(4.25f, 1.58f, 6.85f),
+                new Vector3(-4.3f, 1.58f, 4.25f),
+                new Vector3(4.3f, 1.58f, -4.25f),
+                new Vector3(-4.3f, 1.58f, 0.2f),
+                new Vector3(4.3f, 1.58f, 0.2f),
+                new Vector3(-3.95f, 1.58f, -3.15f),
+                new Vector3(3.95f, 1.58f, 3.15f)
             };
             for (int i = 0; i < props.Length; i++)
             {
-                float height = i < 3 ? 2.25f : 0.85f;
+                bool tree = props[i].IndexOf("Tree", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            props[i].IndexOf("Willow", StringComparison.OrdinalIgnoreCase) >= 0;
+                float height = tree ? 2.1f : 0.78f;
                 var model = QuaterniusAssetLibrary.InstantiateNature(props[i], _mapRoot,
                     _mapRoot.TransformPoint(positions[i]), height, i * 47f);
                 if (model == null) continue;
