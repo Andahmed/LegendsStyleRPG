@@ -587,10 +587,9 @@ namespace LegendsRPG.World
             // faces the player instead of remaining in a horizontal-only orientation.
             if (_label != null && Camera.main != null)
             {
-                var cam = Camera.main.transform;
-                var toCamera = cam.position - _label.transform.position;
-                if (toCamera.sqrMagnitude > 0.01f)
-                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, Vector3.up);
+                // TextMesh reads correctly only when its forward points AWAY from the viewer.
+                // Matching the camera rotation keeps text upright and un-mirrored at any camera yaw/pitch.
+                _label.transform.rotation = Camera.main.transform.rotation;
             }
 
             // hover / ready pulse
