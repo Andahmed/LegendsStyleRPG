@@ -186,7 +186,8 @@ namespace LegendsRPG.UI
     }
 }
 
-
+namespace LegendsRPG.UI
+{
     /// <summary>Keeps a UI root inside the device safe area, including after rotation changes.</summary>
     [DisallowMultipleComponent]
     public sealed class SafeAreaFitter : MonoBehaviour
@@ -236,3 +237,5 @@ namespace LegendsRPG.UI
             _lastHeight = Screen.height;
         }
     }
+
+}
