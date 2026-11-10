@@ -1,4 +1,5 @@
 using UnityEngine;
+using LegendsRPG.Core;
 
 namespace LegendsRPG.Cam
 {
