@@ -568,6 +568,7 @@ namespace LegendsRPG.UI
 
         private Text _nameText;
         private Text _vipText;
+        private Text _levelText;
         private Text _powerText;
         private Text _goldText;
         private Text _diamondText;
@@ -621,16 +622,18 @@ namespace LegendsRPG.UI
             var avatar = UIBuilder.CreateButton(bar, "AvatarBtn", "", new Vector2(130f, 130f),
                 new Vector2(0f, 1f), new Vector2(85f, -95f), new Color(0.25f, 0.3f, 0.5f, 0.95f),
                 Color.white, 44, () => _manager.Open("profile"));
-            var avatarLabel = UIBuilder.CreateText(avatar.transform, "AvatarIcon", "Lv." + PlayerProfile.Level, 36,
+            UIBuilder.CreateText(avatar.transform, "AvatarIcon", "★", 42,
                 Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(130f, 60f));
 
-            // name + vip + power
-            _nameText = UIBuilder.CreateText(bar, "PlayerName", "", 34, Color.white, TextAnchor.MiddleLeft,
-                new Vector2(0f, 1f), new Vector2(170f, -60f), new Vector2(430f, 44f));
-            _vipText = UIBuilder.CreateText(bar, "Vip", "", 26, new Color(1f, 0.8f, 0.25f), TextAnchor.MiddleLeft,
-                new Vector2(0f, 1f), new Vector2(170f, -105f), new Vector2(300f, 36f));
-            _powerText = UIBuilder.CreateText(bar, "Power", "", 28, new Color(0.6f, 0.9f, 1f), TextAnchor.MiddleLeft,
-                new Vector2(0f, 1f), new Vector2(170f, -142f), new Vector2(430f, 36f));
+            // Player identity uses separate, non-overlapping fields inside the safe-area top bar.
+            _nameText = UIBuilder.CreateText(bar, "PlayerName", "", 32, Color.white, TextAnchor.MiddleLeft,
+                new Vector2(0f, 1f), new Vector2(170f, -58f), new Vector2(470f, 44f));
+            _vipText = UIBuilder.CreateText(bar, "Vip", "", 22, new Color(1f, 0.8f, 0.25f), TextAnchor.MiddleLeft,
+                new Vector2(0f, 1f), new Vector2(170f, -108f), new Vector2(145f, 34f));
+            _levelText = UIBuilder.CreateText(bar, "PlayerLevel", "", 22, new Color(0.65f, 0.88f, 1f), TextAnchor.MiddleLeft,
+                new Vector2(0f, 1f), new Vector2(325f, -108f), new Vector2(110f, 34f));
+            _powerText = UIBuilder.CreateText(bar, "Power", "", 22, new Color(0.6f, 0.9f, 1f), TextAnchor.MiddleLeft,
+                new Vector2(0f, 1f), new Vector2(445f, -108f), new Vector2(250f, 34f));
 
             // currency pills (right)
             var goldPill = UIBuilder.CreatePanel(bar, "GoldPill", new Color(0.1f, 0.09f, 0.05f, 0.9f),
@@ -743,8 +746,9 @@ namespace LegendsRPG.UI
         // ---------------- AFK chest bubble ----------------
         private void BuildAFKBubble()
         {
+            // Keep AFK treasure centered above the bottom navigation; the event rail stays clear on the right.
             var panel = UIBuilder.CreateFreeRect(_root, "AFKBubble", new Vector2(420f, 170f),
-                new Vector2(0f, 0f), new Vector2(30f, 210f));
+                new Vector2(0.5f, 0f), new Vector2(0f, 205f));
             var bg = panel.gameObject.AddComponent<Image>();
             bg.sprite = UIBuilder.SolidSprite;
             bg.color = new Color(0.12f, 0.1f, 0.05f, 0.92f);
@@ -806,9 +810,8 @@ namespace LegendsRPG.UI
         private void RefreshHeader()
         {
             if (_nameText != null) _nameText.text = PlayerProfile.Name;
-            if (_vipText != null) _vipText.text = string.IsNullOrEmpty(PlayerProfile.ActiveTitle)
-                ? "VIP " + Economy.VipLevel
-                : PlayerProfile.ActiveTitle + "  •  VIP " + Economy.VipLevel;
+            if (_vipText != null) _vipText.text = "VIP " + Economy.VipLevel;
+            if (_levelText != null) _levelText.text = "Lv." + PlayerProfile.Level;
 
             long power = 0;
             var team = TeamManager.InstanceRef;
