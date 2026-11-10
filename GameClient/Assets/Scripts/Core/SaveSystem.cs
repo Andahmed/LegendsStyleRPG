@@ -139,6 +139,7 @@ namespace LegendsRPG.Core
             public List<CampaignStarSave> continentStars = new List<CampaignStarSave>();
             public string worldBossDay = "";
             public List<int> worldBossAttempts = new List<int>();
+            public List<int> worldBossRewardsClaimed = new List<int>();
 
             // v3 — dungeons
             public string dungeonDay = "";
@@ -274,6 +275,7 @@ namespace LegendsRPG.Core
             if (Current.continentStars == null) Current.continentStars = new List<CampaignStarSave>();
             if (Current.worldBossDay == null) Current.worldBossDay = "";
             if (Current.worldBossAttempts == null) Current.worldBossAttempts = new List<int>();
+            if (Current.worldBossRewardsClaimed == null) Current.worldBossRewardsClaimed = new List<int>();
             if (Current.beasts == null) Current.beasts = new List<BeastSave>();
             if (Current.itemIds == null) Current.itemIds = new List<string>();
             if (Current.itemCounts == null) Current.itemCounts = new List<int>();
