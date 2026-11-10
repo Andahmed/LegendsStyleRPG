@@ -58,7 +58,7 @@ namespace LegendsRPG.Cam
         public void SetDioramaView(Transform target)
         {
             Target = target;
-            _yaw = 90f;
+            _yaw = 0f;
             _pitch = 48f;
             _distance = 17.5f;
             _zoomInput = 0f;
