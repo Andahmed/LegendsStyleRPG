@@ -37,7 +37,8 @@ namespace LegendsRPG.Cam
             _cam.fieldOfView = 50f;
             _cam.nearClipPlane = 0.3f;
             _cam.farClipPlane = 220f;
-            _cam.backgroundColor = new Color(0.05f, 0.06f, 0.10f);
+            // Soft blue backdrop remains visible around the diorama and in the legacy-city fallback.
+            _cam.backgroundColor = new Color(0.48f, 0.68f, 0.84f);
             _cam.clearFlags = CameraClearFlags.SolidColor;
         }
 

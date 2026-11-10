@@ -1,4 +1,5 @@
 using UnityEngine;
+using LegendsRPG.Art;
 
 namespace LegendsRPG.World
 {
@@ -23,6 +24,7 @@ namespace LegendsRPG.World
                 CreateMaterials();
                 BuildRoom();
                 BuildTableAndMap();
+                BuildNatureDressing();
                 BuildPedestals();
                 var focus = new GameObject("DioramaCameraFocus");
                 focus.transform.SetParent(_root, false);
@@ -47,7 +49,10 @@ namespace LegendsRPG.World
             RenderSettings.ambientSkyColor = new Color(0.42f, 0.34f, 0.27f);
             RenderSettings.ambientEquatorColor = new Color(0.30f, 0.24f, 0.19f);
             RenderSettings.ambientGroundColor = new Color(0.12f, 0.09f, 0.07f);
-            RenderSettings.fog = false;
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = new Color(0.58f, 0.73f, 0.86f);
+            RenderSettings.fogDensity = 0.0035f;
         }
 
         private void CreateMaterials()
@@ -156,6 +161,46 @@ namespace LegendsRPG.World
                     new Vector3(0.5f, 0.85f, 0.5f), mountain);
         }
 
+        private void BuildNatureDressing()
+        {
+            // Six lightweight nature props around the map edge; procedural map remains the fallback.
+            string[] props = { "CommonTree_1", "PineTree_2", "BirchTree_1", "Bush_1", "Rock_2", "TreeStump" };
+            Vector3[] positions =
+            {
+                new Vector3(-4.15f, 1.58f, -6.85f),
+                new Vector3(4.15f, 1.58f, -6.85f),
+                new Vector3(-4.15f, 1.58f, 6.85f),
+                new Vector3(4.15f, 1.58f, 6.85f),
+                new Vector3(-4.15f, 1.58f, 2.9f),
+                new Vector3(4.15f, 1.58f, -2.9f)
+            };
+            for (int i = 0; i < props.Length; i++)
+            {
+                float height = i < 3 ? 2.25f : 0.85f;
+                var model = QuaterniusAssetLibrary.InstantiateNature(props[i], _root,
+                    _root.TransformPoint(positions[i]), height, i * 47f);
+                if (model == null) continue;
+                model.name = "DioramaNature_" + props[i] + "_" + i;
+            }
+        }
+
+        private bool BuildQuaterniusLandmark(Transform parent, int kind)
+        {
+            // Curated dungeon props replace primitive icons only when their imported FBX is available.
+            string[] models =
+            {
+                "Statue_Horse", "Pedestal2", "Banner", "Arch", "Skull",
+                "Chest_Gold", "Torch", "Chest", "Pedestal", "Table_Small", "Woodfire"
+            };
+            string modelName = models[Mathf.Clamp(kind, 0, models.Length - 1)];
+            var model = QuaterniusAssetLibrary.InstantiateDungeonProp(modelName, parent,
+                parent.TransformPoint(new Vector3(0f, 0.82f, 0f)),
+                kind == 3 ? 2.25f : 1.55f, parent.eulerAngles.y);
+            if (model == null) return false;
+            model.name = "DioramaProp_" + modelName;
+            return true;
+        }
+
         private void BuildPedestals()
         {
             // 11 clickable systems: the nine main landmarks plus Shop and Forge.
@@ -188,7 +233,8 @@ namespace LegendsRPG.World
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalTop", new Vector3(0f, 0.38f, 0f),
                 new Vector3(1.32f, 0.16f, 1.32f), _stone);
 
-            BuildIcon(root.transform, kind, accent);
+            if (!BuildQuaterniusLandmark(root.transform, kind))
+                BuildIcon(root.transform, kind, accent);
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
                 new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
