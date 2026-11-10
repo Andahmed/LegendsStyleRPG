@@ -108,6 +108,7 @@ namespace LegendsRPG.Core
                 h.HP.Revive(1f);
             }
             team.SetBrainsEnabled(true);
+            team.SetVisualsVisible(true);
 
             // camera into the arena
             var cam = Camera.main != null ? Camera.main.GetComponent<Cam.IsometricCameraController>() : null;
@@ -141,7 +142,7 @@ namespace LegendsRPG.Core
             if (team != null) team.SetBrainsEnabled(false);
 
             Time.timeScale = 1f;
-            World.CityBuilder.ApplyCityMood();
+            ApplyHomeMood();
             Audio.AudioSystem.Play("Victory");
 
             LimitedEvent.AddPoints(1);
@@ -165,7 +166,7 @@ namespace LegendsRPG.Core
             if (team != null) team.SetBrainsEnabled(false);
 
             Time.timeScale = 1f;
-            World.CityBuilder.ApplyCityMood();
+            ApplyHomeMood();
             Audio.AudioSystem.Play("Death");
 
             var cfg = Current;
@@ -195,7 +196,7 @@ namespace LegendsRPG.Core
             var team = TeamManager.InstanceRef;
             if (team != null) team.SetBrainsEnabled(false);
             Time.timeScale = 1f;
-            World.CityBuilder.ApplyCityMood();
+            ApplyHomeMood();
             if (UI.UIManager.Instance != null) UI.UIManager.Instance.ExitBattleMode();
 
             var retry = new Config
@@ -233,15 +234,23 @@ namespace LegendsRPG.Core
                 h.HP.Revive(1f);
             }
             team.BasePosition = _savedCityPos;
+            team.SetVisualsVisible(false);
 
             var cam = Camera.main != null ? Camera.main.GetComponent<Cam.IsometricCameraController>() : null;
             if (cam != null)
             {
-                cam.SetTarget(team.FocusTransform);   // v1.1: camera follows the team center
+                var homeTarget = DioramaHomeBuilder.IsActive ? DioramaHomeBuilder.HomeCameraTarget : team.FocusTransform;
+                cam.SetTarget(homeTarget);
                 cam.SnapToTarget();
             }
 
             Time.timeScale = 1f;
+        }
+
+        private static void ApplyHomeMood()
+        {
+            if (DioramaHomeBuilder.IsActive) DioramaHomeBuilder.ApplyMood();
+            else World.CityBuilder.ApplyCityMood();
         }
 
         private static void RestoreSpawner()
