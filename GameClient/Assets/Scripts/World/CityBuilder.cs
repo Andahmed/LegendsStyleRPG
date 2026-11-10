@@ -25,6 +25,8 @@ namespace LegendsRPG.World
 
             BuildEnvironment();
             BuildGround(city.transform);
+            // Imported Quaternius foliage replaces the empty outskirts around the fallback city.
+            QuaterniusAssetLibrary.BuildCityNature(city.transform);
             BuildPlaza(city.transform);
             BuildAFKChest(city.transform);
             BuildBuildings(city.transform);
