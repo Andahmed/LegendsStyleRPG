@@ -145,8 +145,12 @@ namespace LegendsRPG.Core
             team.CreateTeam(roster, CityBuilder.CitySpawnPoint, demoUnlockAll: false);
             team.SetBrainsEnabled(false);
             team.SetVisualsVisible(homeCameraTarget == null); // hide the party only while the tabletop home is active
-            camera.SetTarget(homeCameraTarget != null ? homeCameraTarget : team.FocusTransform);
-            camera.SnapToTarget();
+            if (homeCameraTarget != null) camera.SetDioramaView(homeCameraTarget);
+            else
+            {
+                camera.SetTarget(team.FocusTransform);
+                camera.SnapToTarget();
+            }
 
             // ============ 9) battle HUD (hidden until a battle starts) ============
             var hudGo = new GameObject("HUD");
