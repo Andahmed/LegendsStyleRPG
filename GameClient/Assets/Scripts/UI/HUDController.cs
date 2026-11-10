@@ -74,18 +74,19 @@ namespace LegendsRPG.UI
 
             var canvas = UIBuilder.CreateCanvas("HUDCanvas");
             _canvas = canvas;
+            var safeArea = UIBuilder.CreateSafeArea(canvas.transform, "BattleHUDSafeArea");
 
-            BuildHeader(canvas.transform);
-            BuildTeamPortraits(canvas.transform);
-            BuildControlColumn(canvas.transform);
-            BuildFloorClearedPanel(canvas.transform);
-            BuildBattleExtras(canvas.transform);
+            BuildHeader(safeArea);
+            BuildTeamPortraits(safeArea);
+            BuildControlColumn(safeArea);
+            BuildFloorClearedPanel(safeArea);
+            BuildBattleExtras(safeArea);
 
-            _notificationText = UIBuilder.CreateText(canvas.transform, "Notification", "", 34,
+            _notificationText = UIBuilder.CreateText(safeArea, "Notification", "", 34,
                 Color.white, TextAnchor.MiddleCenter, new Vector2(0.5f, 1f), new Vector2(0f, -320f),
                 new Vector2(900f, 60f));
 
-            _killStreakText = UIBuilder.CreateText(canvas.transform, "KillStreak", "", 56,
+            _killStreakText = UIBuilder.CreateText(safeArea, "KillStreak", "", 56,
                 new Color(1f, 0.45f, 0.25f), TextAnchor.MiddleCenter, new Vector2(0.5f, 0.5f), new Vector2(0f, 190f),
                 new Vector2(800f, 80f));
 
