@@ -184,6 +184,57 @@ namespace LegendsRPG.World
             }
         }
 
+        /// <summary>
+        /// Loads an optional custom landmark prefab from Resources/Models/Diorama.
+        /// The imported model is normalized to a predictable height and grounded on
+        /// the landmark pedestal. Quaternius and primitive icons remain fallbacks.
+        /// </summary>
+        private static bool TryLoadCustomModel(Transform parent, string id, float targetHeight)
+        {
+            var prefab = Resources.Load<GameObject>("Models/Diorama/diorama_" + id);
+            if (prefab == null) return false;
+
+            var model = Object.Instantiate(prefab, parent);
+            model.name = "DioramaModel_" + id;
+            model.transform.localPosition = Vector3.zero;
+            model.transform.localRotation = Quaternion.identity;
+            model.transform.localScale = Vector3.one;
+
+            foreach (var collider in model.GetComponentsInChildren<Collider>(true))
+                Object.Destroy(collider);
+
+            var renderers = model.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                Object.Destroy(model);
+                return false;
+            }
+
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+                bounds.Encapsulate(renderers[i].bounds);
+
+            if (bounds.size.y < 0.0001f)
+            {
+                Object.Destroy(model);
+                return false;
+            }
+
+            model.transform.localScale = Vector3.one * (targetHeight / bounds.size.y);
+
+            bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+                bounds.Encapsulate(renderers[i].bounds);
+
+            // Center the model over its pedestal and place its lowest point at y=0.46.
+            model.transform.position += new Vector3(
+                parent.position.x - bounds.center.x,
+                parent.position.y + 0.46f - bounds.min.y,
+                parent.position.z - bounds.center.z);
+
+            return true;
+        }
+
         private bool BuildQuaterniusLandmark(Transform parent, int kind)
         {
             // Curated dungeon props replace primitive icons only when their imported FBX is available.
@@ -233,7 +284,8 @@ namespace LegendsRPG.World
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalTop", new Vector3(0f, 0.38f, 0f),
                 new Vector3(1.32f, 0.16f, 1.32f), _stone);
 
-            if (!BuildQuaterniusLandmark(root.transform, kind))
+            if (!TryLoadCustomModel(root.transform, id, kind == 0 ? 2.6f : 1.7f)
+                && !BuildQuaterniusLandmark(root.transform, kind))
                 BuildIcon(root.transform, kind, accent);
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
