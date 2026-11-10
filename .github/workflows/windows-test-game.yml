@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           test -s GameClient/Builds/Windows/LegendsStyleRPG.exe
-          find GameClient/Builds/Windows -maxdepth 2 -type f -printf '%p %s bytes\\n'
+          find GameClient/Builds/Windows -maxdepth 2 -type f -printf '%p %s bytes\n'
 
       - name: Package Windows player
         shell: bash
