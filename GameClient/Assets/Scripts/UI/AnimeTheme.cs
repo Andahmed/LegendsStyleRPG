@@ -38,12 +38,6 @@ namespace LegendsRPG.UI
             }
         }
 
-        public static void AddRarityPips(Transform parent, LegendsRPG.Characters.Rarity rarity,
-            Vector2 anchor, Vector2 pos, int maxPips)
-        {
-            MenuTheme.AddRarityPips(parent, (int)rarity, anchor, pos, maxPips);
-        }
-
         public static Color Element(ElementType element)
         {
             return Combat.ElementalMatrix.GetElementColor(element);
