@@ -656,7 +656,7 @@ namespace LegendsRPG.UI
                 var ble = btnCol.AddComponent<LayoutElement>();
                 ble.preferredWidth = 230f;
 
-                UIX.CreateRowButton(btnCol, "EQUIP", () =>
+                UIX.CreateRowButton(btnCol.transform, "EQUIP", () =>
                     {
                         _pendingItem = id;
                         if (string.IsNullOrEmpty(_equipTargetHero) && team != null && team.Heroes.Count > 0)
@@ -667,7 +667,7 @@ namespace LegendsRPG.UI
                         Rebuild();
                     },
                     new Color(0.2f, 0.5f, 0.35f), 56f, 226f, 24);
-                UIX.CreateRowButton(btnCol, "SELL +" + Economy.Format(200 + item.RarityIndex * 350) + "g", () =>
+                UIX.CreateRowButton(btnCol.transform, "SELL +" + Economy.Format(200 + item.RarityIndex * 350) + "g", () =>
                     {
                         SellItem(id);
                         Rebuild();
