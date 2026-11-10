@@ -387,7 +387,13 @@ namespace LegendsRPG.World
 
         private static void ApplyWin(int region)
         {
-            if (region < 1 || region > RewardClaimed.Length || RewardClaimed[region - 1]) return;
+            if (region < 1 || region > RewardClaimed.Length) return;
+            if (RewardClaimed[region - 1])
+            {
+                UI.UIManager.Instance.ShowBattleResult(true, BossName(region) + " defeated!",
+                    new[] { "Today's World Boss rewards were already claimed.", "Next attempt: tomorrow." });
+                return;
+            }
             // Set the claim flag before changing balances so a victory retry cannot duplicate rewards.
             RewardClaimed[region - 1] = true;
             long gold = 9000L + region * 4500L;
