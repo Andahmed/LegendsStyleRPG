@@ -658,12 +658,17 @@ namespace LegendsRPG.UI
                 var btnCol = new GameObject("Btns");
                 var brt = btnCol.AddComponent<RectTransform>();
                 brt.SetParent(row, false);
-                var bl = btnCol.AddComponent<VerticalLayoutGroup>();
+                var bl = btnCol.AddComponent<HorizontalLayoutGroup>();
+                bl.childAlignment = TextAnchor.MiddleCenter;
+                bl.childForceExpandWidth = false;
+                bl.childControlWidth = false;
                 bl.childForceExpandHeight = false;
                 bl.childControlHeight = false;
-                bl.spacing = 4f;
+                bl.spacing = 8f;
                 var ble = btnCol.AddComponent<LayoutElement>();
-                ble.preferredWidth = 230f;
+                ble.minWidth = 278f;
+                ble.preferredWidth = 278f;
+                ble.flexibleWidth = 0f;
 
                 UIX.CreateRowButton(btnCol.transform, "EQUIP", () =>
                     {
@@ -675,13 +680,13 @@ namespace LegendsRPG.UI
                         Manager.Notify("Pick slot: WPN/ARM/AML/WNG/PET/MNT");
                         Rebuild();
                     },
-                    new Color(0.2f, 0.5f, 0.35f), 56f, 226f, 24);
+                    new Color(0.2f, 0.5f, 0.35f), 76f, 132f, 21);
                 UIX.CreateRowButton(btnCol.transform, "SELL +" + Economy.Format(200 + item.RarityIndex * 350) + "g", () =>
                     {
                         SellItem(id);
                         Rebuild();
                     },
-                    new Color(0.45f, 0.3f, 0.2f), 56f, 226f, 22);
+                    new Color(0.45f, 0.3f, 0.2f), 76f, 138f, 19);
             }
         }
 
@@ -830,29 +835,9 @@ namespace LegendsRPG.UI
 
         public override void Build(UIManager manager, Transform canvasParent, string title)
         {
+            // Rename controls are created in Rebuild as a normal content row so they
+            // participate in the same vertical scroll/layout as the rest of Profile.
             base.Build(manager, canvasParent, title);
-
-            var renameRow = UIBuilder.CreateFreeRect(Root, "RenameRow", new Vector2(1000f, 110f),
-                new Vector2(0.5f, 0f), new Vector2(0f, 130f));
-
-            var inputGo = new GameObject("RenameInput");
-            var irt = inputGo.AddComponent<RectTransform>();
-            irt.SetParent(renameRow, false);
-            irt.anchorMin = Vector2.zero;
-            irt.anchorMax = new Vector2(0f, 1f);
-            irt.offsetMin = Vector2.zero;
-            irt.offsetMax = new Vector2(-280f, 0f);
-
-            var bg = inputGo.AddComponent<Image>();
-            bg.sprite = UIBuilder.SolidSprite;
-            bg.color = new Color(0.12f, 0.13f, 0.18f, 0.98f);
-
-            _renameInput = inputGo.AddComponent<InputField>();
-            _renameInput.placeholder = CreateText(inputGo, "Ph", "New name (2-14 chars)", new Color(0.5f, 0.5f, 0.55f));
-            _renameInput.textComponent = CreateText(inputGo, "Txt", "", Color.white);
-
-            UIBuilder.CreateButton(renameRow, "RenameBtn", "RENAME (500 Dia)", new Vector2(260f, 100f),
-                new Vector2(1f, 0f), new Vector2(-265f, 0f), new Color(0.35f, 0.4f, 0.6f, 0.95f), Color.white, 26, DoRename);
         }
 
         private static Text CreateText(GameObject parent, string name, string value, Color color)
@@ -903,6 +888,23 @@ namespace LegendsRPG.UI
                 "ID: " + PlayerProfile.PlayerId + "\nVIP " + Economy.VipLevel + "  •  " +
                 (string.IsNullOrEmpty(PlayerProfile.ActiveTitle) ? "No title" : "\"" + PlayerProfile.ActiveTitle + "\""),
                 28, new Color(0.8f, 0.85f, 0.95f), TextAnchor.MiddleRight, true);
+
+            var renameRow = UIX.CreateRow(Content, "RenameRow", 112f, 12, 12, 8, 8);
+            var inputGo = new GameObject("RenameInput", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
+            var irt = inputGo.GetComponent<RectTransform>();
+            irt.SetParent(renameRow, false);
+            var inputLayout = inputGo.GetComponent<LayoutElement>();
+            inputLayout.minWidth = 320f;
+            inputLayout.preferredHeight = 76f;
+            inputLayout.flexibleWidth = 1f;
+            var inputBg = inputGo.GetComponent<Image>();
+            inputBg.sprite = UIBuilder.SolidSprite;
+            inputBg.color = new Color(0.12f, 0.13f, 0.18f, 0.98f);
+            _renameInput = inputGo.AddComponent<InputField>();
+            _renameInput.placeholder = CreateText(inputGo, "Ph", "New name (2-14 chars)", new Color(0.5f, 0.5f, 0.55f));
+            _renameInput.textComponent = CreateText(inputGo, "Txt", "", Color.white);
+            UIX.CreateRowButton(renameRow, "RENAME (500 Dia)", DoRename,
+                new Color(0.35f, 0.4f, 0.6f), 76f, 300f, 22);
 
             // statistics
             AddStatRow("Player EXP", Mathf.RoundToInt(PlayerProfile.Exp) + " / " + Mathf.RoundToInt(PlayerProfile.ExpNeeded(PlayerProfile.Level)));
