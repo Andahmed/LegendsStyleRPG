@@ -570,7 +570,9 @@ namespace LegendsRPG.World
             _label = labelGo.AddComponent<TextMesh>();
             _label.text = label;
             _label.fontSize = 44;
-            _label.characterSize = 0.20f;
+            // Diorama landmarks are close together: keep their world labels compact.
+            // The legacy full-size city still gets a larger sign for readability.
+            _label.characterSize = colliderSize.x > 7f ? 0.13f : 0.075f;
             _label.anchor = TextAnchor.MiddleCenter;
             _label.alignment = TextAlignment.Center;
             _label.color = accent;
@@ -590,7 +592,9 @@ namespace LegendsRPG.World
                 var cam = Camera.main.transform;
                 var toCamera = cam.position - _label.transform.position;
                 if (toCamera.sqrMagnitude > 0.01f)
-                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, Vector3.up);
+                    // TextMesh's readable face points along the camera view direction.
+                    // Using the opposite vector avoids the mirrored back-face labels seen in Home.
+                    _label.transform.rotation = Quaternion.LookRotation(-toCamera.normalized, cam.up);
             }
 
             // hover / ready pulse
