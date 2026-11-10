@@ -56,6 +56,9 @@ namespace LegendsRPG.Team
                     var go = new GameObject("TeamFocus");
                     _focus = go.transform;
                 }
+                // Snap to the live team center NOW: BattleSession teleports the heroes to the arena and
+                // snaps the camera in the same frame, before Update() would have moved the focus.
+                if (Heroes.Count > 0) _focus.position = TeamCenter;
                 return _focus;
             }
         }
