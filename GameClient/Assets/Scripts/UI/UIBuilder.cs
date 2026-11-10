@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace LegendsRPG.UI
 {
     /// <summary>
-    /// Code-first uGUI construction helpers (portrait 1080x1920 canvas).
+    /// Code-first uGUI construction helpers (landscape 1920x1080 canvas).
     /// Uses the built-in runtime font — the Arabic localization pass will
     /// switch to TextMeshPro with an Arabic font + reshaper in a later phase.
     /// </summary>
@@ -82,7 +82,7 @@ namespace LegendsRPG.UI
 
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1080f, 1920f);
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
 
             go.AddComponent<GraphicRaycaster>();
@@ -94,6 +94,21 @@ namespace LegendsRPG.UI
                 es.AddComponent<StandaloneInputModule>();
             }
             return canvas;
+        }
+
+
+        /// <summary>Creates a parent rect that follows Android's safe display area.</summary>
+        public static RectTransform CreateSafeArea(Transform parent, string name)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            var rect = go.GetComponent<RectTransform>();
+            rect.SetParent(parent, false);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            go.AddComponent<SafeAreaFitter>();
+            return rect;
         }
 
         public static RectTransform CreatePanel(Transform parent, string name, Color color,
@@ -170,3 +185,54 @@ namespace LegendsRPG.UI
         }
     }
 }
+
+
+    /// <summary>Keeps a UI root inside the device safe area, including after rotation changes.</summary>
+    [DisallowMultipleComponent]
+    public sealed class SafeAreaFitter : MonoBehaviour
+    {
+        private RectTransform _rect;
+        private Rect _lastSafeArea;
+        private int _lastWidth;
+        private int _lastHeight;
+
+        private void OnEnable()
+        {
+            _rect = GetComponent<RectTransform>();
+            ApplySafeArea();
+        }
+
+        private void Update()
+        {
+            if (_rect == null ||
+                _lastWidth != Screen.width ||
+                _lastHeight != Screen.height ||
+                !_lastSafeArea.Equals(Screen.safeArea))
+            {
+                ApplySafeArea();
+            }
+        }
+
+        private void ApplySafeArea()
+        {
+            if (_rect == null) _rect = GetComponent<RectTransform>();
+            if (_rect == null || Screen.width <= 0 || Screen.height <= 0) return;
+
+            Rect safe = Screen.safeArea;
+            Vector2 min = safe.position;
+            Vector2 max = safe.position + safe.size;
+            min.x /= Screen.width;
+            min.y /= Screen.height;
+            max.x /= Screen.width;
+            max.y /= Screen.height;
+
+            _rect.anchorMin = Vector2.Max(Vector2.zero, min);
+            _rect.anchorMax = Vector2.Min(Vector2.one, max);
+            _rect.offsetMin = Vector2.zero;
+            _rect.offsetMax = Vector2.zero;
+
+            _lastSafeArea = safe;
+            _lastWidth = Screen.width;
+            _lastHeight = Screen.height;
+        }
+    }
