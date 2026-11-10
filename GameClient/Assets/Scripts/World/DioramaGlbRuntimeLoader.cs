@@ -74,6 +74,16 @@ namespace LegendsRPG.World
 
             if (declaredLength < glbBytes.Length)
             {
+                for (int i = (int)declaredLength; i < glbBytes.Length; i++)
+                {
+                    if (glbBytes[i] != 0)
+                    {
+                        Debug.LogWarning("[LegendsRPG] Diorama GLB '" + _modelId +
+                            "' has non-zero data after its declared length.", this);
+                        return false;
+                    }
+                }
+
                 var trimmed = new byte[(int)declaredLength];
                 System.Buffer.BlockCopy(glbBytes, 0, trimmed, 0, trimmed.Length);
                 glbBytes = trimmed;
