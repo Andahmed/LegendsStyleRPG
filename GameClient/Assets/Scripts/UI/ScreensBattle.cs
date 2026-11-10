@@ -22,8 +22,9 @@ namespace LegendsRPG.UI
             // chapter switcher
             var nav = UIX.CreateRow(Content, "ChNav", 110f, 14, 14, 10, 10);
             UIX.CreateRowButton(nav, "<", () => { _chapter--; Rebuild(); }, new Color(0.3f, 0.35f, 0.5f), 90f, 110f, 44);
+            var story = CampaignStory.GetChapter(_chapter);
             UIX.AddChildText(nav, "ChName",
-                "Chapter " + _chapter + "\n" + CampaignSystem.ChapterNames[_chapter - 1],
+                "ACT " + _chapter + " — " + story.title + "\n" + story.region,
                 34, new Color(1f, 0.9f, 0.55f), TextAnchor.MiddleCenter, true);
             UIX.CreateRowButton(nav, ">", () => { _chapter++; Rebuild(); }, new Color(0.3f, 0.35f, 0.5f), 90f, 110f, 44);
 
@@ -32,6 +33,26 @@ namespace LegendsRPG.UI
                 "Total stars: " + CampaignSystem.TotalStars() + " / " + (CampaignSystem.Chapters * CampaignSystem.StagesPerChapter * 3) +
                 "   •   Stages cleared: " + CampaignSystem.ClearedStageCount(),
                 28, new Color(0.7f, 0.85f, 1f), TextAnchor.MiddleCenter, true);
+
+            var storyCard = UIX.CreateRow(Content, "StoryBrief", 210f, 18, 18, 12, 12);
+            storyCard.GetComponent<Image>().color = new Color(0.12f, 0.16f, 0.24f, 0.98f);
+            UIX.AddChildText(storyCard, "Story",
+                story.synopsis + "\n\n" +
+                "BOSS: " + story.bossName + "\n" +
+                "OPENING: " + story.opening,
+                25, new Color(0.88f, 0.9f, 0.96f), TextAnchor.MiddleLeft, true);
+
+            int nextStage = 1;
+            while (nextStage <= CampaignSystem.StagesPerChapter &&
+                   CampaignSystem.StarsOf(_chapter, nextStage) > 0) nextStage++;
+            string nextBrief = nextStage <= CampaignSystem.StagesPerChapter
+                ? CampaignStory.GetStageBrief(_chapter, nextStage)
+                : story.finale;
+            var beat = UIX.CreateRow(Content, "StoryBeat", 105f);
+            UIX.AddChildText(beat, "Beat",
+                "NEXT STORY BEAT — " + (nextStage <= CampaignSystem.StagesPerChapter ? _chapter + "-" + nextStage : "CHAPTER COMPLETE") +
+                "\n" + nextBrief,
+                24, new Color(0.72f, 0.88f, 1f), TextAnchor.MiddleCenter, true);
 
             // stage grid 3 per row
             for (int s = 1; s <= CampaignSystem.StagesPerChapter; s += 3)
