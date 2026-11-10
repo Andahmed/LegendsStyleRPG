@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using LegendsRPG.Core;
+using LegendsRPG.Art;
 using LegendsRPG.Team;
 
 namespace LegendsRPG.World
