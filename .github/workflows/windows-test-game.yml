@@ -1,0 +1,55 @@
+name: Windows Test Game
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-test-game-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows:
+    name: Build Windows 64-bit EXE
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout full project
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Build Windows player with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: GameClient
+          targetPlatform: StandaloneWindows64
+          unityVersion: 2022.3.62f3
+          buildMethod: LegendsRPG.EditorTools.BuildTools.BuildWindows
+          allowDirtyBuild: true
+
+      - name: Verify Windows executable exists
+        shell: bash
+        run: |
+          test -s GameClient/Builds/Windows/LegendsStyleRPG.exe
+          find GameClient/Builds/Windows -maxdepth 2 -type f -printf '%p %s bytes\\n'
+
+      - name: Package Windows player
+        shell: bash
+        run: |
+          cd GameClient/Builds/Windows
+          zip -r ../../../Windows-Test-Game-Windows-x64.zip .
+
+      - name: Upload Windows EXE package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Test-Game-Windows-x64
+          path: Windows-Test-Game-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
