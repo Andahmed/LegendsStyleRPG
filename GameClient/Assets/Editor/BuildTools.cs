@@ -25,7 +25,7 @@ namespace LegendsRPG.EditorTools
         /// <summary>
         /// Cloud Build "Pre-export method": guarantees the Boot scene exists and
         /// is in EditorBuildSettings, then applies the Android player settings
-        /// (identifier com.legends.stylerpg, IL2CPP, ARM64 only, API 23/34).
+        /// (identifier com.ahmed.legendsstylerpg, IL2CPP, ARMv7 + ARM64, API 23/34).
         /// </summary>
         public static void PreExport()
         {
@@ -82,9 +82,9 @@ namespace LegendsRPG.EditorTools
             PlayerSettings.companyName = "LegendsStyleRPG";
             PlayerSettings.productName = "Legends Reborn Style RPG";
             PlayerSettings.bundleVersion = "1.2.0";
-            PlayerSettings.Android.bundleVersionCode = 13;
+            PlayerSettings.Android.bundleVersionCode = 14;
 
-            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.legends.stylerpg");
+            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.ahmed.legendsstylerpg");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64; // 32-bit + 64-bit device support
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
