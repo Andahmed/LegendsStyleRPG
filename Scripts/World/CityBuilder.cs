@@ -546,13 +546,18 @@ namespace LegendsRPG.World
 
         public void Init(string screenId, string label, Color accent)
         {
+            Init(screenId, label, accent, new Vector3(8.5f, 7f, 8.5f), new Vector3(0f, 3.2f, 0f));
+        }
+
+        public void Init(string screenId, string label, Color accent, Vector3 colliderSize, Vector3 colliderCenter)
+        {
             ScreenId = screenId;
             Label = label;
             Accent = accent;
 
             var col = gameObject.AddComponent<BoxCollider>();
-            col.size = new Vector3(8.5f, 7f, 8.5f);
-            col.center = new Vector3(0f, 3.2f, 0f);
+            col.size = colliderSize;
+            col.center = colliderCenter;
 
             // floating 3D label
             var labelGo = new GameObject("Label3D");
