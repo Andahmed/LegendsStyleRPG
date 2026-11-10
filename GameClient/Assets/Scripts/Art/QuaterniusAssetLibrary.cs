@@ -43,7 +43,16 @@ namespace LegendsRPG.Art
                 { "vine_spider", "Slime" },
                 { "sun_eagle", "Bat" },
                 { "boss_titan", "Dragon" },
-                { "boss_lich", "Skeleton" }
+                { "boss_lich", "Skeleton" },
+                { "chapter_boss_01", "Dragon" }, { "chapter_boss_02", "Slime" },
+                { "chapter_boss_03", "Slime" }, { "chapter_boss_04", "Dragon" },
+                { "chapter_boss_05", "Dragon" }, { "chapter_boss_06", "Bat" },
+                { "chapter_boss_07", "Dragon" }, { "chapter_boss_08", "Skeleton" },
+                { "chapter_boss_09", "Bat" }, { "chapter_boss_10", "Skeleton" },
+                { "chapter_boss_11", "Bat" }, { "chapter_boss_12", "Dragon" },
+                { "world_boss_1", "Dragon" }, { "world_boss_2", "Dragon" },
+                { "world_boss_3", "Dragon" }, { "world_boss_4", "Bat" },
+                { "world_boss_5", "Skeleton" }
             };
 
         private static readonly string[] CityTrees =
@@ -63,6 +72,33 @@ namespace LegendsRPG.Art
             string modelName;
             if (!MonsterModels.TryGetValue(monsterId ?? string.Empty, out modelName)) return null;
             return InstantiateModel(MonstersRoot + modelName, parent, targetHeight, true);
+        }
+
+        /// <summary>Applies an element/boss tint to imported FBX materials without replacing their textures.</summary>
+        public static void TintModel(GameObject model, Color tint, float strength = 0.38f)
+        {
+            if (model == null) return;
+            strength = Mathf.Clamp01(strength);
+            var renderers = model.GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var mats = renderers[i].materials;
+                for (int j = 0; j < mats.Length; j++)
+                {
+                    var mat = mats[j];
+                    if (mat == null) continue;
+                    if (mat.HasProperty("_BaseColor"))
+                    {
+                        Color baseColor = mat.GetColor("_BaseColor");
+                        mat.SetColor("_BaseColor", Color.Lerp(baseColor, tint, strength));
+                    }
+                    else if (mat.HasProperty("_Color"))
+                    {
+                        Color baseColor = mat.GetColor("_Color");
+                        mat.SetColor("_Color", Color.Lerp(baseColor, tint, strength));
+                    }
+                }
+            }
         }
 
         public static GameObject InstantiateHero(HeroClass heroClass, Transform parent, float targetHeight)
