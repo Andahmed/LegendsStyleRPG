@@ -84,19 +84,27 @@ namespace LegendsRPG.World
                 return;
             }
 
+            chapter = Mathf.Clamp(chapter, 1, Chapters);
+            stage = Mathf.Clamp(stage, 1, StagesPerChapter);
+            var story = CampaignStory.GetChapter(chapter);
             int floor = Mathf.Max(1, (chapter - 1) * StagesPerChapter + stage);
             int difficulty = Mathf.Clamp((chapter - 1) / 3, 0, 3);
             bool boss = stage == StagesPerChapter;
 
+            CombatEvents.RaiseNotification("CHAPTER " + chapter + " — " + story.title + ": " +
+                CampaignStory.GetStageBrief(chapter, stage));
+
             var cfg = new Core.BattleSession.Config
             {
                 type = Core.BattleSession.BattleType.Campaign,
-                title = chapter + "-" + stage + " " + ChapterNames[Mathf.Clamp(chapter - 1, 0, ChapterNames.Length - 1)],
+                title = chapter + "-" + stage + " " + story.region + (boss ? " — " + story.bossName : ""),
                 floor = floor,
                 difficulty = difficulty,
                 boss = boss,
                 chapter = chapter,
-                stage = stage
+                stage = stage,
+                forcedMonsterKey = boss ? CampaignStory.GetBossKey(chapter) : "",
+                monsterCount = boss ? 1 : 0
             };
             cfg.onWin = () => ApplyStageWin(chapter, stage);
             Core.BattleSession.Start(cfg);
@@ -151,11 +159,19 @@ namespace LegendsRPG.World
                 }
             }
 
+            if (stage == StagesPerChapter)
+            {
+                CombatEvents.RaiseNotification(CampaignStory.GetFinale(chapter));
+                if (chapter == Chapters)
+                    Core.PlayerProfile.UnlockTitle("Legend Reborn");
+            }
+
             SaveSystem.MarkDirty();
             OnChanged?.Invoke();
             UI.UIManager.Instance.ShowBattleResult(true,
                 "Stage " + chapter + "-" + stage + " cleared!",
-                new[] { "+" + Core.Economy.Format(gold) + " Gold", "+" + Mathf.RoundToInt(exp) + " Player XP", best + " / 3 Stars" });
+                new[] { "+" + Core.Economy.Format(gold) + " Gold", "+" + Mathf.RoundToInt(exp) + " Player XP",
+                    best + " / 3 Stars", stage == StagesPerChapter ? CampaignStory.GetFinale(chapter) : "Next: " + CampaignStory.GetStageBrief(chapter, Mathf.Min(stage + 1, StagesPerChapter)) });
         }
 
         public static void WriteInto(SaveSystem.SaveData s)
