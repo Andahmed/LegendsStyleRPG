@@ -91,6 +91,8 @@ namespace LegendsRPG.Combat
                 if (skill.IsUltimate) UltCharge = 0f;
                 if (_anim != null && skill.kind == SkillKind.MeleeStrike) _anim.PlayAttack(0.4f);
                 if (_anim != null && skill.kind != SkillKind.MeleeStrike) _anim.PlayCast(0.6f);
+                var importedAnimator = GetComponentInChildren<LegendsRPG.Art.QuaterniusClipDriver>();
+                if (importedAnimator != null) importedAnimator.PlaySkill();
                 Audio.AudioSystem.Play(skill.IsUltimate ? "Ult" : "Skill");
                 if (skill.cameraShake) ShakeCamera(skill.shakeMagnitude);
             }

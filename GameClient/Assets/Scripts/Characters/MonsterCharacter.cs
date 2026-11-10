@@ -3,6 +3,7 @@ using UnityEngine;
 using LegendsRPG.Combat;
 using LegendsRPG.Core;
 using LegendsRPG.Vfx;
+using LegendsRPG.Art;
 
 namespace LegendsRPG.Characters
 {
@@ -21,6 +22,8 @@ namespace LegendsRPG.Characters
         public Health HP { get; private set; }
         public CharacterMotor Motor { get; private set; }
         public CharacterAnimator Anim { get; private set; }
+
+        private QuaterniusClipDriver _modelAnimator;
 
         public event System.Action<MonsterCharacter> MonsterDied;
 
@@ -55,6 +58,16 @@ namespace LegendsRPG.Characters
             Anim.ArmR = body.ArmR;
             Anim.LegL = body.LegL;
             Anim.LegR = body.LegR;
+
+            // Prefer the imported Quaternius FBX when Unity has it available.
+            // The procedural body remains as a safe fallback for fresh checkouts.
+            var importedModel = QuaterniusAssetLibrary.InstantiateMonster(
+                data.monsterId, transform, 2.35f * data.scale);
+            if (importedModel != null)
+            {
+                QuaterniusAssetLibrary.HideProceduralBody(body);
+                _modelAnimator = importedModel.GetComponent<QuaterniusClipDriver>();
+            }
 
             Stats.Init(data.baseHP * hpScale, data.baseAttack * atkScale, data.baseDefense,
                 data.moveSpeed, data.attackSpeed, data.attackRange, data.element, 1);
@@ -102,6 +115,7 @@ namespace LegendsRPG.Characters
                     _target = CombatUtil.FindNearestHero(transform.position, Data.aggroRadius);
                     if (_target != null) _state = State.Chase;
                     Anim.SetMoving(false);
+                    if (_modelAnimator != null) _modelAnimator.SetMoving(false);
                     break;
 
                 case State.Chase:
@@ -127,6 +141,7 @@ namespace LegendsRPG.Characters
                     {
                         Motor.Move((_target.transform.position - transform.position).normalized, Stats.MoveSpeed);
                         Anim.SetMoving(true);
+                        if (_modelAnimator != null) _modelAnimator.SetMoving(true);
                     }
                     break;
 
@@ -143,6 +158,7 @@ namespace LegendsRPG.Characters
                         break;
                     }
                     Anim.SetMoving(false);
+                    if (_modelAnimator != null) _modelAnimator.SetMoving(false);
                     Motor.FaceTowards(_target.transform.position);
                     if (_attackCooldown <= 0f) PerformAttack();
                     break;
@@ -154,11 +170,13 @@ namespace LegendsRPG.Characters
                         _state = State.Idle;
                         Motor.Stop();
                         Anim.SetMoving(false);
+                        if (_modelAnimator != null) _modelAnimator.SetMoving(false);
                     }
                     else
                     {
                         Motor.Move((_spawnPoint - transform.position).normalized, Stats.MoveSpeed);
                         Anim.SetMoving(true);
+                        if (_modelAnimator != null) _modelAnimator.SetMoving(true);
                     }
                     break;
             }
@@ -168,6 +186,7 @@ namespace LegendsRPG.Characters
         {
             _attackCooldown = 1f / Mathf.Max(0.2f, Stats.AttackSpeed);
             Anim.PlayAttack(0.4f);
+            if (_modelAnimator != null) _modelAnimator.PlayAttack();
             CombatUtil.DealDamage(Stats, _target.Stats, Stats.Attack, Data.element, false, gameObject);
             VFXFactory.Spawn(Data.attackVfxKey, _target.transform.position + Vector3.up * 1.1f,
                 Data.primaryColor, Data.isBoss ? 1.6f : 0.9f);
@@ -175,6 +194,8 @@ namespace LegendsRPG.Characters
 
         private void HandleDeath(Health h)
         {
+            Anim.PlayDeath();
+            if (_modelAnimator != null) _modelAnimator.PlayDeath();
             VFXFactory.Spawn("death", transform.position + Vector3.up * 0.8f, Data.primaryColor, 1.1f);
             Audio.AudioSystem.Play("Death", 0.7f);
 
