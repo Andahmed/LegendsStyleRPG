@@ -288,9 +288,17 @@ namespace LegendsRPG.World
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalTop", new Vector3(0f, 0.38f, 0f),
                 new Vector3(1.32f, 0.16f, 1.32f), _stone);
 
-            if (!TryLoadCustomModel(root.transform, id, kind == 0 ? 2.6f : 1.7f)
-                && !BuildQuaterniusLandmark(root.transform, kind))
-                BuildIcon(root.transform, kind, accent);
+            // Keep a visible fallback immediately; the original GLB replaces it only after
+            // glTFast has loaded and instantiated the complete model successfully.
+            float targetHeight = kind == 0 ? 2.6f : 1.7f;
+            var fallback = new GameObject("DioramaFallback");
+            fallback.transform.SetParent(root.transform, false);
+            if (!TryLoadCustomModel(fallback.transform, id, targetHeight)
+                && !BuildQuaterniusLandmark(fallback.transform, kind))
+                BuildIcon(fallback.transform, kind, accent);
+
+            var glbLoader = root.AddComponent<DioramaGlbRuntimeLoader>();
+            glbLoader.Configure(id, fallback.transform, targetHeight);
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
                 new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
