@@ -564,8 +564,24 @@ namespace LegendsRPG.Core
     {
         public const int MaxForgeLevel = 15;
         private static readonly Dictionary<string, int> Levels = new Dictionary<string, int>();
+        public static int Shards { get; private set; }
 
         public static event Action OnChanged;
+
+        public static void GrantShards(int amount)
+        {
+            if (amount <= 0) return;
+            Shards += amount;
+            Combat.CombatEvents.RaiseNotification("+" + amount + " Forge Shards");
+            SaveSystem.MarkDirty();
+            OnChanged?.Invoke();
+        }
+
+        public static int ShardsRequired(string itemId)
+        {
+            int nextLevel = LevelOf(itemId) + 1;
+            return Mathf.Max(1, 1 + (nextLevel - 1) / 4);
+        }
 
         public static int LevelOf(string itemId)
         {
@@ -597,8 +613,33 @@ namespace LegendsRPG.Core
             return true;
         }
 
+        /// <summary>Refines an owned item using both gold and monster-forged shards.</summary>
+        public static bool TryRefine(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId) || Items.ItemDatabase.Get(itemId) == null) return false;
+            int current = LevelOf(itemId);
+            if (current >= MaxForgeLevel) return false;
+            int required = ShardsRequired(itemId);
+            if (Shards < required)
+            {
+                Combat.CombatEvents.RaiseNotification("Need " + required + " Forge Shards (have " + Shards + ")");
+                Audio.AudioSystem.Play("Error");
+                return false;
+            }
+            long cost = CostOf(itemId, current + 1);
+            if (!Economy.TrySpendGold(cost)) return false;
+            Shards -= required;
+            Levels[itemId] = current + 1;
+            Audio.AudioSystem.Play("Fanfare");
+            QuestSystem.ReportProgress("forge_upgrade", 1);
+            SaveSystem.MarkDirty();
+            OnChanged?.Invoke();
+            return true;
+        }
+
         public static void WriteInto(SaveSystem.SaveData s)
         {
+            s.forgeShards = Shards;
             s.forgeLevels.Clear();
             foreach (var kv in Levels)
             {
@@ -609,6 +650,7 @@ namespace LegendsRPG.Core
         public static void ReadFrom(SaveSystem.SaveData s)
         {
             Levels.Clear();
+            Shards = Mathf.Max(0, s.forgeShards);
             if (s.forgeLevels == null) return;
             foreach (var f in s.forgeLevels)
             {

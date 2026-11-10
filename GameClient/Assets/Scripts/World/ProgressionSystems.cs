@@ -84,19 +84,27 @@ namespace LegendsRPG.World
                 return;
             }
 
+            chapter = Mathf.Clamp(chapter, 1, Chapters);
+            stage = Mathf.Clamp(stage, 1, StagesPerChapter);
+            var story = CampaignStory.GetChapter(chapter);
             int floor = Mathf.Max(1, (chapter - 1) * StagesPerChapter + stage);
             int difficulty = Mathf.Clamp((chapter - 1) / 3, 0, 3);
             bool boss = stage == StagesPerChapter;
 
+            CombatEvents.RaiseNotification("CHAPTER " + chapter + " — " + story.title + ": " +
+                CampaignStory.GetStageBrief(chapter, stage));
+
             var cfg = new Core.BattleSession.Config
             {
                 type = Core.BattleSession.BattleType.Campaign,
-                title = chapter + "-" + stage + " " + ChapterNames[Mathf.Clamp(chapter - 1, 0, ChapterNames.Length - 1)],
+                title = chapter + "-" + stage + " " + story.region + (boss ? " — " + story.bossName : ""),
                 floor = floor,
                 difficulty = difficulty,
                 boss = boss,
                 chapter = chapter,
-                stage = stage
+                stage = stage,
+                forcedMonsterKey = boss ? CampaignStory.GetBossKey(chapter) : "",
+                monsterCount = boss ? 1 : 0
             };
             cfg.onWin = () => ApplyStageWin(chapter, stage);
             Core.BattleSession.Start(cfg);
@@ -151,11 +159,19 @@ namespace LegendsRPG.World
                 }
             }
 
+            if (stage == StagesPerChapter)
+            {
+                CombatEvents.RaiseNotification(CampaignStory.GetFinale(chapter));
+                if (chapter == Chapters)
+                    Core.PlayerProfile.UnlockTitle("Legend Reborn");
+            }
+
             SaveSystem.MarkDirty();
             OnChanged?.Invoke();
             UI.UIManager.Instance.ShowBattleResult(true,
                 "Stage " + chapter + "-" + stage + " cleared!",
-                new[] { "+" + Core.Economy.Format(gold) + " Gold", "+" + Mathf.RoundToInt(exp) + " Player XP", best + " / 3 Stars" });
+                new[] { "+" + Core.Economy.Format(gold) + " Gold", "+" + Mathf.RoundToInt(exp) + " Player XP",
+                    best + " / 3 Stars", stage == StagesPerChapter ? CampaignStory.GetFinale(chapter) : "Next: " + CampaignStory.GetStageBrief(chapter, Mathf.Min(stage + 1, StagesPerChapter)) });
         }
 
         public static void WriteInto(SaveSystem.SaveData s)
@@ -232,7 +248,9 @@ namespace LegendsRPG.World
                 difficulty = 3,
                 boss = stage == StagesPerRegion,
                 region = region,
-                stage = stage
+                stage = stage,
+                forcedMonsterKey = stage == StagesPerRegion ? "world_boss_" + region : "",
+                monsterCount = stage == StagesPerRegion ? 1 : 0
             };
             cfg.onWin = () => ApplyGateWin(region, stage);
             Core.BattleSession.Start(cfg);
@@ -274,6 +292,154 @@ namespace LegendsRPG.World
             {
                 if (c != null && !string.IsNullOrEmpty(c.key)) _stars[c.key] = Mathf.Clamp(c.stars, 0, 3);
             }
+        }
+    }
+
+    // ====================================================================
+    // WORLD BOSSES — one persistent daily challenge for each endgame region.
+    // ====================================================================
+    public static class WorldBossSystem
+    {
+        public const int AttemptsPerRegionPerDay = 1;
+        private static string _day = "";
+        private static readonly int[] Attempts = new int[ContinentGateSystem.Regions];
+        private static readonly bool[] RewardClaimed = new bool[ContinentGateSystem.Regions];
+        private static readonly string[] BossNames =
+        {
+            "Elderroot, Worldheart Guardian", "Solkar, Cinderstorm Dragon",
+            "Glacielle, Queen of the White Maw", "Tempestrix, Skybreaker",
+            "Malachar, Sovereign of the Void"
+        };
+
+        public static event Action OnChanged;
+
+        public static string BossName(int region)
+        {
+            return BossNames[Mathf.Clamp(region - 1, 0, BossNames.Length - 1)];
+        }
+
+        public static int AttemptsLeft(int region)
+        {
+            DailyReset();
+            if (region < 1 || region > Attempts.Length) return 0;
+            return Mathf.Max(0, AttemptsPerRegionPerDay - Attempts[region - 1]);
+        }
+
+        public static void DailyReset()
+        {
+            string today = DateTime.UtcNow.ToString("yyyyMMdd");
+            if (_day == today) return;
+            _day = today;
+            for (int i = 0; i < Attempts.Length; i++)
+            {
+                Attempts[i] = 0;
+                RewardClaimed[i] = false;
+            }
+            SaveSystem.MarkDirty();
+            OnChanged?.Invoke();
+        }
+
+        public static void Start(int region)
+        {
+            DailyReset();
+            if (region < 1 || region > ContinentGateSystem.Regions) return;
+            if (!ContinentGateSystem.IsUnlocked(region, 1))
+            {
+                CombatEvents.RaiseNotification("Conquer the region gate to unlock its World Boss.");
+                Audio.AudioSystem.Play("Error");
+                return;
+            }
+            if (AttemptsLeft(region) <= 0)
+            {
+                CombatEvents.RaiseNotification("This region's World Boss attempt is used for today.");
+                Audio.AudioSystem.Play("Error");
+                return;
+            }
+
+            var cfg = new Core.BattleSession.Config
+            {
+                type = Core.BattleSession.BattleType.WorldBoss,
+                title = "WORLD BOSS — " + BossName(region),
+                floor = 220 + region * 22,
+                difficulty = 3,
+                boss = true,
+                hpScale = 1.15f + (region - 1) * 0.16f,
+                atkScale = 1.10f + (region - 1) * 0.08f,
+                forcedMonsterKey = "world_boss_" + region,
+                monsterCount = 1,
+                region = region
+            };
+            cfg.onWin = () => ApplyWin(region);
+            Core.BattleSession.Start(cfg);
+            // Only consume an attempt after BattleSession confirms that combat actually started.
+            if (Core.BattleSession.Active && object.ReferenceEquals(Core.BattleSession.Current, cfg))
+            {
+                Attempts[region - 1]++;
+                SaveSystem.SaveNow();
+                OnChanged?.Invoke();
+            }
+        }
+
+        public static void ApplyWinForRetry(int region)
+        {
+            ApplyWin(region);
+        }
+
+        private static void ApplyWin(int region)
+        {
+            if (region < 1 || region > RewardClaimed.Length) return;
+            if (RewardClaimed[region - 1])
+            {
+                UI.UIManager.Instance.ShowBattleResult(true, BossName(region) + " defeated!",
+                    new[] { "Today's World Boss rewards were already claimed.", "Next attempt: tomorrow." });
+                return;
+            }
+            // Set the claim flag before changing balances so a victory retry cannot duplicate rewards.
+            RewardClaimed[region - 1] = true;
+            long gold = 9000L + region * 4500L;
+            int diamonds = 120 + region * 35;
+            int shards = 3 + region;
+            Core.Economy.AddGold(gold, "World Boss");
+            Core.Economy.AddDiamonds(diamonds, "World Boss");
+            string itemId = Items.ItemDatabase.RollRandomItemId();
+            Items.InventorySystem.Grant(itemId);
+            Core.ForgeSystem.GrantShards(shards);
+            if (region == ContinentGateSystem.Regions)
+                Core.PlayerProfile.UnlockTitle("World Guardian");
+
+            SaveSystem.SaveNow();
+            OnChanged?.Invoke();
+            UI.UIManager.Instance.ShowBattleResult(true, BossName(region) + " defeated!",
+                new[]
+                {
+                    "+" + Core.Economy.Format(gold) + " Gold",
+                    "+" + diamonds + " Diamonds",
+                    "+1 " + (Items.ItemDatabase.Get(itemId) != null ? Items.ItemDatabase.Get(itemId).displayName : "Equipment"),
+                    "+" + shards + " Forge Shards"
+                });
+        }
+
+        public static void WriteInto(SaveSystem.SaveData s)
+        {
+            DailyReset();
+            s.worldBossDay = _day;
+            s.worldBossAttempts = new List<int>(Attempts);
+            s.worldBossRewardsClaimed = new List<int>();
+            for (int i = 0; i < RewardClaimed.Length; i++)
+                s.worldBossRewardsClaimed.Add(RewardClaimed[i] ? 1 : 0);
+        }
+
+        public static void ReadFrom(SaveSystem.SaveData s)
+        {
+            _day = s.worldBossDay ?? "";
+            for (int i = 0; i < Attempts.Length; i++)
+            {
+                Attempts[i] = s.worldBossAttempts != null && i < s.worldBossAttempts.Count
+                    ? Mathf.Clamp(s.worldBossAttempts[i], 0, AttemptsPerRegionPerDay) : 0;
+                RewardClaimed[i] = s.worldBossRewardsClaimed != null &&
+                    i < s.worldBossRewardsClaimed.Count && s.worldBossRewardsClaimed[i] != 0;
+            }
+            DailyReset();
         }
     }
 
@@ -844,6 +1010,10 @@ namespace LegendsRPG.World
 
                 case Core.BattleSession.BattleType.ContinentGate:
                     cfg.onWin = () => ContinentGateSystem.ApplyGateWin(cfg.region, cfg.stage);
+                    break;
+
+                case Core.BattleSession.BattleType.WorldBoss:
+                    cfg.onWin = () => WorldBossSystem.ApplyWinForRetry(cfg.region);
                     break;
 
                 default:

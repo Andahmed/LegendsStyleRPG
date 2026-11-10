@@ -515,7 +515,7 @@ namespace LegendsRPG.UI
             ClearContent();
 
             var head = UIX.CreateRow(Content, "Head", 90f);
-            UIX.AddChildText(head, "T", "FORGE — +12% item stats per level", 30,
+            UIX.AddChildText(head, "T", "FORGE — +12% item stats per level\nMonster refinement shards: " + ForgeSystem.Shards, 30,
                 new Color(1f, 0.9f, 0.55f), TextAnchor.MiddleCenter, true);
 
             var equipped = SaveSystem.Current.equipped;
@@ -566,6 +566,19 @@ namespace LegendsRPG.UI
                     () => { if (ForgeSystem.TryUpgrade(id)) Rebuild(); },
                     maxed ? new Color(0.3f, 0.32f, 0.38f) : new Color(0.65f, 0.35f, 0.15f), 84f, 250f, 26)
                     .interactable = !maxed;
+
+                if (!maxed)
+                {
+                    int neededShards = ForgeSystem.ShardsRequired(id);
+                    var refine = UIX.CreateRow(Content, "Refine_" + id, 76f, 14, 14, 6, 6);
+                    UIX.AddChildText(refine, "Info",
+                        "REFINE +" + (lv + 1) + "  •  " + neededShards + " shards + " + Economy.Format(cost) + " gold",
+                        24, new Color(0.55f, 0.86f, 1f), TextAnchor.MiddleLeft, true);
+                    UIX.CreateRowButton(refine, "REFINE",
+                        () => { if (ForgeSystem.TryRefine(id)) Rebuild(); },
+                        new Color(0.18f, 0.43f, 0.62f), 60f, 190f, 23)
+                        .interactable = ForgeSystem.Shards >= neededShards;
+                }
             }
         }
     }

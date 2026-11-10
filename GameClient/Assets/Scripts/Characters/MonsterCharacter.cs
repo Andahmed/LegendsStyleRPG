@@ -66,6 +66,7 @@ namespace LegendsRPG.Characters
             if (importedModel != null)
             {
                 QuaterniusAssetLibrary.HideProceduralBody(body);
+                QuaterniusAssetLibrary.TintModel(importedModel, data.primaryColor, data.isBoss ? 0.48f : 0.24f);
                 _modelAnimator = importedModel.GetComponent<QuaterniusClipDriver>();
             }
 
@@ -205,6 +206,17 @@ namespace LegendsRPG.Characters
                 float exp = Data.expReward * (World.TowerSystem.CurrentExpScale > 0f ? World.TowerSystem.CurrentExpScale : 1f);
                 team.ShareEXP(exp);
                 DamagePopup.Spawn(transform.position, "+" + Mathf.RoundToInt(exp) + " EXP", new Color(1f, 0.85f, 0.3f));
+            }
+
+            // Refinement shards are a real monster drop. Bosses always drop a bundle;
+            // regular enemies have a modest chance so the forge progression stays paced.
+            bool shardDrop = Data.isBoss || UnityEngine.Random.value < 0.12f;
+            if (shardDrop)
+            {
+                int shards = Data.isBoss ? 3 : 1;
+                Core.ForgeSystem.GrantShards(shards);
+                DamagePopup.Spawn(transform.position + Vector3.right * 0.25f,
+                    "+" + shards + " REFINE SHARD", new Color(0.45f, 0.85f, 1f), Data.isBoss);
             }
 
             if (MonsterDied != null) MonsterDied(this);

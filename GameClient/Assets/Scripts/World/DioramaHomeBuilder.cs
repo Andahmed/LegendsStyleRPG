@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using LegendsRPG.Art;
 
@@ -172,20 +173,31 @@ namespace LegendsRPG.World
 
         private void BuildNatureDressing()
         {
-            // Six lightweight nature props around the map edge; procedural map remains the fallback.
-            string[] props = { "CommonTree_1", "PineTree_2", "BirchTree_1", "Bush_1", "Rock_2", "TreeStump" };
+            // Curated edge foliage uses only FBX names verified in the Resources tree.
+            // The center lanes remain open so landmarks and touch targets stay readable.
+            string[] props =
+            {
+                "CommonTree_1", "PineTree_2", "BirchTree_1", "Willow_1",
+                "Bush_1", "TreeStump", "Flowers", "Rock_Moss_2", "Plant_3", "Rock_2"
+            };
             Vector3[] positions =
             {
-                new Vector3(-4.15f, 1.58f, -6.85f),
-                new Vector3(4.15f, 1.58f, -6.85f),
-                new Vector3(-4.15f, 1.58f, 6.85f),
-                new Vector3(4.15f, 1.58f, 6.85f),
-                new Vector3(-4.15f, 1.58f, 2.9f),
-                new Vector3(4.15f, 1.58f, -2.9f)
+                new Vector3(-4.25f, 1.58f, -6.85f),
+                new Vector3(4.25f, 1.58f, -6.85f),
+                new Vector3(-4.25f, 1.58f, 6.85f),
+                new Vector3(4.25f, 1.58f, 6.85f),
+                new Vector3(-4.3f, 1.58f, 4.25f),
+                new Vector3(4.3f, 1.58f, -4.25f),
+                new Vector3(-4.3f, 1.58f, 0.2f),
+                new Vector3(4.3f, 1.58f, 0.2f),
+                new Vector3(-3.95f, 1.58f, -3.15f),
+                new Vector3(3.95f, 1.58f, 3.15f)
             };
             for (int i = 0; i < props.Length; i++)
             {
-                float height = i < 3 ? 2.25f : 0.85f;
+                bool tree = props[i].IndexOf("Tree", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            props[i].IndexOf("Willow", StringComparison.OrdinalIgnoreCase) >= 0;
+                float height = tree ? 2.1f : 0.78f;
                 var model = QuaterniusAssetLibrary.InstantiateNature(props[i], _mapRoot,
                     _mapRoot.TransformPoint(positions[i]), height, i * 47f);
                 if (model == null) continue;
@@ -249,7 +261,8 @@ namespace LegendsRPG.World
             };
             string modelName = models[Mathf.Clamp(kind, 0, models.Length - 1)];
             var model = QuaterniusAssetLibrary.InstantiateDungeonProp(modelName, parent,
-                parent.TransformPoint(new Vector3(0f, 0.82f, 0f)),
+                // Temporary Quaternius fallback sits on the existing pedestal top.
+                parent.TransformPoint(new Vector3(0f, 0.46f, 0f)),
                 kind == 3 ? 2.25f : 1.55f, parent.eulerAngles.y);
             if (model == null) return false;
             model.name = "DioramaProp_" + modelName;
@@ -279,7 +292,12 @@ namespace LegendsRPG.World
             root.transform.localPosition = position;
             var accent = Accent(kind);
             var click = root.AddComponent<CityBuilding>();
-            click.Init(id, label, accent, new Vector3(1.9f, 2.8f, 1.9f), new Vector3(0f, 1.0f, 0f));
+            // The castle model is wider/taller than the other supplied landmarks.
+            // Extend only its hit area so the upper towers remain easy to select.
+            if (id == "guild")
+                click.Init(id, label, accent, new Vector3(2.8f, 3.1f, 2.4f), new Vector3(0f, 1.55f, 0f));
+            else
+                click.Init(id, label, accent, new Vector3(1.9f, 2.8f, 1.9f), new Vector3(0f, 1.0f, 0f));
 
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalBase", new Vector3(0f, 0.12f, 0f),
                 new Vector3(1.55f, 0.24f, 1.55f), _darkWood);
@@ -288,12 +306,26 @@ namespace LegendsRPG.World
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalTop", new Vector3(0f, 0.38f, 0f),
                 new Vector3(1.32f, 0.16f, 1.32f), _stone);
 
-            if (!TryLoadCustomModel(root.transform, id, kind == 0 ? 2.6f : 1.7f)
-                && !BuildQuaterniusLandmark(root.transform, kind))
-                BuildIcon(root.transform, kind, accent);
+            // Keep a visible fallback immediately; the original GLB replaces it only after
+            // glTFast has loaded and instantiated the complete model successfully.
+            float targetHeight = kind == 0 ? 2.6f : 1.7f;
+            var fallback = new GameObject("DioramaFallback");
+            fallback.transform.SetParent(root.transform, false);
+            if (!TryLoadCustomModel(fallback.transform, id, targetHeight)
+                && !BuildQuaterniusLandmark(fallback.transform, kind))
+                BuildIcon(fallback.transform, kind, accent);
+
+            // Only these five landmarks have bundled GLB source models.
+            if (id == "guild" || id == "summon" || id == "arena"
+                || id == "continent" || id == "beast")
+            {
+                var glbLoader = root.AddComponent<DioramaGlbRuntimeLoader>();
+                glbLoader.Configure(id, fallback.transform, targetHeight);
+            }
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
-                new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
+                new Vector3(0.55f, id == "guild" ? 2.95f : 2.18f, -0.42f),
+                Vector3.one * 0.23f, _red);
             dot.transform.localScale = Vector3.one * 0.23f;
         }
 

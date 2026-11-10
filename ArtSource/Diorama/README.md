@@ -1,19 +1,29 @@
 # Diorama Art Source
 
-This folder keeps source artwork and references outside Unity's imported asset tree.
+This folder keeps the source references and model handoff notes outside Unity's imported asset tree.
 
-## Folders
+## Source assets
 
-- `images/`: visual reference images used to guide modeling. `reference_scene_full.jpg` is a scene-wide reference only; the individual landmark images are modeling references.
-- `models_raw/`: original source files and working exports kept before final Unity export (for example, Meshy source downloads and intermediate formats).
-- `GameClient/Assets/Resources/Models/Diorama/`: final Unity-ready FBX models and their required textures.
+- `images/`: scene and individual landmark reference images. The individual images guide each model; `reference_scene_full.jpg` guides the overall diorama composition.
+- `models_raw/`: reserved for editable source files and intermediate exports.
+- Repository root: the five delivered GLB source models remain here as the original files.
 
-## Naming
+## Unity runtime assets
 
-Final FBX files use the pattern `diorama_<id>.fbx`, for example:
+The five supplied GLBs are copied byte-for-byte into:
 
-- `diorama_guild.fbx`
-- `diorama_summon.fbx`
-- `diorama_arena.fbx`
+`GameClient/Assets/Resources/Models/Diorama/`
 
-Keep each model's textures alongside its FBX in the Unity Resources folder. Do not put reference-only images in `GameClient/Assets`.
+They use the `.bytes` extension so Unity imports them as `TextAsset` and the home scene can load them through glTFast at runtime.
+
+| Source GLB | Runtime resource | Home landmark |
+|---|---|---|
+| `01_Guild_Castle.glb` | `diorama_guild.bytes` | Guild castle |
+| `02_Arena_Banner.glb` | `diorama_arena.bytes` | Arena banner |
+| `03_Beast_Banner.glb` | `diorama_beast.bytes` | Beast banner |
+| `04_Continent_Portal.glb` | `diorama_continent.bytes` | Continent portal |
+| `05_Summon_Altar.glb` | `diorama_summon.bytes` | Summon altar |
+
+The GLBs are authored with their vertical axis along +Z. `DioramaGlbRuntimeLoader` converts them to Unity's +Y-up orientation, fits each model to its landmark, and replaces the temporary fallback only after a successful import. Each supplied model contains its own base, so the temporary display pedestal is removed only after the GLB is ready.
+
+Do not rename the resource files or change the `diorama_<landmark-id>` naming convention without updating the loader and the bindings in `DioramaHomeBuilder`. Keep the current procedural/FBX fallback so Home still opens when a model cannot load.

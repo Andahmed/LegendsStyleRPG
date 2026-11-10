@@ -1,4 +1,5 @@
 using UnityEngine;
+using LegendsRPG.Art;
 using LegendsRPG.Core;
 using LegendsRPG.Vfx;
 
@@ -23,6 +24,8 @@ namespace LegendsRPG.World
             BuildLighting();
             BuildGround(arena.transform);
             BuildBoundary(arena.transform);
+            // Bring the existing modular dungeon FBX set into the battle arena.
+            QuaterniusAssetLibrary.BuildDungeonProps(arena.transform);
             BuildProps(arena.transform);
             BuildBraziers(arena.transform);
             BuildCampfire(arena.transform);

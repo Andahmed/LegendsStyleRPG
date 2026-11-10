@@ -79,6 +79,7 @@ namespace LegendsRPG.Core
             SummonSystem.ReadFrom(SaveSystem.Current);
             CampaignSystem.ReadFrom(SaveSystem.Current);
             ContinentGateSystem.ReadFrom(SaveSystem.Current);
+            WorldBossSystem.ReadFrom(SaveSystem.Current);
             DungeonSystem.ReadFrom(SaveSystem.Current);
             ArenaSystem.ReadFrom(SaveSystem.Current);
             MineSystem.ReadFrom(SaveSystem.Current);
