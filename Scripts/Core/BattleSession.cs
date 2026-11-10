@@ -234,7 +234,7 @@ namespace LegendsRPG.Core
                 h.HP.Revive(1f);
             }
             team.BasePosition = _savedCityPos;
-            team.SetVisualsVisible(false);
+            team.SetVisualsVisible(!DioramaHomeBuilder.IsActive);
 
             var cam = Camera.main != null ? Camera.main.GetComponent<Cam.IsometricCameraController>() : null;
             if (cam != null)
