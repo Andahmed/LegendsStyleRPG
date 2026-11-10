@@ -375,6 +375,11 @@ namespace LegendsRPG.World
             }
         }
 
+        public static void ApplyWinForRetry(int region)
+        {
+            ApplyWin(region);
+        }
+
         private static void ApplyWin(int region)
         {
             long gold = 9000L + region * 4500L;
