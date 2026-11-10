@@ -39,7 +39,7 @@ namespace LegendsRPG.World
                 BuildPedestals();
                 var focus = new GameObject("DioramaCameraFocus");
                 focus.transform.SetParent(_root, false);
-                focus.transform.localPosition = new Vector3(0f, 2.0f, 0f);
+                focus.transform.localPosition = new Vector3(0f, 1.7f, 0f);
                 HomeCameraTarget = focus.transform;
                 IsActive = true;
                 ApplyMood();
@@ -80,51 +80,53 @@ namespace LegendsRPG.World
 
         private void BuildRoom()
         {
-            Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 5.0f, -9.3f),
-                new Vector3(13f, 12f, 0.55f), _darkWood);
+            // A restrained backdrop keeps the tabletop world, not the bookcase, as the focal point.
+            Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 3.65f, -9.6f),
+                new Vector3(16f, 7.3f, 0.45f), _darkWood);
             var trim = Vfx.MaterialLibrary.Solid(new Color(0.48f, 0.27f, 0.12f), 0.55f, 0.3f);
-            Make(PrimitiveType.Cube, "WallTrim", new Vector3(0f, 10.7f, -8.95f), new Vector3(13f, 0.28f, 0.25f), trim);
+            Make(PrimitiveType.Cube, "WallTrim", new Vector3(0f, 7.35f, -9.3f),
+                new Vector3(16f, 0.18f, 0.22f), trim);
 
-            // Two simple wooden shelves and rows of colorful book spines.
+            // Smaller centered shelves provide a library atmosphere without overpowering the map.
             for (int shelf = 0; shelf < 2; shelf++)
             {
-                float y = 5.2f + shelf * 2.45f;
-                Make(PrimitiveType.Cube, "ShelfBoard" + shelf, new Vector3(0f, y, -8.72f),
-                    new Vector3(9.8f, 0.22f, 0.85f), _wood);
+                float y = 2.8f + shelf * 1.7f;
+                Make(PrimitiveType.Cube, "ShelfBoard" + shelf, new Vector3(0f, y, -9.0f),
+                    new Vector3(8.6f, 0.16f, 0.55f), _wood);
                 for (int i = 0; i < 13; i++)
                 {
-                    float x = -4.5f + i * 0.75f;
-                    float h = 0.9f + (i % 4) * 0.18f;
+                    float x = -3.9f + i * 0.65f;
+                    float h = 0.58f + (i % 4) * 0.10f;
                     var bookMat = Vfx.MaterialLibrary.Solid(BookColor(i), 0.45f, 0.2f);
                     Make(PrimitiveType.Cube, "Book_" + shelf + "_" + i,
-                        new Vector3(x, y + 0.12f + h * 0.5f, -8.72f),
-                        new Vector3(0.48f, h, 0.55f), bookMat);
+                        new Vector3(x, y + 0.08f + h * 0.5f, -9.0f),
+                        new Vector3(0.38f, h, 0.38f), bookMat);
                 }
             }
 
-            Make(PrimitiveType.Cube, "LeftRoomPost", new Vector3(-6.2f, 4.6f, -8.9f),
-                new Vector3(0.35f, 10.5f, 0.45f), _wood);
-            Make(PrimitiveType.Cube, "RightRoomPost", new Vector3(6.2f, 4.6f, -8.9f),
-                new Vector3(0.35f, 10.5f, 0.45f), _wood);
+            Make(PrimitiveType.Cube, "LeftRoomPost", new Vector3(-7.8f, 3.5f, -9.3f),
+                new Vector3(0.28f, 7.0f, 0.32f), _wood);
+            Make(PrimitiveType.Cube, "RightRoomPost", new Vector3(7.8f, 3.5f, -9.3f),
+                new Vector3(0.28f, 7.0f, 0.32f), _wood);
 
             var key = new GameObject("WarmRoomKeyLight");
             key.transform.SetParent(_root, false);
-            key.transform.position = new Vector3(-3f, 9f, 3f);
+            key.transform.position = new Vector3(-3f, 7.0f, 3f);
             var kl = key.AddComponent<Light>();
             kl.type = LightType.Point;
             kl.color = new Color(1f, 0.68f, 0.38f);
-            kl.intensity = 2.1f;
-            kl.range = 24f;
+            kl.intensity = 1.8f;
+            kl.range = 20f;
             kl.shadows = LightShadows.Soft;
 
             var fill = new GameObject("SoftRoomFill");
             fill.transform.SetParent(_root, false);
-            fill.transform.position = new Vector3(3f, 7f, -2f);
+            fill.transform.position = new Vector3(3f, 5.5f, -2f);
             var fl = fill.AddComponent<Light>();
             fl.type = LightType.Point;
             fl.color = new Color(1f, 0.83f, 0.62f);
-            fl.intensity = 1.0f;
-            fl.range = 18f;
+            fl.intensity = 0.8f;
+            fl.range = 16f;
         }
 
         private void BuildTableAndMap()
@@ -309,7 +311,12 @@ namespace LegendsRPG.World
 
             // Keep a visible fallback immediately; the original GLB replaces it only after
             // glTFast has loaded and instantiated the complete model successfully.
-            float targetHeight = kind == 0 ? 2.6f : 1.7f;
+            float targetHeight = id == "guild" ? 3.0f
+                : id == "arena" ? 2.2f
+                : id == "beast" ? 2.2f
+                : id == "continent" ? 2.25f
+                : id == "summon" ? 2.2f
+                : 1.7f;
             var fallback = new GameObject("DioramaFallback");
             fallback.transform.SetParent(root.transform, false);
             if (!TryLoadCustomModel(fallback.transform, id, targetHeight)
