@@ -610,7 +610,7 @@ namespace LegendsRPG.UI
                 Color.white, 36, () => _manager.Open("shop"));
         }
 
-        // ---------------- event column (left side) ----------------
+        // ---------------- event column (right side) ----------------
         private void BuildEventColumn()
         {
             var col = UIBuilder.CreateFreeRect(_root, "EventColumn", new Vector2(116f, 438f),
@@ -638,7 +638,7 @@ namespace LegendsRPG.UI
                 TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-8f, -6f), new Vector2(50f, 50f));
         }
 
-        // ---------------- right side buttons ----------------
+        // ---------------- left side buttons ----------------
         private void BuildSideButtons()
         {
             var col = UIBuilder.CreateFreeRect(_root, "SideColumn", new Vector2(112f, 330f),
