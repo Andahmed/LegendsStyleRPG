@@ -21,6 +21,19 @@ namespace LegendsRPG.Characters
             _cc = GetComponent<CharacterController>();
         }
 
+        private void Update()
+        {
+            if (_cc == null || !_cc.enabled) return;
+
+            // Apply gravity even while the AI is idle; otherwise a character
+            // teleported just above the floor can remain suspended in the arena.
+            if (_cc.isGrounded) _verticalVelocity = -1f;
+            else _verticalVelocity += Physics.gravity.y * 2f * Time.deltaTime;
+
+            _cc.Move(Vector3.up * (_verticalVelocity * Time.deltaTime));
+            ClampToArena();
+        }
+
         public void Move(Vector3 direction, float speed)
         {
             direction.y = 0f;
@@ -33,11 +46,8 @@ namespace LegendsRPG.Characters
                 _facing = Vector3.RotateTowards(_facing, direction.normalized, 720f * Mathf.Deg2Rad * Time.deltaTime, 0f);
             }
 
-            if (_cc.isGrounded) _verticalVelocity = -1f;
-            else _verticalVelocity += Physics.gravity.y * 2f * Time.deltaTime;
-
+            // Horizontal locomotion is separate from the gravity step in Update().
             var motion = direction * speed * Time.deltaTime;
-            motion.y = _verticalVelocity * Time.deltaTime;
             _cc.Move(motion);
 
             ClampToArena();
@@ -62,17 +72,23 @@ namespace LegendsRPG.Characters
 
         public void Teleport(Vector3 position)
         {
+            if (_cc == null) _cc = GetComponent<CharacterController>();
+            if (_cc == null) return;
+
             _cc.enabled = false;
             transform.position = position;
+            _verticalVelocity = 0f;
+            CurrentSpeed = 0f;
             _cc.enabled = true;
         }
 
         private void ClampToArena()
         {
-            // Battles run around WaveSpawner.ArenaCenter (currently Z=600), not world origin.
+            // Only constrain movement during a battle. The legacy city/fallback lives at Z=0.
             // Clamp the character's offset from that center so movement cannot snap heroes
             // and monsters back toward (0,0,0) when they leave the arena radius.
-            Vector3 center = WaveSpawner.ArenaCenter;
+            if (!BattleSession.Active) return;
+            Vector3 center = BattleSession.ArenaCenter;
             Vector3 p = transform.position;
             Vector2 offset = new Vector2(p.x - center.x, p.z - center.z);
             float r = offset.magnitude;
