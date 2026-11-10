@@ -267,7 +267,8 @@ namespace LegendsRPG.Art
 
         public void SetMoving(bool moving)
         {
-            if (moving) PlayFirst("Walk", "Flying", "Idle");
+            // Ground heroes and monsters must never fall back to a Flying clip.
+            if (moving) PlayFirst("Walk", "Walking", "Run", "Running", "Idle", "Idle_Battle");
             else PlayIdle();
         }
 
@@ -288,7 +289,9 @@ namespace LegendsRPG.Art
 
         private void PlayIdle()
         {
-            PlayFirst("Idle", "Flying", "Walk");
+            // Prefer grounded idle/standing clips; a missing idle leaves the last pose
+            // rather than starting an unrelated flying animation.
+            PlayFirst("Idle", "Idle_Battle", "Stand", "Standing", "Walk", "Walking");
         }
 
         private void PlayFirst(params string[] keywords)
