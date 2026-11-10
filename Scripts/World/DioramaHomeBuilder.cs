@@ -64,36 +64,36 @@ namespace LegendsRPG.World
 
         private void BuildRoom()
         {
-            var wall = Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 5.0f, -7.3f),
-                new Vector3(23f, 12f, 0.55f), _darkWood);
+            var wall = Make(PrimitiveType.Cube, "WoodRoomBackWall", new Vector3(0f, 5.0f, -9.3f),
+                new Vector3(13f, 12f, 0.55f), _darkWood);
             var trim = Vfx.MaterialLibrary.Solid(new Color(0.48f, 0.27f, 0.12f), 0.55f, 0.3f);
-            Make(PrimitiveType.Cube, "WallTrim", new Vector3(0f, 10.7f, -6.95f), new Vector3(23f, 0.28f, 0.25f), trim);
+            Make(PrimitiveType.Cube, "WallTrim", new Vector3(0f, 10.7f, -8.95f), new Vector3(13f, 0.28f, 0.25f), trim);
 
             // Two simple wooden shelves and rows of colorful book spines.
             for (int shelf = 0; shelf < 2; shelf++)
             {
                 float y = 5.2f + shelf * 2.45f;
                 Make(PrimitiveType.Cube, "ShelfBoard" + shelf, new Vector3(0f, y, -6.72f),
-                    new Vector3(15.5f, 0.22f, 0.85f), _wood);
+                    new Vector3(9.8f, 0.22f, 0.85f), _wood);
                 for (int i = 0; i < 13; i++)
                 {
-                    float x = -6.8f + i * 1.12f;
+                    float x = -4.5f + i * 0.75f;
                     float h = 0.9f + (i % 4) * 0.18f;
                     var bookMat = Vfx.MaterialLibrary.Solid(BookColor(i), 0.45f, 0.2f);
                     Make(PrimitiveType.Cube, "Book_" + shelf + "_" + i,
-                        new Vector3(x, y + 0.12f + h * 0.5f, -6.72f),
-                        new Vector3(0.72f, h, 0.55f), bookMat);
+                        new Vector3(x, y + 0.12f + h * 0.5f, -8.72f),
+                        new Vector3(0.48f, h, 0.55f), bookMat);
                 }
             }
 
-            Make(PrimitiveType.Cube, "LeftRoomPost", new Vector3(-11.2f, 4.6f, -6.9f),
+            Make(PrimitiveType.Cube, "LeftRoomPost", new Vector3(-6.2f, 4.6f, -8.9f),
                 new Vector3(0.35f, 10.5f, 0.45f), _wood);
-            Make(PrimitiveType.Cube, "RightRoomPost", new Vector3(11.2f, 4.6f, -6.9f),
+            Make(PrimitiveType.Cube, "RightRoomPost", new Vector3(6.2f, 4.6f, -8.9f),
                 new Vector3(0.35f, 10.5f, 0.45f), _wood);
 
             var key = new GameObject("WarmRoomKeyLight");
             key.transform.SetParent(_root, false);
-            key.transform.position = new Vector3(-5f, 9f, 2f);
+            key.transform.position = new Vector3(-3f, 9f, 3f);
             var kl = key.AddComponent<Light>();
             kl.type = LightType.Point;
             kl.color = new Color(1f, 0.68f, 0.38f);
@@ -103,7 +103,7 @@ namespace LegendsRPG.World
 
             var fill = new GameObject("SoftRoomFill");
             fill.transform.SetParent(_root, false);
-            fill.transform.position = new Vector3(7f, 7f, -1f);
+            fill.transform.position = new Vector3(3f, 7f, -2f);
             var fl = fill.AddComponent<Light>();
             fl.type = LightType.Point;
             fl.color = new Color(1f, 0.83f, 0.62f);
@@ -115,61 +115,61 @@ namespace LegendsRPG.World
         {
             // Table top, apron and four legs.
             Make(PrimitiveType.Cube, "TableTop", new Vector3(0f, 0.95f, 0f),
-                new Vector3(20f, 0.65f, 13.4f), _wood);
-            Make(PrimitiveType.Cube, "TableFrontApron", new Vector3(0f, 0.38f, 6.35f),
-                new Vector3(19.4f, 0.75f, 0.35f), _darkWood);
-            Make(PrimitiveType.Cube, "TableBackApron", new Vector3(0f, 0.38f, -6.35f),
-                new Vector3(19.4f, 0.75f, 0.35f), _darkWood);
+                new Vector3(11.8f, 0.65f, 17.4f), _wood);
+            Make(PrimitiveType.Cube, "TableFrontApron", new Vector3(0f, 0.38f, 8.35f),
+                new Vector3(11.2f, 0.75f, 0.35f), _darkWood);
+            Make(PrimitiveType.Cube, "TableBackApron", new Vector3(0f, 0.38f, -8.35f),
+                new Vector3(11.2f, 0.75f, 0.35f), _darkWood);
             for (int x = -1; x <= 1; x += 2)
             for (int z = -1; z <= 1; z += 2)
                 Make(PrimitiveType.Cube, "TableLeg_" + x + "_" + z,
-                    new Vector3(x * 8.7f, -1.55f, z * 5.65f), new Vector3(0.75f, 4.7f, 0.75f), _darkWood);
+                    new Vector3(x * 5.0f, -1.55f, z * 7.5f), new Vector3(0.75f, 4.7f, 0.75f), _darkWood);
 
             Make(PrimitiveType.Cube, "MapBorder", new Vector3(0f, 1.32f, 0f),
-                new Vector3(18.4f, 0.22f, 11.8f), _gold);
+                new Vector3(10.8f, 0.22f, 16.2f), _gold);
             Make(PrimitiveType.Cube, "MapGround", new Vector3(0f, 1.47f, 0f),
-                new Vector3(18f, 0.18f, 11.4f), _grass);
+                new Vector3(10.4f, 0.18f, 15.8f), _grass);
 
             // Winding blue river, a few lakes and raised green hills.
-            var riverA = Make(PrimitiveType.Cube, "WorldRiverA", new Vector3(-1.8f, 1.59f, 0.1f),
-                new Vector3(2.1f, 0.035f, 11.2f), _water);
+            var riverA = Make(PrimitiveType.Cube, "WorldRiverA", new Vector3(0f, 1.59f, 0f),
+                new Vector3(1.35f, 0.035f, 15.2f), _water);
             riverA.transform.localRotation = Quaternion.Euler(0f, 18f, 0f);
-            var riverB = Make(PrimitiveType.Cube, "WorldRiverB", new Vector3(2.6f, 1.60f, -1.8f),
-                new Vector3(2.0f, 0.04f, 5.4f), _water);
+            var riverB = Make(PrimitiveType.Cube, "WorldRiverB", new Vector3(1.5f, 1.60f, -2.0f),
+                new Vector3(1.35f, 0.04f, 5.2f), _water);
             riverB.transform.localRotation = Quaternion.Euler(0f, -38f, 0f);
-            Make(PrimitiveType.Cylinder, "WestLake", new Vector3(-6.5f, 1.60f, 2.7f),
-                new Vector3(2.3f, 0.035f, 1.6f), _water);
-            Make(PrimitiveType.Cylinder, "EastLake", new Vector3(6.2f, 1.60f, -3.5f),
-                new Vector3(1.8f, 0.035f, 1.35f), _water);
+            Make(PrimitiveType.Cylinder, "WestLake", new Vector3(-3.6f, 1.60f, 3.6f),
+                new Vector3(1.6f, 0.035f, 1.2f), _water);
+            Make(PrimitiveType.Cylinder, "EastLake", new Vector3(3.6f, 1.60f, -4.2f),
+                new Vector3(1.5f, 0.035f, 1.15f), _water);
 
             for (int i = 0; i < 9; i++)
             {
-                float x = -7.2f + (i % 3) * 1.25f;
-                float z = -3.7f + (i / 3) * 1.0f;
+                float x = -3.8f + (i % 3) * 3.8f;
+                float z = -6.2f + (i / 3) * 6.2f;
                 Make(PrimitiveType.Sphere, "MapHill" + i, new Vector3(x, 1.83f, z),
-                    new Vector3(1.55f, 0.62f + (i % 2) * 0.25f, 1.45f), _grass);
+                    new Vector3(1.15f, 0.42f + (i % 2) * 0.18f, 1.05f), _grass);
             }
             var mountain = Vfx.MaterialLibrary.Solid(new Color(0.42f, 0.43f, 0.39f), 0.75f, 0.15f);
             for (int i = 0; i < 4; i++)
                 Make(PrimitiveType.Capsule, "MapMountain" + i,
-                    new Vector3(5.1f + i * 0.72f, 2.0f, 3.2f - (i % 2) * 0.75f),
-                    new Vector3(0.72f, 1.25f + (i % 2) * 0.35f, 0.72f), mountain);
+                    new Vector3(-4.1f + i * 0.8f, 1.95f, 6.5f),
+                    new Vector3(0.55f, 0.9f + (i % 2) * 0.25f, 0.55f), mountain);
         }
 
         private void BuildPedestals()
         {
             // 11 clickable systems: the nine main landmarks plus Shop and Forge.
-            AddLandmark("guild", "GUILD", new Vector3(-6.5f, 1.62f, -3.7f), 0);
-            AddLandmark("summon", "SUMMON", new Vector3(-2.2f, 1.62f, -3.7f), 1);
-            AddLandmark("arena", "ARENA", new Vector3(2.2f, 1.62f, -3.7f), 2);
-            AddLandmark("continent", "CONTINENT", new Vector3(6.5f, 1.62f, -3.7f), 3);
-            AddLandmark("dungeon", "DUNGEON", new Vector3(-6.5f, 1.62f, 0f), 4);
-            AddLandmark("beast", "BEAST", new Vector3(-2.2f, 1.62f, 0f), 5);
-            AddLandmark("mine", "MINE", new Vector3(2.2f, 1.62f, 0f), 6);
-            AddLandmark("afk", "AFK", new Vector3(6.5f, 1.62f, 0f), 7);
-            AddLandmark("rank", "RANKING", new Vector3(-4.4f, 1.62f, 3.65f), 8);
-            AddLandmark("shop", "SHOP", new Vector3(0f, 1.62f, 3.65f), 9);
-            AddLandmark("forge", "FORGE", new Vector3(4.4f, 1.62f, 3.65f), 10);
+            AddLandmark("guild", "GUILD", new Vector3(-3.0f, 1.62f, -5.3f), 0);
+            AddLandmark("summon", "SUMMON", new Vector3(0f, 1.62f, -5.3f), 1);
+            AddLandmark("arena", "ARENA", new Vector3(3.0f, 1.62f, -5.3f), 2);
+            AddLandmark("continent", "CONTINENT", new Vector3(-3.0f, 1.62f, -1.8f), 3);
+            AddLandmark("dungeon", "DUNGEON", new Vector3(0f, 1.62f, -1.8f), 4);
+            AddLandmark("beast", "BEAST", new Vector3(3.0f, 1.62f, -1.8f), 5);
+            AddLandmark("mine", "MINE", new Vector3(-3.0f, 1.62f, 1.8f), 6);
+            AddLandmark("afk", "AFK", new Vector3(0f, 1.62f, 1.8f), 7);
+            AddLandmark("rank", "RANKING", new Vector3(3.0f, 1.62f, 1.8f), 8);
+            AddLandmark("shop", "SHOP", new Vector3(-1.5f, 1.62f, 5.3f), 9);
+            AddLandmark("forge", "FORGE", new Vector3(1.5f, 1.62f, 5.3f), 10);
         }
 
         private void AddLandmark(string id, string label, Vector3 position, int kind)
@@ -179,19 +179,19 @@ namespace LegendsRPG.World
             root.transform.localPosition = position;
             var accent = Accent(kind);
             var click = root.AddComponent<CityBuilding>();
-            click.Init(id, label, accent, new Vector3(2.15f, 2.8f, 2.15f), new Vector3(0f, 1.0f, 0f));
+            click.Init(id, label, accent, new Vector3(1.9f, 2.8f, 1.9f), new Vector3(0f, 1.0f, 0f));
 
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalBase", new Vector3(0f, 0.12f, 0f),
-                new Vector3(1.85f, 0.24f, 1.85f), _darkWood);
+                new Vector3(1.55f, 0.24f, 1.55f), _darkWood);
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalGoldTrim", new Vector3(0f, 0.27f, 0f),
-                new Vector3(1.72f, 0.08f, 1.72f), _gold);
+                new Vector3(1.44f, 0.08f, 1.44f), _gold);
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalTop", new Vector3(0f, 0.38f, 0f),
-                new Vector3(1.58f, 0.16f, 1.58f), _stone);
+                new Vector3(1.32f, 0.16f, 1.32f), _stone);
 
             BuildIcon(root.transform, kind, accent);
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
-                new Vector3(0.72f, 2.18f, -0.55f), Vector3.one * 0.23f, _red);
+                new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
             dot.transform.localScale = Vector3.one * 0.23f;
         }
 
