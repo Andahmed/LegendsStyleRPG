@@ -18,7 +18,7 @@ namespace LegendsRPG.Core
     {
         public enum BattleType
         {
-            Campaign, Tower, DungeonGold, DungeonExp, Arena, GuildHunt, ContinentGate
+            Campaign, Tower, DungeonGold, DungeonExp, Arena, GuildHunt, ContinentGate, WorldBoss
         }
 
         public class Config
@@ -95,6 +95,9 @@ namespace LegendsRPG.Core
             spawner.ForcedMonsterCount = cfg.monsterCount;
             spawner.ExtraHpScale = cfg.hpScale;
             spawner.ExtraAtkScale = cfg.atkScale;
+            spawner.OverrideBossFloorRules = cfg.type != BattleType.Tower;
+            spawner.BossFloorOverride = cfg.boss;
+            spawner.CampaignChapter = cfg.type == BattleType.Campaign ? cfg.chapter : 0;
 
             // teleport team into the arena, reset HP, enable AI
             _savedCityPos = World.CityBuilder.CitySpawnPoint;
@@ -265,6 +268,9 @@ namespace LegendsRPG.Core
                 spawner.ForcedMonsterCount = 0;
                 spawner.ExtraHpScale = 1f;
                 spawner.ExtraAtkScale = 1f;
+                spawner.OverrideBossFloorRules = false;
+                spawner.BossFloorOverride = false;
+                spawner.CampaignChapter = 0;
             }
         }
 
