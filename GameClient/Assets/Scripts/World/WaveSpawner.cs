@@ -22,6 +22,9 @@ namespace LegendsRPG.World
         public int ForcedMonsterCount = 0;
         public float ExtraHpScale = 1f;
         public float ExtraAtkScale = 1f;
+        public bool OverrideBossFloorRules;
+        public bool BossFloorOverride;
+        public int CampaignChapter;
 
         /// <summary>Registers a runtime MonsterData (e.g. arena shadows, guild boss).</summary>
         public void AddMonster(MonsterData data)
@@ -48,16 +51,36 @@ namespace LegendsRPG.World
 
             ClearLeftovers();
 
-            bool bossFloor = tower.CurrentFloor % GameConfig.BossEveryNFloors == 0 || !string.IsNullOrEmpty(ForcedMonsterKey);
+            bool bossFloor = OverrideBossFloorRules
+                ? BossFloorOverride
+                : tower.CurrentFloor % GameConfig.BossEveryNFloors == 0 || !string.IsNullOrEmpty(ForcedMonsterKey);
             int count = ForcedMonsterCount > 0 ? ForcedMonsterCount
+                : !string.IsNullOrEmpty(ForcedMonsterKey) ? 1
                 : bossFloor ? 2 : Mathf.Min(3 + (tower.CurrentFloor - 1) / 4, 9);
 
             _clearing = false;
             _alive.Clear();
             _waveActive = true;
 
-            string[] pool = { "goblin", "wolf", "shaman", "golem", "wraith",
-                              "storm_hawk", "coral_crab", "vine_spider", "sun_eagle" };
+            string[] defaultPool = { "goblin", "wolf", "shaman", "golem", "wraith",
+                                     "storm_hawk", "coral_crab", "vine_spider", "sun_eagle" };
+            string[][] chapterPools =
+            {
+                new[] { "goblin", "golem", "vine_spider" },
+                new[] { "shaman", "coral_crab", "wolf" },
+                new[] { "wraith", "vine_spider", "golem" },
+                new[] { "wolf", "shaman", "wraith" },
+                new[] { "coral_crab", "shaman", "golem" },
+                new[] { "storm_hawk", "wolf", "goblin" },
+                new[] { "goblin", "golem", "wraith" },
+                new[] { "wraith", "storm_hawk", "shaman" },
+                new[] { "golem", "vine_spider", "sun_eagle" },
+                new[] { "wraith", "golem", "storm_hawk" },
+                new[] { "sun_eagle", "shaman", "golem" },
+                new[] { "wraith", "storm_hawk", "golem" }
+            };
+            string[] pool = CampaignChapter >= 1 && CampaignChapter <= chapterPools.Length
+                ? chapterPools[CampaignChapter - 1] : defaultPool;
 
             for (int i = 0; i < count; i++)
             {
