@@ -100,6 +100,10 @@ namespace LegendsRPG.World
                     transform.position.y + groundOffset - bounds.min.y,
                     transform.position.z - bounds.center.z);
 
+                Debug.Log("[LegendsRPG] Diorama GLB loaded: " + _modelId +
+                    " | renderers=" + renderers.Length +
+                    " | height=" + bounds.size.y.ToString("F2"), this);
+
                 if (_fallback != null)
                     Destroy(_fallback.gameObject);
 
