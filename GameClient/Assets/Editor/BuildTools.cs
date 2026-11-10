@@ -86,7 +86,7 @@ namespace LegendsRPG.EditorTools
 
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.legends.stylerpg");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;   // ARM64 only
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64; // 32-bit + 64-bit device support
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
 
