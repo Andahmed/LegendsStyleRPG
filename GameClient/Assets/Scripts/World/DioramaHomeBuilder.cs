@@ -297,8 +297,13 @@ namespace LegendsRPG.World
                 && !BuildQuaterniusLandmark(fallback.transform, kind))
                 BuildIcon(fallback.transform, kind, accent);
 
-            var glbLoader = root.AddComponent<DioramaGlbRuntimeLoader>();
-            glbLoader.Configure(id, fallback.transform, targetHeight);
+            // Only these five landmarks have bundled GLB source models.
+            if (id == "guild" || id == "summon" || id == "arena"
+                || id == "continent" || id == "beast")
+            {
+                var glbLoader = root.AddComponent<DioramaGlbRuntimeLoader>();
+                glbLoader.Configure(id, fallback.transform, targetHeight);
+            }
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
                 new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
