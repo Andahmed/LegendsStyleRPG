@@ -13,6 +13,7 @@ namespace LegendsRPG.Characters
     {
         private CharacterController _cc;
         private float _verticalVelocity;
+        private int _lastMoveFrame = -1;
         private Vector3 _facing = Vector3.forward;
         public float CurrentSpeed { get; private set; }
 
@@ -23,6 +24,7 @@ namespace LegendsRPG.Characters
 
         public void Move(Vector3 direction, float speed)
         {
+            _lastMoveFrame = Time.frameCount;
             direction.y = 0f;
             if (direction.sqrMagnitude > 1f) direction.Normalize();
 
@@ -42,6 +44,15 @@ namespace LegendsRPG.Characters
 
             ClampToArena();
             transform.rotation = Quaternion.LookRotation(_facing);
+        }
+
+        // Standing characters (Stop() / no Move() call this frame) must still fall to the ground.
+        private void LateUpdate()
+        {
+            if (_cc == null || !_cc.enabled || _lastMoveFrame == Time.frameCount) return;
+            if (_cc.isGrounded) { _verticalVelocity = -1f; return; }
+            _verticalVelocity += Physics.gravity.y * 2f * Time.deltaTime;
+            _cc.Move(new Vector3(0f, _verticalVelocity * Time.deltaTime, 0f));
         }
 
         public void Stop()
@@ -65,6 +76,7 @@ namespace LegendsRPG.Characters
             _cc.enabled = false;
             transform.position = position;
             _cc.enabled = true;
+            _verticalVelocity = 0f;
         }
 
         private void ClampToArena()
