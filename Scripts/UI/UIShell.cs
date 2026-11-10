@@ -610,7 +610,7 @@ namespace LegendsRPG.UI
                 Color.white, 36, () => _manager.Open("shop"));
         }
 
-        // ---------------- event column (left side) ----------------
+        // ---------------- event column (right side) ----------------
         private void BuildEventColumn()
         {
             var col = UIBuilder.CreateFreeRect(_root, "EventColumn", new Vector2(120f, 560f),
