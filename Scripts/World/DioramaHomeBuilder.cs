@@ -73,7 +73,7 @@ namespace LegendsRPG.World
             for (int shelf = 0; shelf < 2; shelf++)
             {
                 float y = 5.2f + shelf * 2.45f;
-                Make(PrimitiveType.Cube, "ShelfBoard" + shelf, new Vector3(0f, y, -6.72f),
+                Make(PrimitiveType.Cube, "ShelfBoard" + shelf, new Vector3(0f, y, -8.72f),
                     new Vector3(9.8f, 0.22f, 0.85f), _wood);
                 for (int i = 0; i < 13; i++)
                 {
@@ -115,20 +115,20 @@ namespace LegendsRPG.World
         {
             // Table top, apron and four legs.
             Make(PrimitiveType.Cube, "TableTop", new Vector3(0f, 0.95f, 0f),
-                new Vector3(11.8f, 0.65f, 17.4f), _wood);
+                new Vector3(10.6f, 0.65f, 17.4f), _wood);
             Make(PrimitiveType.Cube, "TableFrontApron", new Vector3(0f, 0.38f, 8.35f),
-                new Vector3(11.2f, 0.75f, 0.35f), _darkWood);
+                new Vector3(10.0f, 0.75f, 0.35f), _darkWood);
             Make(PrimitiveType.Cube, "TableBackApron", new Vector3(0f, 0.38f, -8.35f),
                 new Vector3(11.2f, 0.75f, 0.35f), _darkWood);
             for (int x = -1; x <= 1; x += 2)
             for (int z = -1; z <= 1; z += 2)
                 Make(PrimitiveType.Cube, "TableLeg_" + x + "_" + z,
-                    new Vector3(x * 5.0f, -1.55f, z * 7.5f), new Vector3(0.75f, 4.7f, 0.75f), _darkWood);
+                    new Vector3(x * 4.6f, -1.55f, z * 7.5f), new Vector3(0.75f, 4.7f, 0.75f), _darkWood);
 
             Make(PrimitiveType.Cube, "MapBorder", new Vector3(0f, 1.32f, 0f),
-                new Vector3(10.8f, 0.22f, 16.2f), _gold);
+                new Vector3(9.8f, 0.22f, 16.2f), _gold);
             Make(PrimitiveType.Cube, "MapGround", new Vector3(0f, 1.47f, 0f),
-                new Vector3(10.4f, 0.18f, 15.8f), _grass);
+                new Vector3(9.4f, 0.18f, 15.8f), _grass);
 
             // Winding blue river, a few lakes and raised green hills.
             var riverA = Make(PrimitiveType.Cube, "WorldRiverA", new Vector3(0f, 1.59f, 0f),
@@ -142,18 +142,18 @@ namespace LegendsRPG.World
             Make(PrimitiveType.Cylinder, "EastLake", new Vector3(3.6f, 1.60f, -4.2f),
                 new Vector3(1.5f, 0.035f, 1.15f), _water);
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 8; i++)
             {
-                float x = -3.8f + (i % 3) * 3.8f;
-                float z = -6.2f + (i / 3) * 6.2f;
-                Make(PrimitiveType.Sphere, "MapHill" + i, new Vector3(x, 1.83f, z),
-                    new Vector3(1.15f, 0.42f + (i % 2) * 0.18f, 1.05f), _grass);
+                float x = (i % 2 == 0) ? -4.05f : 4.05f;
+                float z = -7.0f + (i / 2) * 4.65f;
+                Make(PrimitiveType.Sphere, "MapHill" + i, new Vector3(x, 1.78f, z),
+                    new Vector3(0.95f, 0.38f + (i % 2) * 0.12f, 0.9f), _grass);
             }
             var mountain = Vfx.MaterialLibrary.Solid(new Color(0.42f, 0.43f, 0.39f), 0.75f, 0.15f);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 2; i++)
                 Make(PrimitiveType.Capsule, "MapMountain" + i,
-                    new Vector3(-4.1f + i * 0.8f, 1.95f, 6.5f),
-                    new Vector3(0.55f, 0.9f + (i % 2) * 0.25f, 0.55f), mountain);
+                    new Vector3(i == 0 ? -4.25f : 4.25f, 1.95f, 0f),
+                    new Vector3(0.5f, 0.85f, 0.5f), mountain);
         }
 
         private void BuildPedestals()
