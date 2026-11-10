@@ -249,7 +249,8 @@ namespace LegendsRPG.World
             };
             string modelName = models[Mathf.Clamp(kind, 0, models.Length - 1)];
             var model = QuaterniusAssetLibrary.InstantiateDungeonProp(modelName, parent,
-                parent.TransformPoint(new Vector3(0f, 0.82f, 0f)),
+                // Temporary Quaternius fallback sits on the existing pedestal top.
+                parent.TransformPoint(new Vector3(0f, 0.46f, 0f)),
                 kind == 3 ? 2.25f : 1.55f, parent.eulerAngles.y);
             if (model == null) return false;
             model.name = "DioramaProp_" + modelName;
@@ -279,7 +280,12 @@ namespace LegendsRPG.World
             root.transform.localPosition = position;
             var accent = Accent(kind);
             var click = root.AddComponent<CityBuilding>();
-            click.Init(id, label, accent, new Vector3(1.9f, 2.8f, 1.9f), new Vector3(0f, 1.0f, 0f));
+            // The castle model is wider/taller than the other supplied landmarks.
+            // Extend only its hit area so the upper towers remain easy to select.
+            if (id == "guild")
+                click.Init(id, label, accent, new Vector3(2.8f, 3.1f, 2.4f), new Vector3(0f, 1.55f, 0f));
+            else
+                click.Init(id, label, accent, new Vector3(1.9f, 2.8f, 1.9f), new Vector3(0f, 1.0f, 0f));
 
             MakeChild(root.transform, PrimitiveType.Cube, "PedestalBase", new Vector3(0f, 0.12f, 0f),
                 new Vector3(1.55f, 0.24f, 1.55f), _darkWood);
@@ -306,7 +312,8 @@ namespace LegendsRPG.World
             }
 
             var dot = MakeChild(root.transform, PrimitiveType.Sphere, "NotificationDot",
-                new Vector3(0.55f, 2.18f, -0.42f), Vector3.one * 0.23f, _red);
+                new Vector3(0.55f, id == "guild" ? 2.95f : 2.18f, -0.42f),
+                Vector3.one * 0.23f, _red);
             dot.transform.localScale = Vector3.one * 0.23f;
         }
 
