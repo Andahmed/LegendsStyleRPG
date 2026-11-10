@@ -5,6 +5,7 @@ using LegendsRPG.Characters;
 using LegendsRPG.Combat;
 using LegendsRPG.Core;
 using LegendsRPG.Team;
+using LegendsRPG.Art;
 
 namespace LegendsRPG.UI
 {
@@ -452,6 +453,20 @@ namespace LegendsRPG.UI
 
             var body = CharacterBodyFactory.Build(_display, _hero.element, true, 1f,
                 _hero.primaryColor, _hero.secondaryColor);
+
+            // Use the same imported, rigged class model as the battle team.
+            // The procedural model remains available as a safe fallback.
+            var importedModel = QuaterniusAssetLibrary.InstantiateHero(_hero.heroClass, _display.transform, 2.35f);
+            if (importedModel != null)
+            {
+                QuaterniusAssetLibrary.HideProceduralBody(body);
+                _display.name = "HeroDisplay_" + _hero.heroClass;
+            }
+            else
+            {
+                Debug.LogWarning("[HeroDetail] Imported model unavailable for " + _hero.heroClass +
+                    "; using procedural hero display.");
+            }
 
             // podium disc under the model
             var podium = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
