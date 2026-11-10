@@ -107,6 +107,7 @@ namespace LegendsRPG.Core
             catch (System.Exception ex)
             {
                 Debug.LogError("[LegendsRPG] Diorama home failed; restoring legacy city. " + ex);
+                CityWalker.Enabled = true;
                 var fallbackCity = new GameObject("CityBuilder_Fallback");
                 fallbackCity.AddComponent<CityBuilder>().Build();
             }
@@ -143,7 +144,7 @@ namespace LegendsRPG.Core
             var roster = HeroDatabase.CreateDefaultRoster();
             team.CreateTeam(roster, CityBuilder.CitySpawnPoint, demoUnlockAll: false);
             team.SetBrainsEnabled(false);
-            team.SetVisualsVisible(false);  // heroes are reserved for battles, not displayed on the tabletop
+            team.SetVisualsVisible(homeCameraTarget == null); // hide the party only while the tabletop home is active
             camera.SetTarget(homeCameraTarget != null ? homeCameraTarget : team.FocusTransform);
             camera.SnapToTarget();
 
