@@ -566,8 +566,8 @@ namespace LegendsRPG.World
             labelGo.transform.localPosition = new Vector3(0f, labelHeight, 0f);
             _label = labelGo.AddComponent<TextMesh>();
             _label.text = label;
-            _label.fontSize = 48;
-            _label.characterSize = 0.28f;
+            _label.fontSize = 44;
+            _label.characterSize = 0.20f;
             _label.anchor = TextAnchor.MiddleCenter;
             _label.alignment = TextAlignment.Center;
             _label.color = accent;
@@ -578,16 +578,16 @@ namespace LegendsRPG.World
             _baseScale = transform.localScale;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            // billboard the label toward the camera
+            // Full camera-facing billboard: include camera pitch so the TextMesh front
+            // faces the player instead of remaining in a horizontal-only orientation.
             if (_label != null && Camera.main != null)
             {
                 var cam = Camera.main.transform;
-                var dir = cam.position - _label.transform.position;
-                dir.y = 0f;
-                if (dir.sqrMagnitude > 0.01f)
-                    _label.transform.rotation = Quaternion.LookRotation(dir.normalized);
+                var toCamera = cam.position - _label.transform.position;
+                if (toCamera.sqrMagnitude > 0.01f)
+                    _label.transform.rotation = Quaternion.LookRotation(toCamera.normalized, Vector3.up);
             }
 
             // hover / ready pulse
