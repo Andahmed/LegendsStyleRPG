@@ -1,5 +1,6 @@
 using UnityEngine;
 using LegendsRPG.Core;
+using LegendsRPG.World;
 
 namespace LegendsRPG.Characters
 {
@@ -68,12 +69,19 @@ namespace LegendsRPG.Characters
 
         private void ClampToArena()
         {
+            // Battles run around WaveSpawner.ArenaCenter (currently Z=600), not world origin.
+            // Clamp the character's offset from that center so movement cannot snap heroes
+            // and monsters back toward (0,0,0) when they leave the arena radius.
+            Vector3 center = WaveSpawner.ArenaCenter;
             Vector3 p = transform.position;
-            float r = new Vector2(p.x, p.z).magnitude;
-            if (r > GameConfig.ArenaRadius - 1.2f)
+            Vector2 offset = new Vector2(p.x - center.x, p.z - center.z);
+            float r = offset.magnitude;
+            float maxRadius = GameConfig.ArenaRadius - 1.2f;
+            if (r > maxRadius)
             {
-                Vector2 xz = new Vector2(p.x, p.z).normalized * (GameConfig.ArenaRadius - 1.2f);
-                p.x = xz.x; p.z = xz.y;
+                offset = offset.normalized * maxRadius;
+                p.x = center.x + offset.x;
+                p.z = center.z + offset.y;
                 _cc.enabled = false;
                 transform.position = p;
                 _cc.enabled = true;
