@@ -287,7 +287,7 @@ namespace LegendsRPG.UI
         {
             var canvas = UIBuilder.CreateCanvas("ScreenCanvas");
             canvas.sortingOrder = 10;  // full-screen panels above everything
-            _screenCanvas = canvas.transform;
+            _screenCanvas = UIBuilder.CreateSafeArea(canvas.transform, "ScreenSafeArea");
 
             BuildNotifier(_screenCanvas);
 
@@ -536,7 +536,8 @@ namespace LegendsRPG.UI
             _manager = manager;
             var canvas = UIBuilder.CreateCanvas("CityHUDCanvas");
             canvas.sortingOrder = 5;   // screens (10) render above the city HUD
-            _root = UIBuilder.CreatePanel(canvas.transform, "CityHUDRoot",
+            var safeArea = UIBuilder.CreateSafeArea(canvas.transform, "CityHUDSafeArea");
+            _root = UIBuilder.CreatePanel(safeArea, "CityHUDRoot",
                 new Color(0, 0, 0, 0), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
             BuildTopBar();
@@ -612,27 +613,27 @@ namespace LegendsRPG.UI
         // ---------------- event column (left side) ----------------
         private void BuildEventColumn()
         {
-            var col = UIBuilder.CreateFreeRect(_root, "EventColumn", new Vector2(120f, 560f),
-                new Vector2(0f, 0.5f), new Vector2(65f, 130f));
+            var col = UIBuilder.CreateFreeRect(_root, "EventColumn", new Vector2(116f, 438f),
+                new Vector2(1f, 0.5f), new Vector2(-62f, 8f));
 
-            MakeEventButton(col, "SIGN-IN", new Color(0.85f, 0.45f, 0.15f, 0.95f), new Vector2(0f, 0f),
+            MakeEventButton(col, "SIGN-IN", new Color(0.85f, 0.45f, 0.15f, 0.95f), new Vector2(0f, -48f),
                 () => _manager.Open("signin"), out _signinDot);
-            MakeEventButton(col, "OFFERS", new Color(0.75f, 0.25f, 0.5f, 0.95f), new Vector2(0f, -130f),
+            MakeEventButton(col, "OFFERS", new Color(0.75f, 0.25f, 0.5f, 0.95f), new Vector2(0f, -148f),
                 () => _manager.Open("offers"), out _);
-            MakeEventButton(col, "EVENT", new Color(0.2f, 0.55f, 0.8f, 0.95f), new Vector2(0f, -260f),
+            MakeEventButton(col, "EVENT", new Color(0.2f, 0.55f, 0.8f, 0.95f), new Vector2(0f, -248f),
                 () => _manager.Open("events"), out _);
-            MakeEventButton(col, "MERCHANT", new Color(0.4f, 0.6f, 0.2f, 0.95f), new Vector2(0f, -390f),
+            MakeEventButton(col, "MERCHANT", new Color(0.4f, 0.6f, 0.2f, 0.95f), new Vector2(0f, -348f),
                 () => _manager.Open("merchant"), out _giftDot);
 
-            _eventTimerText = UIBuilder.CreateText(col, "EventTimer", "", 24, new Color(1f, 0.85f, 0.4f),
-                TextAnchor.MiddleCenter, new Vector2(0f, 0f), new Vector2(60f, -486f), new Vector2(160f, 40f));
+            _eventTimerText = UIBuilder.CreateText(col, "EventTimer", "", 20, new Color(1f, 0.85f, 0.4f),
+                TextAnchor.MiddleCenter, new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(160f, 32f));
         }
 
         private void MakeEventButton(Transform parent, string label, Color color, Vector2 pos,
             UnityEngine.Events.UnityAction onClick, out Text dot)
         {
             var btn = UIBuilder.CreateButton(parent, "Evt_" + label, label, new Vector2(120f, 120f),
-                new Vector2(0f, 0f), pos, color, Color.white, 24, onClick);
+                new Vector2(0.5f, 1f), pos, color, Color.white, 22, onClick);
             dot = UIBuilder.CreateText(btn.transform, "Dot", "", 34, new Color(1f, 0.25f, 0.2f),
                 TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-8f, -6f), new Vector2(50f, 50f));
         }
@@ -640,25 +641,39 @@ namespace LegendsRPG.UI
         // ---------------- right side buttons ----------------
         private void BuildSideButtons()
         {
-            var col = UIBuilder.CreateFreeRect(_root, "SideColumn", new Vector2(120f, 300f),
-                new Vector2(1f, 0.5f), new Vector2(-65f, 160f));
+            var col = UIBuilder.CreateFreeRect(_root, "SideColumn", new Vector2(112f, 330f),
+                new Vector2(0f, 0.5f), new Vector2(60f, 0f));
 
-            UIBuilder.CreateButton(col, "SettingsBtn", "SET", new Vector2(110f, 110f),
-                new Vector2(0f, 0f), new Vector2(0f, 0f), new Color(0.3f, 0.32f, 0.4f, 0.95f),
-                Color.white, 30, () => _manager.Open("settings"));
-            UIBuilder.CreateButton(col, "ProfileBtn", "ME", new Vector2(110f, 110f),
-                new Vector2(0f, 0f), new Vector2(0f, -125f), new Color(0.3f, 0.4f, 0.55f, 0.95f),
-                Color.white, 30, () => _manager.Open("profile"));
-            UIBuilder.CreateButton(col, "RankBtn", "RANK", new Vector2(110f, 110f),
-                new Vector2(0f, 0f), new Vector2(0f, -250f), new Color(0.5f, 0.42f, 0.2f, 0.95f),
-                Color.white, 26, () => _manager.Open("rank"));
+            UIBuilder.CreateButton(col, "SettingsBtn", "SET", new Vector2(104f, 104f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -45f), new Color(0.3f, 0.32f, 0.4f, 0.95f),
+                Color.white, 26, () => _manager.Open("settings"));
+            UIBuilder.CreateButton(col, "ProfileBtn", "ME", new Vector2(104f, 104f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -160f), new Color(0.3f, 0.4f, 0.55f, 0.95f),
+                Color.white, 26, () => _manager.Open("profile"));
+            UIBuilder.CreateButton(col, "RankBtn", "RANK", new Vector2(104f, 104f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -275f), new Color(0.5f, 0.42f, 0.2f, 0.95f),
+                Color.white, 23, () => _manager.Open("rank"));
         }
 
         // ---------------- bottom navigation ----------------
         private void BuildBottomNav()
         {
             var bar = UIBuilder.CreatePanel(_root, "BottomNav", new Color(0.05f, 0.06f, 0.1f, 0.92f),
-                new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(0f, 190f));
+                new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 0f), new Vector2(0f, 170f));
+
+            var row = UIBuilder.CreateFreeRect(bar, "NavigationRow", Vector2.zero, Vector2.zero, Vector2.zero);
+            row.anchorMin = Vector2.zero;
+            row.anchorMax = Vector2.one;
+            row.offsetMin = new Vector2(18f, 8f);
+            row.offsetMax = new Vector2(-18f, -8f);
+            var rowLayout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            rowLayout.childAlignment = TextAnchor.MiddleCenter;
+            rowLayout.spacing = 10f;
+            rowLayout.padding = new RectOffset(6, 6, 4, 4);
+            rowLayout.childControlWidth = true;
+            rowLayout.childControlHeight = true;
+            rowLayout.childForceExpandWidth = true;
+            rowLayout.childForceExpandHeight = false;
 
             string[] labels = { "QUEST", "CHAT", "TECH", "SHOP", "REWARD", "FORGE", "HERO", "BAG" };
             Color[] colors =
@@ -678,9 +693,14 @@ namespace LegendsRPG.UI
 
             for (int i = 0; i < labels.Length; i++)
             {
-                float x = 75f + i * 133f;
-                var btn = UIBuilder.CreateButton(bar, "Nav_" + labels[i], labels[i], new Vector2(118f, 118f),
-                    new Vector2(0f, 0f), new Vector2(x, 118f), colors[i], Color.white, 22, actions[i]);
+                var btn = UIBuilder.CreateButton(row, "Nav_" + labels[i], labels[i], new Vector2(118f, 118f),
+                    new Vector2(0.5f, 0.5f), Vector2.zero, colors[i], Color.white, 22, actions[i]);
+                var buttonLayout = btn.gameObject.AddComponent<LayoutElement>();
+                buttonLayout.minWidth = 76f;
+                buttonLayout.preferredWidth = 118f;
+                buttonLayout.flexibleWidth = 1f;
+                buttonLayout.minHeight = 88f;
+                buttonLayout.preferredHeight = 118f;
                 if (labels[i] == "QUEST")
                 {
                     _questDot = UIBuilder.CreateText(btn.transform, "Dot", "", 32, new Color(1f, 0.25f, 0.2f),
@@ -692,8 +712,8 @@ namespace LegendsRPG.UI
         // ---------------- AFK chest bubble ----------------
         private void BuildAFKBubble()
         {
-            var panel = UIBuilder.CreateFreeRect(_root, "AFKBubble", new Vector2(420f, 170f),
-                new Vector2(0f, 0f), new Vector2(30f, 210f));
+            var panel = UIBuilder.CreateFreeRect(_root, "AFKBubble", new Vector2(380f, 142f),
+                new Vector2(0.5f, 0f), new Vector2(0f, 184f));
             var bg = panel.gameObject.AddComponent<Image>();
             bg.sprite = UIBuilder.SolidSprite;
             bg.color = new Color(0.12f, 0.1f, 0.05f, 0.92f);
