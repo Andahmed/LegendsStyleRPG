@@ -264,6 +264,19 @@ namespace LegendsRPG.UI
             return outer;
         }
 
+        public static void AddRarityPips(Transform parent, int rarity, Vector2 anchor, Vector2 pos, int maxPips)
+        {
+            int count = Mathf.Clamp(rarity + 1, 1, maxPips);
+            float spacing = 12f;
+            float total = (count - 1) * spacing;
+            for (int i = 0; i < count; i++)
+            {
+                Circle(parent, "RarityPip" + i, anchor,
+                    pos + new Vector2(-total * 0.5f + i * spacing, 0f),
+                    8f, Gold);
+            }
+        }
+
         /// <summary>Round hero portrait (element-coloured) with level badge.</summary>
         public static RectTransform HeroPortrait(Transform parent, Vector2 anchor, Vector2 pos, float diameter,
             Characters.HeroData data, int level)
