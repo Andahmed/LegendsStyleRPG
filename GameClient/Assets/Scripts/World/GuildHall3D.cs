@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using LegendsRPG.Core;
+using LegendsRPG.Art;
 using LegendsRPG.Team;
 
 namespace LegendsRPG.World
@@ -164,15 +165,30 @@ namespace LegendsRPG.World
             go.transform.position = pos;
             go.transform.rotation = Quaternion.LookRotation(HallCenter + Vector3.back * 2f - pos);
 
-            var stone = Vfx.MaterialLibrary.Solid(new Color(0.4f, 0.36f, 0.42f), 0.5f, 0.2f);
+            // Prefer the real Quaternius dungeon prop. Keep the original primitive
+            // pedestal/orb as a safe fallback when a model is unavailable at runtime.
+            string model = tab == "hunt" ? "Pedestal"
+                : tab == "caravan" ? "Barrel"
+                : tab == "war" ? "Banner"
+                : tab == "tech" ? "Table_Big"
+                : tab == "gifts" ? "Chest_Gold"
+                : "Banner_wall";
+            float modelHeight = tab == "war" || tab == "wish" ? 3.0f : 2.2f;
+            var imported = QuaterniusAssetLibrary.InstantiateDungeonProp(
+                model, go.transform, pos, modelHeight, go.transform.eulerAngles.y);
 
-            Prim(go.transform, PrimitiveType.Cylinder, new Vector3(0f, 0.55f, 0f), new Vector3(1.6f, 0.55f, 1.6f), stone);
-            Prim(go.transform, PrimitiveType.Sphere, new Vector3(0f, 1.5f, 0f), new Vector3(0.45f, 0.45f, 0.45f),
-                Vfx.MaterialLibrary.Emissive(accent, 2.2f));
+            if (imported == null)
+            {
+                var stone = Vfx.MaterialLibrary.Solid(new Color(0.4f, 0.36f, 0.42f), 0.5f, 0.2f);
+                Prim(go.transform, PrimitiveType.Cylinder, new Vector3(0f, 0.55f, 0f),
+                    new Vector3(1.6f, 0.55f, 1.6f), stone);
+                Prim(go.transform, PrimitiveType.Sphere, new Vector3(0f, 1.5f, 0f),
+                    new Vector3(0.45f, 0.45f, 0.45f), Vfx.MaterialLibrary.Emissive(accent, 2.2f));
+            }
 
             var l = new GameObject("Light").AddComponent<Light>();
             l.transform.SetParent(go.transform, false);
-            l.transform.localPosition = new Vector3(0f, 2f, 0f);
+            l.transform.localPosition = new Vector3(0f, 2.1f, 0f);
             l.type = LightType.Point;
             l.color = accent;
             l.range = 6f;
@@ -191,37 +207,62 @@ namespace LegendsRPG.World
             {
                 float x = (i % 2 == 0 ? -1 : 1) * 8.5f;
                 float z = HallOffsetZ + (i / 2) * 7f - 3f;
+                Vector3 pillarPos = new Vector3(x, 0f, z);
+                var column = QuaterniusAssetLibrary.InstantiateDungeonProp(
+                    "Column", parent, pillarPos, 7.0f, 0f);
+                if (column == null)
+                {
+                    var pillar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    Destroy(pillar.GetComponent<Collider>());
+                    pillar.name = "Pillar" + i;
+                    pillar.transform.SetParent(parent, false);
+                    pillar.transform.position = new Vector3(x, 3.5f, z);
+                    pillar.transform.localScale = new Vector3(1f, 3.5f, 1f);
+                    pillar.GetComponent<MeshRenderer>().material = pillarMat;
+                }
 
-                var pillar = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                Destroy(pillar.GetComponent<Collider>());
-                pillar.name = "Pillar" + i;
-                pillar.transform.SetParent(parent, false);
-                pillar.transform.position = new Vector3(x, 3.5f, z);
-                pillar.transform.localScale = new Vector3(1f, 3.5f, 1f);
-                pillar.GetComponent<MeshRenderer>().material = pillarMat;
-
-                var flame = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Destroy(flame.GetComponent<Collider>());
-                flame.name = "Brazier" + i;
-                flame.transform.SetParent(parent, false);
-                flame.transform.position = new Vector3(x, 7.4f, z);
-                flame.transform.localScale = Vector3.one * 0.4f;
-                flame.GetComponent<MeshRenderer>().material = flameMat;
+                Vector3 torchPos = new Vector3(x, 0f, z);
+                var torch = QuaterniusAssetLibrary.InstantiateDungeonProp(
+                    "Torch", parent, torchPos + Vector3.up * 5.8f, 2.0f, 0f);
+                if (torch == null)
+                {
+                    var flame = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    Destroy(flame.GetComponent<Collider>());
+                    flame.name = "Brazier" + i;
+                    flame.transform.SetParent(parent, false);
+                    flame.transform.position = new Vector3(x, 7.4f, z);
+                    flame.transform.localScale = Vector3.one * 0.4f;
+                    flame.GetComponent<MeshRenderer>().material = flameMat;
+                }
+                var lightGo = new GameObject("GuildTorchLight" + i);
+                lightGo.transform.SetParent(parent, false);
+                lightGo.transform.position = new Vector3(x, 7.0f, z);
+                var torchLight = lightGo.AddComponent<Light>();
+                torchLight.type = LightType.Point;
+                torchLight.color = new Color(1f, 0.58f, 0.25f);
+                torchLight.range = 9f;
+                torchLight.intensity = 1.4f;
             }
 
-            // banners along the walls
+            // Quaternius wall banners add real silhouettes to the hall. Use the
+            // former colored cubes only if the imported banner cannot be loaded.
             var bannerMat = Vfx.MaterialLibrary.Solid(new Color(0.6f, 0.2f, 0.25f), 0.8f, 0.2f);
             for (int i = 0; i < 4; i++)
             {
                 float x = (i % 2 == 0 ? -1 : 1) * 13f;
                 float z = HallOffsetZ + (i / 2) * 10f - 2f;
-                var banner = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Destroy(banner.GetComponent<Collider>());
-                banner.name = "Banner" + i;
-                banner.transform.SetParent(parent, false);
-                banner.transform.position = new Vector3(x, 4f, z);
-                banner.transform.localScale = new Vector3(0.15f, 3.2f, 1.6f);
-                banner.GetComponent<MeshRenderer>().material = bannerMat;
+                var banner = QuaterniusAssetLibrary.InstantiateDungeonProp(
+                    "Banner_wall", parent, new Vector3(x, 2.2f, z), 3.2f, x < 0f ? 90f : -90f);
+                if (banner == null)
+                {
+                    var fallback = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    Destroy(fallback.GetComponent<Collider>());
+                    fallback.name = "Banner" + i;
+                    fallback.transform.SetParent(parent, false);
+                    fallback.transform.position = new Vector3(x, 4f, z);
+                    fallback.transform.localScale = new Vector3(0.15f, 3.2f, 1.6f);
+                    fallback.GetComponent<MeshRenderer>().material = bannerMat;
+                }
             }
 
             Vfx.VFXFactory.SpawnContinuous("campfire", HallCenter + new Vector3(0f, 0.4f, -6f),
