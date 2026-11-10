@@ -10,7 +10,6 @@ namespace LegendsRPG.Combat
     public class DamagePopup : MonoBehaviour
     {
         private TextMesh _text;
-        private float _life;
         private const float Duration = 0.9f;
         private Vector3 _velocity;
 
@@ -47,7 +46,6 @@ namespace LegendsRPG.Combat
             if (_text == null) _text = GetComponent<TextMesh>();
             _text.text = message;
             _text.color = color;
-            _life = Duration;
             _velocity = Vector3.up * 1.8f;
             StartCoroutine(FadeRoutine());
         }
@@ -81,7 +79,6 @@ namespace LegendsRPG.Combat
         private void OnDisable()
         {
             StopAllCoroutines();
-            _life = 0f;
         }
     }
 }
