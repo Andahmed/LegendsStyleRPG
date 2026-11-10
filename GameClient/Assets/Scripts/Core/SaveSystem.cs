@@ -114,6 +114,7 @@ namespace LegendsRPG.Core
             // v3 — tech & forge
             public List<int> techLevels = new List<int>();
             public List<ForgeRecordSave> forgeLevels = new List<ForgeRecordSave>();
+            public int forgeShards = 0;
 
             // v3 — daily quests
             public string questDay = "";
@@ -136,6 +137,8 @@ namespace LegendsRPG.Core
             // v3 — campaign & continent gate
             public List<CampaignStarSave> campaignStars = new List<CampaignStarSave>();
             public List<CampaignStarSave> continentStars = new List<CampaignStarSave>();
+            public string worldBossDay = "";
+            public List<int> worldBossAttempts = new List<int>();
 
             // v3 — dungeons
             public string dungeonDay = "";
@@ -261,6 +264,7 @@ namespace LegendsRPG.Core
             if (Current.titles == null) Current.titles = new List<string>();
             if (Current.techLevels == null) Current.techLevels = new List<int>();
             if (Current.forgeLevels == null) Current.forgeLevels = new List<ForgeRecordSave>();
+            if (Current.forgeShards < 0) Current.forgeShards = 0;
             if (Current.questProgress == null) Current.questProgress = new List<int>();
             if (Current.questClaimed == null) Current.questClaimed = new List<string>();
             if (Current.shopSlots == null) Current.shopSlots = new List<ShopSlotSave>();
@@ -268,6 +272,8 @@ namespace LegendsRPG.Core
             if (Current.eventClaimed == null) Current.eventClaimed = new List<int>();
             if (Current.campaignStars == null) Current.campaignStars = new List<CampaignStarSave>();
             if (Current.continentStars == null) Current.continentStars = new List<CampaignStarSave>();
+            if (Current.worldBossDay == null) Current.worldBossDay = "";
+            if (Current.worldBossAttempts == null) Current.worldBossAttempts = new List<int>();
             if (Current.beasts == null) Current.beasts = new List<BeastSave>();
             if (Current.itemIds == null) Current.itemIds = new List<string>();
             if (Current.itemCounts == null) Current.itemCounts = new List<int>();
@@ -356,6 +362,7 @@ namespace LegendsRPG.Core
                 SummonSystem.WriteInto(Current);
                 World.CampaignSystem.WriteInto(Current);
                 World.ContinentGateSystem.WriteInto(Current);
+                World.WorldBossSystem.WriteInto(Current);
                 World.DungeonSystem.WriteInto(Current);
                 World.ArenaSystem.WriteInto(Current);
                 World.MineSystem.WriteInto(Current);
