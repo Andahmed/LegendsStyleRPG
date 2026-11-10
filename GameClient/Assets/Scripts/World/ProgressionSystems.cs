@@ -248,7 +248,9 @@ namespace LegendsRPG.World
                 difficulty = 3,
                 boss = stage == StagesPerRegion,
                 region = region,
-                stage = stage
+                stage = stage,
+                forcedMonsterKey = stage == StagesPerRegion ? "world_boss_" + region : "",
+                monsterCount = stage == StagesPerRegion ? 1 : 0
             };
             cfg.onWin = () => ApplyGateWin(region, stage);
             Core.BattleSession.Start(cfg);
@@ -982,6 +984,10 @@ namespace LegendsRPG.World
 
                 case Core.BattleSession.BattleType.ContinentGate:
                     cfg.onWin = () => ContinentGateSystem.ApplyGateWin(cfg.region, cfg.stage);
+                    break;
+
+                case Core.BattleSession.BattleType.WorldBoss:
+                    cfg.onWin = () => WorldBossSystem.ApplyWinForRetry(cfg.region);
                     break;
 
                 default:
