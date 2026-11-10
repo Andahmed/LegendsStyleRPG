@@ -264,6 +264,12 @@ namespace LegendsRPG.UI
             return outer;
         }
 
+        public static void AddRarityPips(Transform parent, LegendsRPG.Characters.Rarity rarity,
+            Vector2 anchor, Vector2 pos, int maxPips)
+        {
+            AddRarityPips(parent, (int)rarity, anchor, pos, maxPips);
+        }
+
         public static void AddRarityPips(Transform parent, int rarity, Vector2 anchor, Vector2 pos, int maxPips)
         {
             int count = Mathf.Clamp(rarity + 1, 1, maxPips);
