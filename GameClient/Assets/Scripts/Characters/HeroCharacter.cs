@@ -2,6 +2,7 @@ using UnityEngine;
 using LegendsRPG.Combat;
 using LegendsRPG.Core;
 using LegendsRPG.Vfx;
+using LegendsRPG.Art;
 
 namespace LegendsRPG.Characters
 {
@@ -22,6 +23,8 @@ namespace LegendsRPG.Characters
         public CharacterAnimator Anim { get; private set; }
         public SkillCaster Caster { get; private set; }
         public Transform WeaponTip { get; private set; }
+
+        private QuaterniusClipDriver _modelAnimator;
 
         public int Slot { get; private set; }
 
@@ -55,6 +58,15 @@ namespace LegendsRPG.Characters
             Anim.LegR = body.LegR;
             Anim.MainRenderer = body.MainRenderer;
             WeaponTip = body.WeaponTip;
+
+            // Use the imported, rigged Quaternius hero model when available.
+            // Keep the procedural body as a fallback for missing/unimported assets.
+            var importedModel = QuaterniusAssetLibrary.InstantiateHero(data.heroClass, transform, 2.35f);
+            if (importedModel != null)
+            {
+                QuaterniusAssetLibrary.HideProceduralBody(body);
+                _modelAnimator = importedModel.GetComponent<QuaterniusClipDriver>();
+            }
 
             // v1.0: per-hero progression (own level + ascension stars)
             if (Core.HeroProgress.LevelOf(data.heroId) > 1) level = Core.HeroProgress.LevelOf(data.heroId);
@@ -104,6 +116,7 @@ namespace LegendsRPG.Characters
                 Motor.Stop();
             }
             Anim.SetMoving(moving);
+            if (_modelAnimator != null) _modelAnimator.SetMoving(moving);
 
             if (engage)
             {
@@ -119,6 +132,7 @@ namespace LegendsRPG.Characters
             if (moving) Motor.Move(new Vector3(stick.x, 0f, stick.y).normalized, Stats.MoveSpeed);
             else Motor.Stop();
             Anim.SetMoving(moving);
+            if (_modelAnimator != null) _modelAnimator.SetMoving(moving);
             if (attack) TryBasicAttack();
         }
 
@@ -131,6 +145,7 @@ namespace LegendsRPG.Characters
 
             Motor.FaceTowards(m.transform.position);
             Anim.PlayAttack(0.32f);
+            if (_modelAnimator != null) _modelAnimator.PlayAttack();
 
             float dmg = Stats.Attack;
             CombatUtil.DealDamage(Stats, m.Stats, dmg, Data.element, false, gameObject);
