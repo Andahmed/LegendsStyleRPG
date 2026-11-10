@@ -43,7 +43,7 @@ namespace LegendsRPG.Core
                     break;
 
                 case 2: // High — soft shadows (default)
-                    QualitySettings.shadows = ShadowQuality.SoftShadows;
+                    QualitySettings.shadows = ShadowQuality.All;
                     QualitySettings.pixelLightCount = 4;
                     QualitySettings.shadowDistance = 70f;
                     QualitySettings.vSyncCount = 0;
@@ -51,7 +51,7 @@ namespace LegendsRPG.Core
                     break;
 
                 default: // Ultra — everything
-                    QualitySettings.shadows = ShadowQuality.SoftShadows;
+                    QualitySettings.shadows = ShadowQuality.All;
                     QualitySettings.pixelLightCount = 8;
                     QualitySettings.shadowDistance = 110f;
                     QualitySettings.vSyncCount = 0;
