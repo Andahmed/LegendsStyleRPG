@@ -47,7 +47,7 @@ namespace LegendsRPG.Core
 
         private static void OnLowMemory()
         {
-            QualitySettings.masterTextureLimit = 1; // half-resolution textures
+            QualitySettings.globalTextureMipmapLimit = 1; // half-resolution textures
             Debug.LogWarning("[LegendsRPG] Low memory: reduced texture quality.");
         }
 
