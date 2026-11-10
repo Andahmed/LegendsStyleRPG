@@ -282,6 +282,68 @@ namespace LegendsRPG.Characters
                 480, 24, 8, 2.4f, 0.7f, 7.5f, 2.2f, 260f,
                 new Color(0.5f, 0.35f, 0.9f), new Color(0.15f, 0.13f, 0.2f));
 
+            // Twelve named campaign guardians: one unique boss identity per chapter.
+            string[] chapterBossNames =
+            {
+                "Cindervault, the Ember Titan", "Nereth, Warden of the Deep",
+                "Morvane, Mire Matriarch", "Varkuun, Frostbound Colossus",
+                "Thalassa, Abyssal Archivist", "Raijin, Tempest Sovereign",
+                "Drazhul, Ashen Forgemaster", "Nyxara, Umbral Regent",
+                "Auralith, Prism Oracle", "Vorath, Rift Devourer",
+                "Elyndra, Celestial Arbiter", "Aetherion, the Hollow King"
+            };
+            ElementType[] bossElements =
+            {
+                ElementType.Fire, ElementType.Water, ElementType.Nature, ElementType.Ice,
+                ElementType.Water, ElementType.Lightning, ElementType.Fire, ElementType.Dark,
+                ElementType.Light, ElementType.Dark, ElementType.Light, ElementType.Dark
+            };
+            Color[] bossColors =
+            {
+                new Color(0.95f,0.28f,0.10f), new Color(0.12f,0.55f,0.92f),
+                new Color(0.32f,0.70f,0.28f), new Color(0.55f,0.82f,1.0f),
+                new Color(0.18f,0.45f,0.78f), new Color(0.95f,0.80f,0.18f),
+                new Color(0.94f,0.42f,0.12f), new Color(0.42f,0.22f,0.72f),
+                new Color(0.55f,0.90f,1.0f), new Color(0.20f,0.12f,0.34f),
+                new Color(1.0f,0.82f,0.48f), new Color(0.30f,0.12f,0.50f)
+            };
+            for (int i = 0; i < chapterBossNames.Length; i++)
+            {
+                string id = "chapter_boss_" + (i + 1).ToString("D2");
+                float hp = 720f + i * 95f;
+                float atk = 25f + i * 2.2f;
+                float scale = 2.35f + (i % 3) * 0.18f;
+                map[id] = MakeMonster(id, chapterBossNames[i], bossElements[i], true,
+                    hp, atk, 13f + i, 2.4f + (i % 3) * 0.2f, 0.62f, i % 3 == 1 ? 7.0f : 3.0f,
+                    scale, 280f + i * 35f, bossColors[i], new Color(0.12f,0.12f,0.16f));
+            }
+
+            string[] worldBossNames =
+            {
+                "Elderroot, Worldheart Guardian", "Solkar, Cinderstorm Dragon",
+                "Glacielle, Queen of the White Maw", "Tempestrix, Skybreaker",
+                "Malachar, Sovereign of the Void"
+            };
+            ElementType[] worldElements =
+            {
+                ElementType.Nature, ElementType.Fire, ElementType.Ice,
+                ElementType.Lightning, ElementType.Dark
+            };
+            Color[] worldColors =
+            {
+                new Color(0.25f,0.72f,0.32f), new Color(1.0f,0.32f,0.12f),
+                new Color(0.50f,0.82f,1.0f), new Color(0.95f,0.85f,0.25f),
+                new Color(0.36f,0.18f,0.62f)
+            };
+            for (int i = 0; i < worldBossNames.Length; i++)
+            {
+                string id = "world_boss_" + (i + 1);
+                map[id] = MakeMonster(id, worldBossNames[i], worldElements[i], true,
+                    1800f + i * 420f, 42f + i * 5f, 24f + i * 3f,
+                    2.35f, 0.52f, i == 4 ? 7.5f : 3.2f, 3.15f + i * 0.12f,
+                    800f + i * 120f, worldColors[i], new Color(0.08f,0.08f,0.12f));
+            }
+
             return map;
         }
 
