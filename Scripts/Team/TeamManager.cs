@@ -167,7 +167,6 @@ namespace LegendsRPG.Team
             return result;
         }
 
-        /// <summary>Enables/disables the AI brains (city walking vs battle AI).</summary>
         /// <summary>Show or hide the party models while the home diorama is displayed.</summary>
         public void SetVisualsVisible(bool visible)
         {
@@ -181,6 +180,7 @@ namespace LegendsRPG.Team
             }
         }
 
+        /// <summary>Enables/disables the AI brains (city walking vs battle AI).</summary>
         public void SetBrainsEnabled(bool enabled)
         {
             foreach (var h in Heroes)
