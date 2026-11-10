@@ -695,7 +695,7 @@ namespace LegendsRPG.UI
         private void BuildSideButtons()
         {
             var col = UIBuilder.CreateFreeRect(_root, "SideColumn", new Vector2(120f, 300f),
-                new Vector2(0f, 0.5f), new Vector2(65f, -120f));
+                new Vector2(0f, 0.5f), new Vector2(65f, 150f));
 
             UIBuilder.CreateButton(col, "SettingsBtn", "SET", new Vector2(110f, 110f),
                 new Vector2(0f, 0f), new Vector2(0f, 0f), new Color(0.3f, 0.32f, 0.4f, 0.95f),
@@ -748,7 +748,7 @@ namespace LegendsRPG.UI
         {
             // Keep AFK treasure centered above the bottom navigation; the event rail stays clear on the right.
             var panel = UIBuilder.CreateFreeRect(_root, "AFKBubble", new Vector2(420f, 170f),
-                new Vector2(0.5f, 0f), new Vector2(0f, 205f));
+                new Vector2(0.5f, 0f), new Vector2(0f, 300f));
             var bg = panel.gameObject.AddComponent<Image>();
             bg.sprite = UIBuilder.SolidSprite;
             bg.color = new Color(0.12f, 0.1f, 0.05f, 0.92f);
