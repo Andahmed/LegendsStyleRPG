@@ -24,6 +24,7 @@ namespace LegendsRPG.Cam
         private float _distance = 13f;
         private float _zoomInput;
         private bool _snapNext;
+        private bool _homeLocked;
         private Vector3 _shakeOffset;
         private float _shakeTimeLeft, _shakeMagnitude;
         private Camera _cam;
@@ -59,6 +60,7 @@ namespace LegendsRPG.Cam
             _pitch = 48f;
             _distance = 22f;
             _zoomInput = 0f;
+            _homeLocked = true;
             _snapNext = true;
         }
 
@@ -70,17 +72,20 @@ namespace LegendsRPG.Cam
             _pitch = GameConfig.CameraDefaultPitch;
             _distance = 13f;
             _zoomInput = 0f;
+            _homeLocked = false;
             _snapNext = true;
         }
 
         public void AddZoomInput(float delta)
         {
+            if (_homeLocked) return;
             _zoomInput += delta;
         }
 
         /// <summary>HUD "angle" button: rotates the fixed isometric view by 60° per press.</summary>
         public void CycleAngle()
         {
+            if (_homeLocked) return;
             _yaw += 60f;
             Audio.AudioSystem.Play("UI");
         }
