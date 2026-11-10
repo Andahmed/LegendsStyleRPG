@@ -282,6 +282,7 @@ namespace LegendsRPG.UI
         public override void Rebuild()
         {
             ClearContent();
+            _region = Mathf.Clamp(_region, 1, ContinentGateSystem.Regions);
 
             var gateInfo = UIX.CreateRow(Content, "GateInfo", 100f);
             bool gated = CampaignSystem.ClearedStageCount() < 20;
@@ -342,6 +343,20 @@ namespace LegendsRPG.UI
                     });
                 }
             }
+
+            bool worldBossUnlocked = ContinentGateSystem.IsUnlocked(_region, 1);
+            int worldBossAttempts = WorldBossSystem.AttemptsLeft(_region);
+            var worldBoss = UIX.CreateRow(Content, "WorldBoss", 170f, 16, 16, 12, 12);
+            worldBoss.GetComponent<Image>().color = new Color(0.22f, 0.10f, 0.18f, 0.98f);
+            UIX.AddChildText(worldBoss, "BossInfo",
+                "WORLD BOSS — " + WorldBossSystem.BossName(_region) + "\n" +
+                (worldBossUnlocked ? "Daily attempts left: " + worldBossAttempts + " / " + WorldBossSystem.AttemptsPerRegionPerDay
+                    : "Unlock this region's gate to challenge its World Boss."),
+                27, new Color(1f, 0.82f, 0.65f), TextAnchor.MiddleLeft, true);
+            UIX.CreateRowButton(worldBoss, worldBossAttempts > 0 ? "CHALLENGE" : "DAILY ATTEMPT USED",
+                () => { Manager.CloseScreen(); WorldBossSystem.Start(_region); },
+                new Color(0.68f, 0.22f, 0.18f), 100f, 260f, 26)
+                .interactable = worldBossUnlocked && worldBossAttempts > 0;
 
             var reward = UIX.CreateRow(Content, "Reward", 90f);
             UIX.AddChildText(reward, "R", "First clear of every stage: +120 diamonds + random equipment", 26,
