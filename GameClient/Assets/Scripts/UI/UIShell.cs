@@ -632,8 +632,8 @@ namespace LegendsRPG.UI
         private void MakeEventButton(Transform parent, string label, Color color, Vector2 pos,
             UnityEngine.Events.UnityAction onClick, out Text dot)
         {
-            var btn = UIBuilder.CreateButton(parent, "Evt_" + label, label, new Vector2(120f, 120f),
-                new Vector2(0.5f, 1f), pos, color, Color.white, 22, onClick);
+            var btn = UIBuilder.CreateButton(parent, "Evt_" + label, label, new Vector2(96f, 96f),
+                new Vector2(0.5f, 1f), pos, color, Color.white, 18, onClick);
             dot = UIBuilder.CreateText(btn.transform, "Dot", "", 34, new Color(1f, 0.25f, 0.2f),
                 TextAnchor.UpperRight, new Vector2(1f, 1f), new Vector2(-8f, -6f), new Vector2(50f, 50f));
         }
@@ -666,14 +666,6 @@ namespace LegendsRPG.UI
             row.anchorMax = Vector2.one;
             row.offsetMin = new Vector2(18f, 8f);
             row.offsetMax = new Vector2(-18f, -8f);
-            var rowLayout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
-            rowLayout.childAlignment = TextAnchor.MiddleCenter;
-            rowLayout.spacing = 10f;
-            rowLayout.padding = new RectOffset(6, 6, 4, 4);
-            rowLayout.childControlWidth = true;
-            rowLayout.childControlHeight = true;
-            rowLayout.childForceExpandWidth = true;
-            rowLayout.childForceExpandHeight = false;
 
             string[] labels = { "QUEST", "CHAT", "TECH", "SHOP", "REWARD", "FORGE", "HERO", "BAG" };
             Color[] colors =
@@ -693,14 +685,10 @@ namespace LegendsRPG.UI
 
             for (int i = 0; i < labels.Length; i++)
             {
+                // Equal normalized anchors keep eight square buttons spread across any landscape width.
+                float anchorX = (i + 0.5f) / labels.Length;
                 var btn = UIBuilder.CreateButton(row, "Nav_" + labels[i], labels[i], new Vector2(118f, 118f),
-                    new Vector2(0.5f, 0.5f), Vector2.zero, colors[i], Color.white, 22, actions[i]);
-                var buttonLayout = btn.gameObject.AddComponent<LayoutElement>();
-                buttonLayout.minWidth = 76f;
-                buttonLayout.preferredWidth = 118f;
-                buttonLayout.flexibleWidth = 1f;
-                buttonLayout.minHeight = 88f;
-                buttonLayout.preferredHeight = 118f;
+                    new Vector2(anchorX, 0.5f), Vector2.zero, colors[i], Color.white, 22, actions[i]);
                 if (labels[i] == "QUEST")
                 {
                     _questDot = UIBuilder.CreateText(btn.transform, "Dot", "", 32, new Color(1f, 0.25f, 0.2f),
@@ -713,7 +701,7 @@ namespace LegendsRPG.UI
         private void BuildAFKBubble()
         {
             var panel = UIBuilder.CreateFreeRect(_root, "AFKBubble", new Vector2(380f, 142f),
-                new Vector2(0.5f, 0f), new Vector2(0f, 184f));
+                new Vector2(0.5f, 0f), new Vector2(0f, 245f));
             var bg = panel.gameObject.AddComponent<Image>();
             bg.sprite = UIBuilder.SolidSprite;
             bg.color = new Color(0.12f, 0.1f, 0.05f, 0.92f);
