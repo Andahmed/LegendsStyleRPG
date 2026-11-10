@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -85,9 +86,9 @@ namespace LegendsRPG.EditorTools
 
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.legends.stylerpg");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.Arm64;   // ARM64 only
-            PlayerSettings.Android.minSdkVersion = (AndroidSdkVersion)23;
-            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersion)34;
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;   // ARM64 only
+            PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
+            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
 
             // The game code itself forces portrait at runtime (GameRoot.Awake) —
             // keep the player settings consistent with the code. If a landscape
