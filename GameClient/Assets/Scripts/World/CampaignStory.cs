@@ -116,12 +116,24 @@ namespace LegendsRPG.World
         public static string GetStageBrief(int chapter, int stage)
         {
             var c = GetChapter(chapter);
-            if (stage <= 1) return c.opening;
-            if (stage == 8) return c.turningPoint;
-            if (stage >= 15) return "FINAL ENCOUNTER — " + c.bossName + ". " + c.finale;
-            if (stage <= 5) return "Push deeper into " + c.region + ". " + c.synopsis;
-            if (stage <= 10) return "The trail grows dangerous. " + c.turningPoint;
-            return "The seal is close. Prepare the team for " + c.bossName + ".";
+            switch (Mathf.Clamp(stage, 1, 15))
+            {
+                case 1: return c.opening;
+                case 2: return "Track the first corrupted patrol through " + c.region + ". " + c.synopsis;
+                case 3: return "Rescue the stranded settlers and learn which path the enemy is guarding.";
+                case 4: return "Break the enemy supply line before the corruption reaches the next refuge.";
+                case 5: return "Recover the first relic fragment and protect it from the pursuing hunters.";
+                case 6: return "Defend the forward camp while the team studies the relic's warning.";
+                case 7: return "Defeat the guardian's champion and open the route to the inner territory.";
+                case 8: return c.turningPoint;
+                case 9: return "Enter the inner ruins and follow the evidence left by the previous seal keepers.";
+                case 10: return "Destroy the corrupted ward before it can summon another wave.";
+                case 11: return "Escort the surviving keeper through the hostile approach.";
+                case 12: return "Recover the missing seal piece and bring it to the chapter sanctuary.";
+                case 13: return "Hunt down the lieutenant protecting " + c.bossName + ".";
+                case 14: return "Secure the sanctuary, restore the team's strength and prepare for " + c.bossName + ".";
+                default: return "FINAL ENCOUNTER — " + c.bossName + ". " + c.finale;
+            }
         }
 
         public static string GetChapterSummary(int chapter) { return GetChapter(chapter).synopsis; }
