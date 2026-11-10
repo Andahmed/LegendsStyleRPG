@@ -94,7 +94,7 @@ namespace LegendsRPG.World
                 // The supplied models already include their own stone/metal bases.
                 // Ground those bases directly on the tabletop, then remove the temporary
                 // wooden display pedestal together with the fallback model.
-                const float groundOffset = 0.06f;
+                const float groundOffset = -0.06f;
                 modelRoot.transform.position += new Vector3(
                     transform.position.x - bounds.center.x,
                     transform.position.y + groundOffset - bounds.min.y,
