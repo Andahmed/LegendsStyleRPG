@@ -62,8 +62,8 @@ namespace LegendsRPG.Cam
             // keeps that long axis horizontal in the landscape camera view.
             _yaw = 0f;
             _pitch = 48f;
-            // Keep the full tabletop and its landmark models inside a landscape frame.
-            _distance = 15.5f;
+            // Leave enough vertical margin for the tabletop, table legs and the reduced library backdrop.
+            _distance = 18f;
             _zoomInput = 0f;
             _homeLocked = true;
             _snapNext = true;
