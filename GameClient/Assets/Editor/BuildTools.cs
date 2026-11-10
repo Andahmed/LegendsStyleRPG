@@ -76,6 +76,51 @@ namespace LegendsRPG.EditorTools
             }
         }
 
+        /// <summary>
+        /// CI entry point for a Windows 64-bit standalone player.
+        /// Does not modify Android player settings.
+        /// </summary>
+        public static void BuildWindows()
+        {
+            ProjectBootstrapEditor.EnsureBootScene();
+
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.StandaloneWindows64)
+            {
+                if (!EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64))
+                {
+                    Debug.LogError("[BuildTools] Could not switch the active build target to Windows 64-bit.");
+                    EditorApplication.Exit(1);
+                    return;
+                }
+            }
+
+            PlayerSettings.companyName = "LegendsStyleRPG";
+            PlayerSettings.productName = "Legends Reborn Style RPG";
+            PlayerSettings.bundleVersion = "1.2.0";
+
+            const string outputPath = "Builds/Windows/LegendsStyleRPG.exe";
+            var options = new BuildPlayerOptions
+            {
+                scenes = new[] { ProjectBootstrapEditor.BootScenePath },
+                locationPathName = outputPath,
+                target = BuildTarget.StandaloneWindows64,
+                options = BuildOptions.None
+            };
+
+            var report = BuildPipeline.BuildPlayer(options);
+            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                Debug.Log("[BuildTools] Windows player built successfully: " + report.summary.outputPath +
+                          " size=" + (report.summary.totalSize / (1024f * 1024f)).ToString("F1") + " MB");
+            }
+            else
+            {
+                Debug.LogError("[BuildTools] Windows build FAILED: result=" + report.summary.result +
+                               " totalErrors=" + report.summary.totalErrors);
+                EditorApplication.Exit(1);
+            }
+        }
+
         /// <summary>Android player settings applied for every CI build.</summary>
         public static void ApplyAndroidPlayerSettings()
         {
