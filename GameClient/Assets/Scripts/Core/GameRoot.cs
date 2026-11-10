@@ -36,7 +36,11 @@ namespace LegendsRPG.Core
             DontDestroyOnLoad(gameObject);
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-            Screen.orientation = ScreenOrientation.Portrait;
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+            Screen.orientation = ScreenOrientation.AutoRotation;
 #endif
 
             BuildGame();

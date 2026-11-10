@@ -213,6 +213,7 @@ namespace LegendsRPG.UI
     public abstract class ScreenBase
     {
         protected RectTransform Root;
+        protected RectTransform Backdrop;
         protected Text TitleText;
         protected RectTransform Content;
         protected UIManager Manager;
@@ -222,8 +223,11 @@ namespace LegendsRPG.UI
         public virtual void Build(UIManager manager, Transform canvasParent, string title)
         {
             Manager = manager;
-            Root = UIBuilder.CreatePanel(canvasParent, "Screen_" + GetType().Name,
+            Backdrop = UIBuilder.CreatePanel(canvasParent, "ScreenBackdrop_" + GetType().Name,
                 new Color(0.04f, 0.05f, 0.09f, 0.97f), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            Backdrop.gameObject.SetActive(false);
+
+            Root = UIBuilder.CreateSafeArea(canvasParent, "ScreenSafeArea_" + GetType().Name);
             Root.gameObject.SetActive(false);
 
             TitleText = UIBuilder.CreateText(Root, "Title", title, 52,
@@ -242,6 +246,7 @@ namespace LegendsRPG.UI
         public virtual void Open()
         {
             IsOpen = true;
+            if (Backdrop != null) Backdrop.gameObject.SetActive(true);
             Root.gameObject.SetActive(true);
             Root.SetAsLastSibling();
             Rebuild();
@@ -251,6 +256,7 @@ namespace LegendsRPG.UI
         {
             IsOpen = false;
             Root.gameObject.SetActive(false);
+            if (Backdrop != null) Backdrop.gameObject.SetActive(false);
         }
 
         public virtual void Tick() { }
@@ -582,8 +588,7 @@ namespace LegendsRPG.UI
             _manager = manager;
             var canvas = UIBuilder.CreateCanvas("CityHUDCanvas");
             canvas.sortingOrder = 5;   // screens (10) render above the city HUD
-            _root = UIBuilder.CreatePanel(canvas.transform, "CityHUDRoot",
-                new Color(0, 0, 0, 0), Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            _root = UIBuilder.CreateSafeArea(canvas.transform, "CityHUDSafeArea");
 
             BuildTopBar();
             BuildEventColumn();
@@ -724,9 +729,9 @@ namespace LegendsRPG.UI
 
             for (int i = 0; i < labels.Length; i++)
             {
-                float x = 75f + i * 133f;
-                var btn = UIBuilder.CreateButton(bar, "Nav_" + labels[i], labels[i], new Vector2(118f, 118f),
-                    new Vector2(0f, 0f), new Vector2(x, 118f), colors[i], Color.white, 22, actions[i]);
+                float xAnchor = (i + 0.5f) / labels.Length;
+                var btn = UIBuilder.CreateButton(bar, "Nav_" + labels[i], labels[i], new Vector2(112f, 118f),
+                    new Vector2(xAnchor, 0f), new Vector2(0f, 118f), colors[i], Color.white, 22, actions[i]);
                 if (labels[i] == "QUEST")
                 {
                     _questDot = UIBuilder.CreateText(btn.transform, "Dot", "", 32, new Color(1f, 0.25f, 0.2f),
