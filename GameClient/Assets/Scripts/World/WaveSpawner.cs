@@ -104,7 +104,11 @@ namespace LegendsRPG.World
 
         private void SpawnMonster(string key, Vector3 pos)
         {
-            if (_monsters == null || !_monsters.ContainsKey(key)) return;
+            if (_monsters == null || !_monsters.ContainsKey(key))
+            {
+                Debug.LogWarning("[WaveSpawner] Unknown monster key '" + key + "' - spawn skipped");
+                return;
+            }
             var data = _monsters[key];
             var tower = GameManager.Instance.Tower;
 
