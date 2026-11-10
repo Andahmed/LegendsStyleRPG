@@ -41,6 +41,7 @@ namespace LegendsRPG.Team
         }
 
         public event Action<HeroCharacter> HeroRespawned;
+        public event Action<int> OnActiveChanged;
 
         private Transform _focus;           // live team center — battle camera target
         private AutoSkills _autoSkills;     // kept for symmetric wiring; consumed by TeamAIBrain
@@ -139,6 +140,20 @@ namespace LegendsRPG.Team
             }
 
             UpdateFocus();
+        }
+
+        /// <summary>Rebuilds the live party after the player changes the team loadout.</summary>
+        public void RebuildTeam()
+        {
+            var save = SaveSystem.Current;
+            if (save.teamLoadout != null && save.teamLoadout.Count > 0)
+            {
+                save.teamHeroIds.Clear();
+                save.teamHeroIds.AddRange(save.teamLoadout);
+            }
+
+            CreateTeam(HeroDatabase.CreateDefaultRoster(), BasePosition, false);
+            OnActiveChanged?.Invoke(0);
         }
 
         /// <summary>Orders the roster by the saved team formation (drag order).</summary>
