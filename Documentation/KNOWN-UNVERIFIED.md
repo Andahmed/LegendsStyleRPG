@@ -68,3 +68,15 @@
 4. تثبيت وتشغيل APK على هاتف حقيقي مع تسجيل نتائج الاختبار.
 
 نجاح APK لا يساوي اعتماد اللعبة كاملة؛ يلزم استكمال قائمة Documentation/TestingGuide.md.
+
+
+## أحدث نتيجة GitHub Actions — 2026-11-11
+
+- Commit المفحوص: 06249de63f11a5f53f929bbfde75ce6c42021815.
+- Workflow run: 43083520873.
+- النتيجة: Failed عند خطوة Validate Unity credentials.
+- خطوة Build project تم تخطيها نتيجة فشل التحقق السابق؛ لم يبدأ Unity Compile أو Android packaging.
+- GitHub أعاد عدد Artifacts = 0؛ لا يوجد APK في هذا التشغيل.
+- النتيجة تثبت أن واحدًا أو أكثر من الأسرار المطلوبة لم يكن متاحًا للـWorkflow. لا يمكن قراءة قيم Secrets من تكامل GitHub، لذلك لا أجزم أيها تحديدًا ناقص.
+
+الرابط: https://github.com/Andahmed/LegendsStyleRPG/actions/runs/43083520873
