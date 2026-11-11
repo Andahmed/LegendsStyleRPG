@@ -3,23 +3,16 @@
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
+[Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 MemoryCaptures/
-
-# Builds: ignore outputs but keep the folder placeholder
-Builds/*
-!Builds/Android/
-Builds/Android/*
-!Builds/Android/.gitkeep
-
-# IDE
-.vs/
-.idea/
+Recordings/
 *.csproj
 *.sln
 *.suo
 *.user
+*.userprefs
 *.pidb
 *.booproj
 *.svd
@@ -27,30 +20,6 @@ Builds/Android/*
 *.mdb
 *.opendb
 *.VC.db
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Unity crash reports
-sysinfo.txt
-*.stackdump
-
-# Backend Python
-Backend/__pycache__/
-Backend/**/__pycache__/
-Backend/.venv/
-Backend/venv/
-Backend/*.db
-Backend/.env
-Backend/app.log
-
-# Secrets - NEVER commit
-*.keystore
-!debug.keystore
-*.jks
-.env
-
-# real env files (only *.env.example are committed)
-Deployment/config/*.env
-!Deployment/config/*.env.example
+*.apk
+*.aab
+*.unitypackage

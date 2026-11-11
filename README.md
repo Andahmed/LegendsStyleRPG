@@ -1,36 +1,27 @@
-# GameClient — Unity Android (LegendsStyleRPG)
+# Legends Reborn — Clean Rebuild
 
-نموذج لعب ثلاثي الأبعاد كامل (Prototype 0.2 + أنظمة أساسية من 0.3–0.5) مبني بـ Unity 2022.3 LTS، بدون أي أصول خارجية — كل المشاهد والشخصيات والمؤثرات والصوت تُبنى برمجيًا.
+This branch is a clean Unity rebuild. The original `main` branch is preserved unchanged.
 
-## فتح المشروع
+## Project
+- Unity Editor: 2022.3.62f3
+- Client project: `GameClient/`
+- Initial target: Android, portrait/landscape responsive runtime UI, third-person action RPG foundation.
+- Graphics are retained under `GameClient/Assets/Resources` and `GameClient/Assets/Graphics`.
 
-1. ثبّت **Unity 2022.3.55f1 + Android Build Support** (الدليل الكامل: `../Documentation/Installation.md`).
-2. Unity Hub → **Add project from disk** → اختر هذا المجلد (`GameClient`).
-3. عند أول فتح يُنشأ مشهد `Assets/Scenes/Boot.unity` تلقائيًا ويُضاف إلى Build Settings.
+## First playable foundation
+- Runtime-generated training ground using retained modular-dungeon and nature models.
+- Warrior player model, third-person follow camera and mobile virtual joystick.
+- Skeleton/slime enemies with chase and melee behavior.
+- Basic attack, mana skill, health, XP and gold feedback.
 
-## التشغيل والبناء
+## Open
+Open `GameClient/` with Unity 2022.3.62f3. Open `Assets/Scenes/Main.unity` and press Play.
 
-| الأمر | الطريقة |
-|-------|---------|
-| تشغيل داخل المحرر | افتح Boot.unity ثم Play |
-| بناء APK | قائمة **Legends RPG → Build → Build Android APK** |
-| إعادة إنشاء المشهد | قائمة **Legends RPG → Setup → Create Boot Scene** |
-| فحص الهيكل | قائمة **Legends RPG → Setup → Verify Project Structure** |
+## Rebuild stages
+1. Stable player movement, camera, scene and combat.
+2. Character classes, animation controllers and skills.
+3. World zones, dungeon instances, bosses and drops.
+4. Guild, summon, inventory, equipment and progression.
+5. Backend authority, persistence, matchmaking and Android release hardening.
 
-## ما يعمل حاليًا (قابل للاختبار فورًا)
-
-- ساحة قتال 3D إجرائية (أعمدة، مشاعل، ضباب، إضاءة) وكاميرا Isometric بتدوير وتقريب.
-- بطل يتحرك بعصا لمس افتراضية + هجوم أساسي + مهارتان + Ultimate بشحن.
-- **62 بطلًا** في القاعدة (7 عناصر × 8 + 6 مصممين)، وفريق قتال من 6 قابلين للتبديل أثناء القتال مع AI لغير النشط وAuto Battle.
-- **نظام معدات**: 235 قطعة (أسلحة/دروع/تعاويذ/أجنحة/مرافقين/مواكب) × 5 ندرات، 6 خانات ارتداء، تطبيق إحصائيات حقيقي، أجنحة مرفرفة ومرافق طائر مرئي، وغنائم عند إنهاء الطوابق.
-- وحوش بذكاء اصطناعي (مطاردة/هجوم/انصراف) — 9 أنواع تغطي العناصر السبعة + زعماء كل 10 طوابق.
-- مصفوفة عناصر من 7 عناصر (قوة/ضعف) وضرر بالنعناع/الكريتيكال.
-- برج خبرة: 4 درجات صعوبة × 200 طابق بتدرج حسابي — بدون تكرار يدوي.
-- حفظ محلي JSON (schema v2 يشمل المعدات والملكية) + بنية جاهزة للربط بالـ Backend.
-- مؤثرات جسيمات لكل عنصر + أرقام ضرر + صوت مُولّد برمجيًا + موسيقى محيطة.
-
-## ملاحظات تقنية
-
-- **بدون أصول خارجية:** الشخصيات أجسام بدائية مركّبة بحركة إجرائية (`CharacterAnimator`) — يُستبدل بـ Animator + موديلات FBX/GLB في مرحلة 0.2 وفق الخطة.
-- لا توجد Library/Temp في التسليم — يُعاد توليدها عند أول فتح.
-- إصدار Unity مثبت في `ProjectSettings/ProjectVersion.txt`.
+The first stage is a local playable foundation, not a finished online MMORPG. Networking and server-authoritative progression are intentionally deferred until core gameplay is stable.
