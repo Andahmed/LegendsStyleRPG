@@ -62,3 +62,10 @@ Settings → Secrets and variables → Actions:
 ## الحالة المسجلة
 
 لم يكن هناك APK ناجح مثبت في التسليم عند كتابة هذه الوثيقة. وكانت تشغيلات GitHub السابقة تتخطى المهمة بسبب شرط ENABLE_GITHUB_UNITY_BUILD. إزالة الشرط تفعّل محاولة البناء؛ لكنها لا توفر رخصة Unity ولا تضمن أن أول Unity Compile سيجتاز.
+
+
+## آخر تشغيل موثق بعد تفعيل Workflow
+
+في 2026-11-11 بدأ GitHub تشغيل Workflow الجديد على Commit 06249de63f11a5f53f929bbfde75ce6c42021815، ولم يعد يتخطاه بسبب متغير تمكين. لكنه توقف عند Validate Unity credentials، ثم تم تخطي Build project وVerify APK وUpload APK. سجل التشغيل 43083520873 لا يحتوي على أي Artifact؛ لم يتم إنتاج APK في هذه المحاولة.
+
+هذا يعني أن trigger وإعدادات Workflow تم تشغيلها، لكن Unity لم يبدأ البناء. أضف أسرار Unity المطلوبة ثم أعد تشغيل Workflow يدويًا.
