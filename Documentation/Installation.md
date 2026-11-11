@@ -1,129 +1,101 @@
-# دليل التثبيت وبناء أول APK — LegendsStyleRPG
+# تثبيت LegendsStyleRPG وبناء Android APK
 
-هذا الدليل يأخذك من الصفر (جهاز جديد بدون Unity) حتى تثبيت أول APK قابل للعب على هاتف Android حقيقي. اتبع الخطوات بالترتيب.
+هذا الدليل يطابق إعدادات المصدر الحالية، وليس تعليمات الإصدارات القديمة.
 
----
+## 1. المتطلبات
 
-## 1. تثبيت Unity Hub والإصدار الصحيح
+- Unity Hub.
+- Unity Editor **2022.3.62f3** بالضبط، كما هو مثبت في GameClient/ProjectSettings/ProjectVersion.txt.
+- من وحدات Unity: Android Build Support وAndroid SDK & NDK Tools وOpenJDK.
+- مساحة فارغة كافية لاستيراد ملفات FBX وبناء Android.
 
-1. حمّل **Unity Hub** من الموقع الرسمي: `https://unity.com/download`
-2. ثبّت Unity Hub وشغّله، وسجّل الدخول (يمكن إنشاء حساب Personal مجاني).
-3. من Unity Hub: **Installs → Install Editor**.
-4. اختر تبويب **Archive** (أو "Install latest official release" ثم ابحث عن الإصدار) واختر:
-   - **Unity 2022.3.55f1 (LTS)** — هذا هو الإصدار الموثّق للمشروع.
-   - ملاحظة: أي إصدار 2022.3 LTS يعمل. إن طلب منك Unity تنزيل 2022.3.55f1 بالضبط عند فتح المشروع، اقبل التنزيل.
-5. في شاشة إضافة الوحدات (Add modules) **يجب** تحديد:
-   - ✅ **Android Build Support**
-   - ✅ **OpenJDK**
-   - ✅ **Android SDK & NDK Tools**
+## 2. فتح المشروع الصحيح
 
-   هذه الثلاثة إلزامية — بدونها لن يُبنى APK.
+1. نزّل المستودع Andahmed/LegendsStyleRPG أو استخدم Clone.
+2. من Unity Hub اختر **Add project from disk**.
+3. اختر مجلد GameClient تحديدًا؛ لا تختَر جذر GitHub.
+4. افتح المشروع بإصدار Unity 2022.3.62f3.
+5. انتظر حتى ينتهي Package Manager من تنزيل الحزم وحتى يكتمل استيراد Assets.
+6. افتح Console. لا تكمل الاختبار إذا توجد أخطاء حمراء (Compile Errors).
+7. ينشئ ProjectBootstrapEditor مشهد Assets/Scenes/Boot.unity تلقائيًا عند تحميل المشروع إذا كان غير موجود، ويضيفه إلى Build Settings.
 
----
+## 3. إعدادات Android المرجعية
 
-## 2. فتح المشروع لأول مرة
+تُطبّق تلقائيًا من Assets/Editor/BuildTools.cs عند البناء:
 
-1. فك ضغط ملف `LegendsStyleRPG_v0.1.0_source.zip` إلى مسار **بدون مسافات عربية في أسماء المجلدات** (مثل `D:\Dev\LegendsStyleRPG`).
-2. في Unity Hub: **Add → Add project from disk** واختر مجلد `GameClient` (المجلد الذي يحتوي `Assets` و`Packages`).
-3. افتح المشروع. أول فتح يستغرق 3–10 دقائق (استيراد وتجميع).
-4. **ما يحدث تلقائيًا عند أول فتح:**
-   - ينشئ سكربت `ProjectBootstrapEditor` مشهد `Assets/Scenes/Boot.unity` ويضيفه لقائمة Build.
-   - يتم تجميع كل أكواد C# تحت `Assets/Scripts`.
-5. إن ظهرت نافذة "Enter Safe Mode?" بسبب أي خطأ تجميع: افتح Console، صوّر/انسخ الخطأ وأبلغ فريق التطوير — لا تكمل قبل حل الأخطاء الحمراء.
+| الإعداد | القيمة |
+|---|---|
+| Application ID | com.ahmed.legendsstylerpg |
+| Scripting Backend | IL2CPP |
+| Architectures | ARMv7 + ARM64 |
+| Minimum API | 23 |
+| Target API | 34 |
+| Orientation | Landscape فقط، يسار أو يمين |
+| Bundle version | 1.2.0 |
+| Version code | 14 |
 
-> **تحقق سريع:** من شريط القوائم يجب أن يظهر قائمة جديدة **Legends RPG**. إن ظهرت فالسكربتات تعمل.
+أي تعديل على هذه القيم يجب أن يتم في BuildTools.ApplyAndroidPlayerSettings ثم تُراجع الوثائق معه.
 
----
+## 4. تجربة المشروع داخل Unity
 
-## 3. تجربة اللعبة داخل المحرر (اختياري لكن مستحسن)
+1. افتح Assets/Scenes/Boot.unity.
+2. اضغط Play.
+3. افحص ظهور شاشة/مدينة البداية ثم التنقل إلى الأنظمة.
+4. ابدأ معركة وتحقق من حركة الأبطال واستهدافهم وهجماتهم والمهارات والـ Ultimate.
+5. اختبر الإيقاف واستئناف السرعة x1/x2/x3، والعودة من المعركة.
+6. افتح Console وراجع أي Missing Resource أو Animation أو NullReference.
 
-1. افتح `Assets/Scenes/Boot.unity`.
-2. اضغط زر **Play** ▶.
-3. سترى ساحة قتال 3D وبطلًا واحدًا على الأقل والوحوش.
-4. التحكم داخل المحرر (v1.1 — القتال تلقائي بالكامل بنمط Legends Reborn):
-   - الأبطال يتحركون ويهاجمون تلقائيًا بالذكاء الاصطناعي — لا عصا تحكم ولا زر هجوم ولا تبديل بطل.
-   - **الضغط على بورتريه بطل شريط طاقته (Rage) ممتلئ**: يطلق الـ Ultimate الخاص به (البورتريه يتوهج عند الامتلاء).
-   - **AUTO**: تشغيل/إيقاف إطلاق المهارات والـ Ultimate تلقائيًا.
-   - **x1/x2/x3**: سرعة المعركة، **PAUSE**: إيقاف مؤقت، **RETREAT**: انسحاب.
-   - **ANGLE / RESET**: تبديل زاوية الكاميرا الثابتة أو رجوعها للزاوية الأساسية.
-   - **عجلة الفأرة** (أو القرص بإصبعين على الهاتف): تقريب/إبعاد فقط.
-5. اضغط Play للإيقاف.
+لا تعتبر أي بند ناجحًا لمجرد ظهور المشهد؛ سجّل النتيجة وفق Documentation/TestingGuide.md.
 
----
+## 5. أصول 3D
 
-## 4. بناء APK (الخطوة الحاسمة)
+ملفات Quaternius الحالية موجودة تحت:
+Assets/Resources/GameArt/Free3D/
 
-### الطريقة الأسهل (قائمة جاهزة):
-1. من شريط القوائم: **Legends RPG → Build → Build Android APK**.
-2. أول مرة سيحوّل Unity المشروع إلى منصة Android (انتظر حتى ينتهي التحويل).
-3. اختر مجلد الحفظ عند الطلب (الافتراضي `Builds/Android/`).
-4. عند نجاح البناء سيظهر في Console: `APK built successfully` ويوجد الملف:
-   `Builds/Android/LegendsRPG-v0.1.0.apk`
+وتتكون من 208 ملفات FBX: 150 Nature و48 Modular Dungeon و4 Animated Monsters و6 RPG Characters. يستدعيها QuaterniusAssetLibrary من Resources، وتضبط QuaterniusFbxImporter نوع الاستيراد والـ Animation.
 
-### الطريقة اليدوية (للفهم):
-1. **File → Build Profiles / Build Settings**
-2. اختر **Android → Switch Platform**
-3. تأكد أن مشهد `Scenes/Boot.unity` موجود في **Scenes In Build**
-4. **Player Settings** (تحقق فقط — القيم مضبوطة تلقائيًا):
-   - Company/Product Name: `LegendsStyleRPG` / `Legends Reborn Style RPG`
-   - Minimum API Level: **23**
-   - Target API Level: **34** (أو أعلى)
-   - Scripting Backend: **Mono** (كافٍ للنموذج الأولي؛ IL2CPP + ARM64 يُنصح به قبل الإصدار النهائي)
-5. اضغط **Build** واختر اسم الملف.
+لا تحتاج إلى إعادة تنزيل هذه الملفات من Asset Store عند استخدام نسخة المستودع الحالية. لكن يجب التحقق داخل Unity من نجاح الاستيراد والخامات والـ Animation Clips قبل اعتمادها بصريًا.
 
----
+## 6. بناء APK محليًا
 
-## 5. تثبيت APK على الهاتف
+1. افتح المشروع في Unity 2022.3.62f3.
+2. انتظر انتهاء الاستيراد والتجميع دون Compile Errors.
+3. من القائمة اختر **Legends RPG → Build → Build Android APK**.
+4. يقوم BuildTools بإنشاء Boot scene عند الحاجة وضبط إعدادات Android وبناء الملف.
+5. مسار الخرج: Builds/Android/LegendsRPG-v1.2.0.apk
+6. لا يعتبر البناء ناجحًا إلا إذا أظهر Console رسالة APK built successfully وكان الملف موجودًا وغير فارغ.
 
-1. انسخ ملف APK إلى الهاتف (كابل USB / بلوتوث / Drive).
-2. على الهاتف: الإعدادات → الأمان → اسمح بـ **تثبيت تطبيقات من مصادر غير معروفة** (لتطبيق الملفات المستخدم).
-3. اضغط على الملف → **تثبيت**.
-4. افتح اللعبة: سترى ساحة القتال مباشرة (لا يوجد شاشة تحميل معقدة في 0.1).
+## 7. البناء عبر GitHub Actions
 
-### التثبيت عبر ADB (للمطوّرين):
-```bash
-# فعّل USB Debugging من خيارات المطوّر في الهاتف ثم:
-adb install -r Builds/Android/LegendsRPG-v0.1.0.apk
+Workflow: .github/workflows/build-android.yml
 
-# مشاهدة السجلات الحية أثناء اللعب:
-adb logcat -s Unity
-```
+أضف هذه القيم كـ Repository secrets من:
+**Settings → Secrets and variables → Actions → New repository secret**
 
----
+- UNITY_LICENSE
+- UNITY_EMAIL
+- UNITY_PASSWORD
 
-## 6. ما يجب أن تراه على الهاتف (معيار نجاح 0.1)
+بعدها ادفع تغييرًا إلى main داخل GameClient/ أو شغّل Workflow يدويًا من Actions. لا يلزم إنشاء Repository variable باسم ENABLE_GITHUB_UNITY_BUILD.
 
-| # | يجب أن يعمل |
-|---|-------------|
-| 1 | اللعبة تفتح دون انهيار وتعرض ساحة 3D حقيقية بكاميرا مائلة |
-| 2 | الأبطال يتحركون ويهاجمون تلقائيًا (مطاردة أقرب عدو + تشكيل أمامي/خلفي) بلا أي تحكم يدوي |
-| 3 | الضغط على بورتريه بطل شريط طاقته ممتلئ يطلق الـ Ultimate، والبورتريه يتوهج عند الامتلاء |
-| 4 | AUTO يشغّل/يوقف إطلاق المهارات تلقائيًا، وسرعة x2/x3 تغيّر سرعة المعركة، وPAUSE يوقفها ويعيد إكمالها بنفس السرعة |
-| 5 | الوحوش تتحرك وتهاجم، HP ينقص، والموت والعودة تعمل |
-| 6 | زر ANGLE يبدّل زاوية الكاميرا وRESET يرجعها للزاوية الأساسية، والقرص بإصبعين يقرّب/يبعد (لا تدوير بالسحب) |
-| 7 | عند قتل كل الوحوش تظهر شاشة Floor Cleared وزر NEXT FLOOR |
-| 8 | عداد FPS أعلى الشاشة (هدف: 60 على هواتف متوسطة حديثة) |
+بعد النجاح، افتح تشغيل Workflow ونزّل Artifact باسم LegendsRPG-Android-APK. إذا فشل فاقرأ أول خطأ في Unity log؛ لا تُعامل فشل البناء كاختبار ناجح.
 
----
+## 8. التثبيت والاختبار على الهاتف
 
-## 7. استكشاف الأخطاء وإصلاحها
+يمكن التثبيت باستخدام Android Debug Bridge:
 
-| المشكلة | الحل |
-|---------|------|
-| `CommandInvokationFailure: Gradle build failed` | تأكد من تثبيت OpenJDK + Android SDK & NDK مع المحرر (خطوة 1.5). أعد التشغيل بعد التثبيت. |
-| `Unable to find Unity JAR` أو أخطاء SDK | Unity Hub → Installs → 2022.3.55f1 → Add modules → أضف Android Build Support. |
-| المشهد فارغ عند Play | قائمة **Legends RPG → Setup → Create Boot Scene** ثم أعد الفتح. |
-| لا تظهر قائمة Legends RPG | هناك خطأ تجميع — افتح Console وصحّح الأخطاء الحمراء أولًا. |
-| APK لا يثبت على الهاتف | تأكد من السماح بالمصادر غير المعروفة، وأن Minimum API ≤ إصدار أندرويد هاتفك. |
-| أداء منخفض | واجهة اللعبة تعمل؛ جرّب لاحقًا تقليل الظلال: Player Settings → Quality. (إعدادات Low/Med/High/Ultra تأتي في مرحلة 0.2) |
+- adb install -r Builds/Android/LegendsRPG-v1.2.0.apk
+- adb logcat -s Unity
 
----
+اختبر على الأقل:
+- بدء التشغيل دون انهيار.
+- اتجاه Landscape على الهاتف.
+- تحميل الموديلات والـ Animation Clips والخامات.
+- انتقالات الشاشات والضغط على معالم المدينة.
+- معركة كاملة من البداية للنهاية.
+- عدم تداخل الواجهة مع أبعاد الشاشة.
+- الأداء والذاكرة والحرارة على جهاز حقيقي.
 
-## 8. إعادة بناء المشروع من الملفات المسلّمة (تحقق استقلالية)
+## 9. حدود التسليم الحالية
 
-لتتأكد أن التسليم مكتمل:
-1. على **جهاز آخر** (أو مجلد جديد)، فك ضغط الـ ZIP.
-2. افتح `GameClient` من Unity Hub بنفس الإصدار.
-3. أعد خطوات 3 و4 أعلاه — يجب أن يعمل البناء دون أي ملفات إضافية.
-
-متطلبات إعادة البناء: Unity 2022.3.55f1 + Android Build Support فقط. لا توجد Assets خارجية أو مفاتيح أو اعتماد على جهاز المطوّر.
+راجع KNOWN-UNVERIFIED.md: وجود الكود والأصول وإعدادات CI لا يثبت أن Unity Compile أو Play Mode أو جهاز Android قد اجتاز الاختبار. لا تعتمد الإصدار قبل وجود APK ناجح ونتيجة اختبار هاتف موثقة.

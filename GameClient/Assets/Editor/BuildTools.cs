@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
@@ -7,15 +8,8 @@ using UnityEngine;
 namespace LegendsRPG.EditorTools
 {
     /// <summary>
-    /// v1.2: CI-friendly build entry points for Unity Cloud Build (Build
-    /// Automation) and local batchmode builds — no editor window needed.
-    ///
-    /// Unity Cloud Build setup:
-    ///   Pre-export method:  LegendsRPG.EditorTools.BuildTools.PreExport
-    ///   (Build method optional:) LegendsRPG.EditorTools.BuildTools.BuildAndroid
-    ///
-    /// Both are safe in batchmode: the Boot scene is created programmatically
-    /// (EditorSceneManager) and registered in EditorBuildSettings.
+    /// CI-friendly Android build entry points.
+    /// Unity version is pinned by ProjectSettings/ProjectVersion.txt.
     /// </summary>
     public static class BuildTools
     {
@@ -23,9 +17,8 @@ namespace LegendsRPG.EditorTools
         private const string ApkName = "LegendsRPG-v1.2.0.apk";
 
         /// <summary>
-        /// Cloud Build "Pre-export method": guarantees the Boot scene exists and
-        /// is in EditorBuildSettings, then applies the Android player settings
-        /// (identifier com.ahmed.legendsstylerpg, IL2CPP, ARMv7 + ARM64, API 23/34).
+        /// Cloud Build pre-export hook: creates Boot.unity when needed,
+        /// registers it in Build Settings, and applies Android player settings.
         /// </summary>
         public static void PreExport()
         {
@@ -34,9 +27,8 @@ namespace LegendsRPG.EditorTools
         }
 
         /// <summary>
-        /// -executeMethod entry point: pre-export + build an APK. On failure the
-        /// reason is printed to the log (Debug.LogError) and the process exits
-        /// with code 1 so CI marks the build red.
+        /// Local and GitHub Actions build entry point.
+        /// A successful report is not accepted unless a non-empty APK exists.
         /// </summary>
         public static void BuildAndroid()
         {
@@ -52,7 +44,9 @@ namespace LegendsRPG.EditorTools
                 }
             }
 
-            string outputPath = OutputDir + "/" + ApkName;
+            Directory.CreateDirectory(OutputDir);
+            string outputPath = Path.Combine(OutputDir, ApkName).Replace("\\", "/");
+
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { ProjectBootstrapEditor.BootScenePath },
@@ -62,21 +56,26 @@ namespace LegendsRPG.EditorTools
             };
 
             var report = BuildPipeline.BuildPlayer(options);
-            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            bool apkExists = File.Exists(outputPath);
+            long apkBytes = apkExists ? new FileInfo(outputPath).Length : 0L;
+
+            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded &&
+                apkExists && apkBytes > 0L)
             {
-                Debug.Log("[BuildTools] APK built successfully: " + report.summary.outputPath +
-                          "  size=" + (report.summary.totalSize / (1024f * 1024f)).ToString("F1") + " MB");
+                Debug.Log("[BuildTools] APK built successfully: " + outputPath +
+                          " size=" + (apkBytes / (1024f * 1024f)).ToString("F1") + " MB");
             }
             else
             {
-                Debug.LogError("[BuildTools] APK build FAILED: result=" + report.summary.result +
-                               "  totalErrors=" + report.summary.totalErrors +
-                               " — read the full Unity log above for the first compile error.");
+                Debug.LogError("[BuildTools] APK build FAILED or output missing: result=" +
+                               report.summary.result + " totalErrors=" + report.summary.totalErrors +
+                               " fileExists=" + apkExists + " fileBytes=" + apkBytes +
+                               " — inspect the Unity log for the first compile/build error.");
                 EditorApplication.Exit(1);
             }
         }
 
-        /// <summary>Android player settings applied for every CI build.</summary>
+        /// <summary>Android settings shared by local builds, CI and Cloud Build.</summary>
         public static void ApplyAndroidPlayerSettings()
         {
             PlayerSettings.companyName = "LegendsStyleRPG";
@@ -86,11 +85,11 @@ namespace LegendsRPG.EditorTools
 
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.ahmed.legendsstylerpg");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64; // 32-bit + 64-bit device support
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)23;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)34;
 
-            // Landscape UI is built against a 1920x1080 reference canvas.
+            // Landscape only; allow both landscape orientations.
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
             PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;

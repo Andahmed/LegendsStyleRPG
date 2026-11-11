@@ -1,17 +1,56 @@
 name: Build Unity Android APK
-on: [push, workflow_dispatch]
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "GameClient/**"
+      - ".github/workflows/build-android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    # GitHub Actions requires its own UNITY_LICENSE secret. The project uses
-    # Unity Cloud Build by default, so keep this optional job skipped until enabled.
-    if: ${{ vars.ENABLE_GITHUB_UNITY_BUILD == 'true' }}
     name: Build Unity Android APK
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           lfs: true
+
+      - name: Validate Unity credentials
+        shell: bash
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          missing=()
+          [[ -n "${UNITY_LICENSE}" ]] || missing+=("UNITY_LICENSE")
+          [[ -n "${UNITY_EMAIL}" ]] || missing+=("UNITY_EMAIL")
+          [[ -n "${UNITY_PASSWORD}" ]] || missing+=("UNITY_PASSWORD")
+
+          if (( ${#missing[@]} > 0 )); then
+            printf '::error::Missing GitHub Actions secret(s): %s\n' "${missing[*]}"
+            {
+              echo "### Android build blocked"
+              echo "Add the following repository secrets under Settings → Secrets and variables → Actions:"
+              for key in "${missing[@]}"; do echo "- $key"; done
+              echo "The workflow is enabled; no Unity build was attempted because credentials are missing."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "Unity credentials are present (values are not printed)."
 
       - name: Build project
         uses: game-ci/unity-builder@v4
@@ -23,9 +62,24 @@ jobs:
           projectPath: GameClient
           targetPlatform: Android
           unityVersion: 2022.3.62f3
-          buildMethod: LegendsRPG.EditorTools.ProjectBootstrapEditor.BuildAndroidApk
+          buildMethod: LegendsRPG.EditorTools.BuildTools.BuildAndroid
 
-      - uses: actions/upload-artifact@v4
+      - name: Verify APK
+        shell: bash
+        run: |
+          apk="GameClient/Builds/Android/LegendsRPG-v1.2.0.apk"
+          test -s "$apk"
+          sha256sum "$apk" | tee /tmp/apk-sha.txt
+          {
+            echo "### Android APK built"
+            echo "- File: LegendsRPG-v1.2.0.apk"
+            echo "- SHA-256: $(awk '{print $1}' /tmp/apk-sha.txt)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
           name: LegendsRPG-Android-APK
-          path: GameClient/Builds/Android/*.apk
+          path: GameClient/Builds/Android/LegendsRPG-v1.2.0.apk
+          if-no-files-found: error
+          retention-days: 14
