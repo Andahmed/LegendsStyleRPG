@@ -37,6 +37,7 @@ namespace LegendsReborn.Rebuild
             if (joystick != null && joystick.Direction.sqrMagnitude > 0.02f)
                 input = joystick.Direction;
 
+            Mana = Mathf.Min(MaxMana, Mana + 4f * Time.deltaTime);
             input = Vector2.ClampMagnitude(input, 1f);
             Vector3 forward = cameraTransform != null ? cameraTransform.forward : Vector3.forward;
             Vector3 right = cameraTransform != null ? cameraTransform.right : Vector3.right;
@@ -58,7 +59,7 @@ namespace LegendsReborn.Rebuild
                 controller.SimpleMove(movement * moveSpeed);
 
             if (Input.GetKeyDown(KeyCode.Space) && LegendsBootstrap.Instance != null)
-                LegendsBootstrap.Instance.SendMessage("BasicAttack", SendMessageOptions.DontRequireReceiver);
+                LegendsBootstrap.Instance.BasicAttack();
         }
 
         public void TakeDamage(float amount)
