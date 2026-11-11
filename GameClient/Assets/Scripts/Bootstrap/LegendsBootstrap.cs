@@ -48,6 +48,7 @@ namespace LegendsReborn.Rebuild
             BuildEnemies();
             BuildHud();
             RefreshHud();
+            InvokeRepeating(nameof(RefreshHud), 0.1f, 0.1f);
         }
 
         private void ConfigureEnvironment()
@@ -262,7 +263,7 @@ namespace LegendsReborn.Rebuild
                 new Vector2(92f, 92f), new Color(0.16f, 0.42f, 0.38f, 0.94f), () => player.Dash());
         }
 
-        private void BasicAttack()
+        public void BasicAttack()
         {
             EnemyBrain target = FindClosestEnemy(3.8f);
             if (target == null)
