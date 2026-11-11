@@ -25,3 +25,7 @@ Open `GameClient/` with Unity 2022.3.62f3. Open `Assets/Scenes/Main.unity` and p
 5. Backend authority, persistence, matchmaking and Android release hardening.
 
 The first stage is a local playable foundation, not a finished online MMORPG. Networking and server-authoritative progression are intentionally deferred until core gameplay is stable.
+
+## Validation status
+- GitHub tree, retained asset count, scene reference and runtime resource paths have been checked.
+- Unity Editor compilation, Play Mode, and Android APK/AAB build have **not** yet been run for this clean branch.
